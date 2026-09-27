@@ -1,0 +1,47 @@
+# Repo นี้ออกแบบให้ root ตรงกับโฟลเดอร์ CurseForge instance "Minaria"
+# (C:\Users\DELL\curseforge\minecraft\Instances\Minaria)
+# เก็บเฉพาะสิ่งที่เป็น "งานออกแบบ" — config, script, quest, รายชื่อ mod — ไม่เก็บไฟล์ใหญ่/ไฟล์ runtime
+
+# Runtime / generated
+logs/
+crash-reports/
+screenshots/
+saves/
+backups/
+local/
+.cache/
+cache/
+.fabric/
+.mixin.out/
+journeymap/data/
+xaero/
+XaeroWaypoints/
+XaeroWorldMap/
+downloads/
+*.log
+*.log.gz
+
+# Mod jars — รายชื่อ mod ติดตามผ่าน minecraftinstance.json แทน
+mods/*.jar
+mods/*.disabled
+resourcepacks/*.zip
+shaderpacks/*.zip
+
+# Client-only / personal
+options.txt
+optionsof.txt
+optionsshaders.txt
+servers.dat
+servers.dat_old
+usercache.json
+usernamecache.json
+realms_persistence.json
+patchouli_data.json
+command_history.txt
+
+# OS / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
