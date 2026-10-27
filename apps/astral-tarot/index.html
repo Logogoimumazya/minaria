@@ -481,6 +481,131 @@ html { overflow-x: clip; }
   animation: rays 3.4s ease-out forwards;
 }
 @keyframes rays { 0% { opacity: 0; transform: rotate(0deg) scale(.4); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(45deg) scale(1.15); } }
+/* ---------- oracle chronicle, follow-up chat, star map, shadow ---------- */
+.chron { border-color: var(--line-strong); background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,196,106,.08), transparent 70%), var(--panel); }
+.chron-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.chron-h { font-size: 24px; color: var(--gold-hi); }
+.chron-status { font-size: 13px; text-align: right; }
+.src { display: inline-block; padding: 3px 12px; border-radius: 99px; border: 1px solid var(--line-strong); }
+.src.ai { color: var(--gold-hi); background: rgba(232,196,106,.1); box-shadow: 0 0 16px rgba(232,196,106,.18); }
+.src.book { color: var(--mist); }
+.chron-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.ctab { flex: none; font: inherit; font-size: 13px; color: var(--mist); background: rgba(7,8,20,.45); border: 1px solid var(--line); border-radius: 10px; padding: 5px 12px; cursor: pointer; display: flex; gap: 6px; align-items: baseline; }
+.ctab b { font-family: var(--f-latin); color: var(--gold-deep); font-size: 11px; }
+.ctab.on { color: var(--ivory); border-color: var(--gold); background: rgba(232,196,106,.12); box-shadow: inset 0 -2px 0 var(--gold); }
+.ctab.on b { color: var(--gold); }
+.chron-stage { min-height: 220px; margin-top: 8px; }
+.chapter { border: 1px solid var(--line); border-radius: 16px; padding: clamp(14px, 3vw, 24px); background: rgba(7,8,20,.35); position: relative; overflow: hidden; }
+.chapter::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 0% 0%, rgba(232,196,106,.10), transparent 40%); }
+.chapter.enter { animation: chIn .7s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes chIn { from { opacity: 0; transform: translateY(12px) scale(.985); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+.ch-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.ch-num { width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--gold); font-family: var(--f-deco); color: var(--gold-hi); font-size: 15px; box-shadow: 0 0 18px rgba(232,196,106,.25), inset 0 0 12px rgba(232,196,106,.15); }
+.ch-head h3 { font-size: 22px; color: var(--gold-hi); margin: 0; }
+.ch-cards { margin-left: auto; display: flex; gap: 6px; }
+.cmini { width: 38px; aspect-ratio: 200/340; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 4px; transition: transform .25s; }
+.cmini svg { width: 100%; height: 100%; display: block; border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,.5), 0 0 10px rgba(232,196,106,.25); }
+.cmini.rev svg { transform: rotate(180deg); }
+.cmini:hover { transform: translateY(-3px) rotate(-2deg); }
+.cmini.shadow svg { box-shadow: 0 0 14px rgba(160,120,255,.5); }
+.ch-body p { margin: 0 0 12px; font-size: 16px; line-height: 1.85; max-width: 70ch; }
+.ch-body b { color: var(--gold-hi); }
+.ch-body p:first-child::first-letter { font-family: var(--f-title); font-size: 1.9em; color: var(--gold); line-height: 1; }
+.poem { display: grid; gap: 6px; justify-items: center; text-align: center; padding: 10px 0; font-family: var(--f-title); font-size: clamp(20px, 3.2vw, 28px); color: var(--gold-hi); line-height: 1.5; }
+.poem span { animation: chIn .8s ease both; }
+.poem span:nth-child(2) { animation-delay: .25s; } .poem span:nth-child(3) { animation-delay: .5s; } .poem span:nth-child(4) { animation-delay: .75s; }
+.caret { display: inline-block; width: .55em; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--gold); animation: blink 1s steps(2) infinite; border-radius: 1px; }
+@keyframes blink { 50% { opacity: 0; } }
+.chron-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.chron-nav .btn { padding: 8px 18px; font-size: 14.5px; }
+.oracle-wait { display: grid; justify-items: center; gap: 12px; padding: 30px 10px; text-align: center; color: var(--gold-hi); }
+.oracle-wait p { margin: 0; min-height: 1.6em; animation: chIn .6s ease both; }
+.orb { position: relative; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,240,200,.9), rgba(160,120,255,.35) 35%, rgba(20,16,60,.9) 70%); box-shadow: 0 0 40px rgba(170,140,255,.45), inset 0 0 30px rgba(255,220,160,.25); animation: orb 3s ease-in-out infinite; overflow: hidden; }
+.orb i { position: absolute; inset: -20%; border-radius: 45%; background: conic-gradient(from 0deg, transparent, rgba(232,196,106,.35), transparent 40%); animation: spin 4s linear infinite; mix-blend-mode: screen; }
+.orb i:nth-child(2) { animation-duration: 6.5s; animation-direction: reverse; background: conic-gradient(from 90deg, transparent, rgba(150,180,255,.3), transparent 35%); }
+.orb i:nth-child(3) { animation-duration: 9s; inset: -35%; }
+@keyframes orb { 50% { transform: scale(1.06); box-shadow: 0 0 60px rgba(170,140,255,.6), inset 0 0 30px rgba(255,220,160,.35); } }
+.askmore h3 { margin-bottom: 8px; }
+.sugs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.sug { font: inherit; font-size: 13.5px; color: var(--gold-hi); background: rgba(232,196,106,.07); border: 1px solid var(--line-strong); border-radius: 99px; padding: 5px 14px; cursor: pointer; }
+.sug:hover { background: rgba(232,196,106,.16); }
+.chat { display: grid; gap: 10px; margin-bottom: 12px; }
+.chat:empty { display: none; }
+.bub { max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.75; animation: chIn .4s ease both; }
+.bub p { margin: 0 0 8px; } .bub p:last-child { margin: 0; }
+.bub.me { justify-self: end; background: rgba(232,196,106,.14); border: 1px solid var(--line-strong); border-bottom-right-radius: 4px; }
+.bub.oracle { justify-self: start; background: rgba(7,8,20,.5); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.bub.oracle b { color: var(--gold-hi); }
+.dots i { animation: blink 1.2s infinite; font-style: normal; } .dots i:nth-child(2) { animation-delay: .2s; } .dots i:nth-child(3) { animation-delay: .4s; }
+.ask-form { display: flex; gap: 8px; }
+.ask-form input { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--ivory); background: rgba(7,8,20,.55); border: 1px solid var(--line); border-radius: 99px; padding: 9px 16px; }
+.ask-form input:focus { outline: none; border-color: var(--gold); }
+.ask-form .btn { padding: 9px 20px; font-size: 15px; }
+.starmap h4, .sm-block h4 { margin: 0 0 8px; font-size: 15.5px; color: var(--gold-hi); }
+.sm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.sm-block { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: rgba(7,8,20,.3); min-width: 0; }
+.sm-block p { margin: 6px 0 0; font-size: 14px; }
+.sm-note { color: var(--mist); font-size: 13px !important; margin: 0 0 8px !important; }
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lk { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13.5px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); }
+.lk-ends b { font-family: var(--f-latin); color: var(--gold); margin-right: 2px; }
+.lk-ends i { display: inline-block; width: 22px; height: 2px; vertical-align: middle; margin: 0 4px; background: currentColor; }
+.lk.same, .lk.friend { color: var(--gold-hi); border-color: rgba(232,196,106,.4); }
+.lk.neutral { color: var(--mist); }
+.lk.contrary { color: var(--bad); border-color: rgba(240,138,155,.4); }
+.lk.contrary .lk-ends i { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); }
+.lk-type { font-size: 12.5px; }
+.combos { display: grid; gap: 10px; }
+.combo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-strong); background: linear-gradient(100deg, rgba(232,196,106,.10), transparent 60%); position: relative; overflow: hidden; }
+.combo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,240,200,.14) 50%, transparent 60%); background-size: 250% 100%; animation: shine 4s ease-in-out infinite; pointer-events: none; }
+@keyframes shine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+.combo.s-1 { border-color: rgba(240,138,155,.45); background: linear-gradient(100deg, rgba(240,138,155,.10), transparent 60%); }
+.combo-glyph { display: flex; align-items: center; gap: 4px; }
+.combo-glyph span { width: 30px; height: 44px; display: grid; place-items: center; border-radius: 5px; border: 1px solid var(--gold); font-family: var(--f-latin); font-size: 11px; color: var(--gold-hi); background: rgba(16,20,58,.9); box-shadow: 0 0 10px rgba(232,196,106,.3); }
+.combo-glyph em { font-style: normal; color: var(--gold); font-size: 12px; }
+.combo-name { font-family: var(--f-body); letter-spacing: .04em; font-weight: 700; font-size: 14px; color: var(--gold-hi); }
+.combo p { margin: 2px 0 0; font-size: 13.5px; }
+.combo small { color: var(--mist); font-size: 12px; }
+.tr-name { color: var(--gold); }
+svg.trend { width: 100%; height: auto; display: block; }
+.trend .zero { stroke: rgba(255,255,255,.15); stroke-dasharray: 3 4; }
+.trend .ln { fill: none; stroke: var(--gold); stroke-width: 2.2; stroke-linejoin: round; }
+.trend .area { fill: rgba(232,196,106,.12); }
+.trend circle.up { fill: var(--good); } .trend circle.dn { fill: var(--bad); }
+.trend text { fill: var(--mist); font-size: 10px; font-family: var(--f-body); }
+.sh-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 12px; align-items: start; }
+.sh-row .mini { width: 70px; aspect-ratio: 200/340; padding: 0; border: 0; background: none; cursor: pointer; }
+.sh-row .mini svg { width: 100%; height: 100%; display: block; border-radius: 6px; box-shadow: 0 0 18px rgba(160,120,255,.45); }
+.sh-row .mini.rev svg { transform: rotate(180deg); }
+.shadow-block { border-color: rgba(160,120,255,.35); background: radial-gradient(circle at 0 0, rgba(120,80,200,.15), transparent 60%), rgba(7,8,20,.3); }
+svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
+.jn-path { fill: none; stroke: rgba(232,196,106,.25); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.jn circle { fill: rgba(174,168,204,.45); }
+.jn.on circle { fill: var(--gold-hi); filter: drop-shadow(0 0 4px rgba(232,196,106,.9)); }
+.jn.focus circle:not(.jn-halo) { fill: #fff; }
+.jn-halo { fill: none !important; stroke: var(--gold); stroke-width: 1; animation: halo 2.4s ease-out infinite; transform-box: fill-box; transform-origin: center; filter: none !important; }
+@keyframes halo { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+.jn text { fill: var(--gold-hi); font-size: 9px; font-family: var(--f-latin); font-weight: 700; }
+/* links drawn across the table */
+.links-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.lnk { fill: none; stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.4s cubic-bezier(.3,.7,.2,1) forwards; }
+.lnk.same, .lnk.friend { stroke: #ffd98a; filter: drop-shadow(0 0 3px rgba(255,217,138,.9)); }
+.lnk.neutral { stroke: rgba(201,184,255,.55); }
+.lnk.contrary { stroke: #ff7d8f; filter: drop-shadow(0 0 3px rgba(255,90,110,.8)); }
+.lnk.combo { stroke: rgba(255,255,255,.75); stroke-width: 1.4; filter: drop-shadow(0 0 4px rgba(200,220,255,.9)); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.board .card.chron-glow .front { box-shadow: 0 0 0 1.5px var(--gold-hi), 0 0 34px rgba(232,196,106,.65); }
+/* shadow card */
+.shadow-slot { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 18px auto 0; }
+.shadow-slot .card { position: relative; width: clamp(64px, 12vw, 92px); }
+.shadow-slot .card .front { box-shadow: 0 0 30px rgba(160,120,255,.55); }
+.shadow-cap { display: grid; gap: 2px; font-size: 14px; }
+.shadow-cap b { color: #d6c8ff; font-size: 16px; }
+.shadow-slot.rising { animation: rise-shadow 1.4s cubic-bezier(.2,.7,.2,1) both; }
+.shadow-slot.rising .card::after { content: ""; position: absolute; inset: -40% -60%; background: radial-gradient(ellipse, rgba(120,80,200,.35), transparent 65%); filter: blur(10px); animation: smoke 3s ease-out forwards; pointer-events: none; z-index: -1; }
+@keyframes rise-shadow { from { opacity: 0; transform: translateY(50px) scale(.9); filter: brightness(.3); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes smoke { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.6) translateY(-30px); } }
+@media (max-width: 760px) { .sm-grid { grid-template-columns: 1fr; } .ch-cards { margin-left: 0; } }
 @media (max-width: 900px) {
   .intro { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
@@ -631,6 +756,7 @@ html { overflow-x: clip; }
       <p id="reveal-hint">แตะไพ่เพื่อเปิด เปิดตามลำดับตัวเลขจะได้อารมณ์ที่สุด</p>
     </div>
     <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
+    <div class="shadow-slot" id="shadow-slot" hidden></div>
     <ol class="legend-list" id="legend" hidden></ol>
     <div class="btn-row center-row" style="margin-top:18px" id="reveal-controls">
       <button class="btn ghost" type="button" id="btn-reveal-all">เปิดทั้งหมด</button>
@@ -963,7 +1089,7 @@ const SPREADS = {
     pos: [{ x: 18, y: 23, w: .9, ab: "self", k: "ตัวคุณ", d: "ใจและบทบาทของคุณในความรักนี้" }, { x: 82, y: 23, w: .9, ab: "other", k: "{o}", d: "ใจของ{o} หรือคนที่กำลังจะเข้ามา" }, { x: 50, y: 23, w: 1.1, ab: "both", k: "สายสัมพันธ์", d: "พลังที่เชื่อมคุณทั้งสองไว้" }, { x: 32, y: 72, w: .9, ab: "both", k: "อุปสรรค", d: "สิ่งที่ต้องข้ามผ่านไปด้วยกัน" }, { x: 68, y: 72, w: 1.4, ab: "both", k: "แนวโน้ม", d: "ทิศทางของความสัมพันธ์ในอีกไม่กี่เดือน" }] },
   career: { name: "งานและการเงิน", sub: "5 ใบ · อาชีพ เงินทอง", aspect: 1.25, cw: 15, max: 720, key: 0, out: 4, adv: 2, cap: true, focus: "career",
     pos: [{ x: 18, y: 23, w: 1, ab: "s", k: "สถานการณ์งาน", d: "ภาพรวมของงานตอนนี้" }, { x: 50, y: 23, w: 1, ab: "s", k: "การเงิน", d: "กระแสเงินและทรัพยากรที่มี" }, { x: 82, y: 23, w: .8, ab: "s", k: "จุดแข็ง", d: "สิ่งที่มีอยู่และควรใช้" }, { x: 32, y: 72, w: .9, ab: "s", k: "สิ่งที่ขวาง", d: "ความท้าทายที่ต้องจัดการ" }, { x: 68, y: 72, w: 1.4, ab: "s", k: "ผลลัพธ์", d: "สิ่งที่จะเกิดขึ้นใน 1–3 เดือน" }] },
-  choice: { name: "สองทางเลือก", sub: "5 ใบ · เทียบ A กับ B", aspect: 1.35, cw: 14, max: 720, key: 0, out: 2, adv: 0, cap: true,
+  choice: { name: "สองทางเลือก", sub: "5 ใบ · เทียบ A กับ B", aspect: 1.35, cw: 14, max: 720, key: 0, out: 2, adv: 0, cap: true, linkK: 2.9,
     pos: [{ x: 50, y: 44, w: .8, ab: "self", k: "ใจคุณตอนนี้", d: "สภาพใจและสิ่งที่คุณต้องการจริงๆ" },
       { x: 15, y: 24, w: 1, ab: "self", path: "A", k: "{A} · ช่วงแรก", d: "ถ้าเลือก{A} จะเจออะไรในช่วงแรก" }, { x: 15, y: 72, w: 1.4, ab: "self", path: "A", k: "{A} · ปลายทาง", d: "ผลลัพธ์ถ้าเลือก{A}" },
       { x: 85, y: 24, w: 1, ab: "self", path: "B", k: "{B} · ช่วงแรก", d: "ถ้าเลือก{B} จะเจออะไรในช่วงแรก" }, { x: 85, y: 72, w: 1.4, ab: "self", path: "B", k: "{B} · ปลายทาง", d: "ผลลัพธ์ถ้าเลือก{B}" }] },
@@ -1395,6 +1521,7 @@ const GRADES = {
   shuffle: { c1: [.04, .02, .11], c2: [.28, .08, .42], c3: [.58, .24, .66], glow: 1.05, tint: "rgb(120,50,170)", vig: .55, keyC: "rgba(200,140,255,.14)", key: [.5, .42] },
   pick: { c1: [.01, .01, .035], c2: [.07, .05, .2], c3: [.2, .12, .38], glow: .7, tint: "rgb(30,25,90)", vig: .7, keyC: "rgba(160,150,255,.08)", key: [.5, .12] },
   reveal: { c1: [.035, .025, .05], c2: [.26, .17, .09], c3: [.68, .48, .18], glow: .95, tint: "rgb(170,120,40)", vig: .55, keyC: "rgba(255,215,140,.15)", key: [.5, .32] },
+  shadow: { c1: [.008, .0, .02], c2: [.07, .02, .13], c3: [.3, .1, .42], glow: .62, tint: "rgb(60,20,90)", vig: .85, keyC: "rgba(170,120,255,.12)", key: [.5, .72] },
   reading: { c1: [.045, .02, .045], c2: [.28, .11, .15], c3: [.58, .33, .22], glow: .85, tint: "rgb(160,80,70)", vig: .3, keyC: "rgba(255,170,120,.10)", key: [.25, .85] }
 };
 const ELEMENT_GRADE = {
@@ -1569,6 +1696,30 @@ const Director = {
       Cam.letterbox(true);
       Cam.set(board, { s: .9, rx: 12 }, .9);
       setTimeout(() => { Cam.set(board, {}, 1.2); Cam.letterbox(false); res(); }, 950 * SPEED);
+    });
+  },
+  /* the twist: the scene darkens and the bottom card of the deck rises out of the smoke */
+  shadow() {
+    return new Promise(res => {
+      if (!S.shadow) return res();
+      const slot = $("#shadow-slot");
+      buildShadowSlot(false);
+      slot.hidden = false;
+      Grade.set("shadow"); Cam.letterbox(true);
+      slot.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+      slot.classList.add("rising");
+      setTimeout(() => {
+        const r = slot.getBoundingClientRect();
+        if (!REDUCED) FX.burst(r.left + r.width / 2, r.top + r.height * .45, 70, 3, ["#8a6cd0", "#b9a2ff", "#5a3fa0", "#d8c8ff"]);
+      }, 300 * SPEED);
+      setTimeout(() => {
+        const c = slot.querySelector(".card");
+        c.classList.add("flipped");
+        Grade.pulse(.3); Sound.chime(330);
+        slot.querySelector(".shadow-cap .muted").textContent = DECK[S.shadow.id].th + (S.shadow.rev ? " · กลับหัว" : "");
+        setTimeout(() => burstAt(c, 36, 4), 500 * SPEED);
+      }, 1300 * SPEED);
+      setTimeout(() => { Grade.set("reveal"); Cam.letterbox(false); slot.classList.remove("rising"); res(); }, 3300 * SPEED);
     });
   },
   sweep() { if (!REDUCED) $("#sweep").animate([{ opacity: 0, backgroundPosition: "130% 0" }, { opacity: 1, offset: .3 }, { opacity: 0, backgroundPosition: "-30% 0" }], { duration: 1800, easing: "ease-in-out" }); }
@@ -2042,6 +2193,7 @@ function pickCard(i, el) {
 /* ================= STAGE 4: REVEAL ================= */
 function startReveal() {
   const sp = S.sp;
+  S.shadow = pickShadow();
   S.flipped = sp.pos.map(() => false);
   $("#reading").hidden = true; $("#reading").innerHTML = "";
   $("#reveal-controls").hidden = false;
@@ -2082,6 +2234,7 @@ function buildBoard(sp, open) {
   lg.hidden = sp.cap;
   lg.innerHTML = sp.cap ? "" : sp.pos.map((p, i) => `<li id="lg-${i}"><b>${i + 1}</b><span><em>${esc(p.k)}</em> <span class="lg-name"></span></span></li>`).join("");
   if (open && !sp.cap) sp.pos.forEach((p, i) => setCap(null, i));
+  buildShadowSlot(open);
 }
 function setCap(btn, i) {
   const c = S.deck[S.picks[i]], card = DECK[c.id];
@@ -2102,7 +2255,7 @@ function flip(i, quiet, fast) {
   setTimeout(() => burstAt(btn, card.major ? 90 : 50, card.major ? 7 : 5), (REDUCED ? 380 : fast ? 650 : 950) * SPEED);
   if (S.flipped.every(Boolean)) {
     $("#reveal-controls").hidden = true;
-    shot.then(() => Director.finale()).then(() => { Sound.swell(); finishReading(); });
+    shot.then(() => Director.finale()).then(() => Director.shadow()).then(() => { Sound.swell(); finishReading(); });
   }
 }
 /* the camera hops from card to card */
@@ -2136,9 +2289,13 @@ function computeReading() {
   const el = { fire: 0, water: 0, air: 0, earth: 0 };
   let majors = 0, revs = 0, courts = 0;
   const ranks = {}, suits = {};
+  /* a card well dignified by its neighbours speaks louder, an ill-dignified one is muted */
+  cards.forEach(e => { e.base = e.rev ? e.card.vr : e.card.v; e.dig = 0; });
+  const links = findLinks(sp, cards);
+  links.forEach(l => { cards[l.i].dig += DIG[l.type].w; cards[l.j].dig += DIG[l.type].w; });
   cards.forEach(entry => {
     const { card, rev, pos } = entry;
-    const val = rev ? card.vr : card.v, mult = card.major ? 1.3 : 1, w = pos.w;
+    const val = entry.base * clamp(1 + entry.dig, .6, 1.45), mult = card.major ? 1.3 : 1, w = pos.w;
     entry.val = val;
     entry.contrib = {};
     ["love", "career", "money", "health"].forEach(d => { entry.contrib[d] = val * card.aff[d] * mult * w; sums[d] += entry.contrib[d]; });
@@ -2153,7 +2310,12 @@ function computeReading() {
   Object.keys(sums).forEach(d => scores[d] = Math.round(50 + 48 * Math.tanh(sums[d] / (wsum * 1.5))));
   const overall = Math.round(DOMAINS.reduce((a, d) => a + scores[d.k], 0) / DOMAINS.length);
   const num = numerology(S.q);
-  return { sp, ctx: sp.ctx, cards, scores, overall, el, majors, revs, courts, ranks, suits, num, n: cards.length, date: new Date(), code: S.code, riffles: S.riffles, q: S.q, spreadKey: S.spreadKey };
+  const R = { sp, ctx: sp.ctx, cards, scores, overall, el, majors, revs, courts, ranks, suits, num, n: cards.length, date: new Date(), code: S.code, riffles: S.riffles, q: S.q, spreadKey: S.spreadKey, links };
+  R.combos = findCombos(cards);
+  R.trend = findTrend(R);
+  R.journey = findJourney(R);
+  R.shadow = S.shadow ? { card: DECK[S.shadow.id], rev: S.shadow.rev } : null;
+  return R;
 }
 const band = s => s >= 80 ? 0 : s >= 65 ? 1 : s >= 50 ? 2 : s >= 35 ? 3 : 4;
 const stars = s => { const n = clamp(Math.round(s / 20), 1, 5); return "★".repeat(n) + "☆".repeat(5 - n); };
@@ -2404,6 +2566,495 @@ function showStep(i) {
   if (typeof st.spot === "number") { Sound.chime(587); setTimeout(() => burstAt(cards[st.spot], 30, 3), 350 * SPEED); }
 }
 
+/* ================= DEEP READING: dignities, combos, trend, journey ================= */
+const stripTags = s => String(s).replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+/* elemental dignities (Golden Dawn): neighbouring cards strengthen or weaken each other by element */
+const DIG = {
+  same: { th: "ธาตุเดียวกัน · สอดประสาน", short: "สอดประสาน", w: .15 },
+  friend: { th: "ธาตุมิตร · หนุนกัน", short: "หนุนกัน", w: .1 },
+  neutral: { th: "ธาตุกลาง · ประคองกัน", short: "ประคองกัน", w: .03 },
+  contrary: { th: "ธาตุศัตรู · ต้านกัน", short: "ต้านกัน", w: -.2 }
+};
+function dignity(a, b) {
+  if (a === b) return "same";
+  const k = [a, b].sort().join("-");
+  return k === "fire-water" || k === "air-earth" ? "contrary" : k === "air-fire" || k === "earth-water" ? "friend" : "neutral";
+}
+/* cards count as neighbours when they sit within about three card-widths of each other on the table */
+function findLinks(sp, cards) {
+  const out = [], thr = sp.cw / 100 * (sp.linkK || 2.4);
+  for (let i = 0; i < cards.length; i++) for (let j = i + 1; j < cards.length; j++) {
+    const a = sp.pos[i], b = sp.pos[j];
+    if (Math.hypot((a.x - b.x) / 100, (a.y - b.y) / 100 / sp.aspect) <= thr) out.push({ i, j, type: dignity(cards[i].card.el, cards[j].card.el) });
+  }
+  return out;
+}
+const cid = (suit, rank) => 22 + ["wands", "cups", "swords", "pentacles"].indexOf(suit) * 14 + rank - 1;
+const COMBOS = [
+  [[16, 17], "หลังพายุมีดวงดาว", "สิ่งที่พังลงคือการเปิดฟ้าให้ความหวังส่องถึง ความเจ็บตอนนี้จะกลายเป็นการเยียวยา", 1],
+  [[13, 0], "ปิดฉากเพื่อออกเดิน", "บทเก่าจบลงพอดีกับที่ใจพร้อมเริ่มต้นใหม่ เป็นจังหวะของการเปลี่ยนชีวิต", 1],
+  [[13, 20], "การเกิดใหม่", "สิ่งที่จบไปแล้วถูกเรียกให้ลุกขึ้นอีกครั้งในรูปแบบใหม่ ไม่ใช่แบบเดิม", 1],
+  [[6, cid("cups", 2)], "หัวใจตรงกัน", "ไพ่คู่รักสองชั้น ความรู้สึกของทั้งสองฝ่ายสะท้อนกันอย่างชัดเจน", 1],
+  [[19, 21], "ชัยชนะเต็มวง", "ความสำเร็จที่ทั้งสว่างและสมบูรณ์ หนึ่งในคู่ไพ่ที่ดีที่สุดของสำรับ", 1],
+  [[15, 6], "รักที่ผูกมัด", "แรงดึงดูดสูงแต่มีพันธนาการแฝง ต้องแยกให้ออกระหว่างรักกับการยึดติด", -1],
+  [[18, 2], "ม่านแห่งความลับ", "ลางสังหรณ์แรงมาก และยังมีเรื่องที่ไม่ถูกเปิดเผย เชื่อใจตัวเองแต่ตรวจสอบข้อเท็จจริง", 0],
+  [[10, 1], "จังหวะพบฝีมือ", "โอกาสมาถึงพอดีกับที่ฝีมือพร้อม ถ้าลงมือตอนนี้จะได้ผลเกินคาด", 1],
+  [[16, 13], "เปลี่ยนแปลงถอนราก", "การเปลี่ยนครั้งนี้ลึกและเร็ว สิ่งเดิมจะไม่กลับมาอีก", -1],
+  [[11, 20], "ผลแห่งการกระทำ", "สิ่งที่ทำไว้จะย้อนกลับมาอย่างยุติธรรม เป็นเวลาของการตัดสินและการเริ่มใหม่", 0],
+  [[9, 12], "ถอยเพื่อมองเห็น", "การหยุดและอยู่กับตัวเองคือคำตอบ ยังไม่ใช่เวลาเร่ง", 0],
+  [[3, 4], "คู่ราชันย์", "ความอบอุ่นกับความมั่นคงมาบรรจบกัน เหมาะกับการสร้างครอบครัว ทีม หรือรากฐานระยะยาว", 1],
+  [[7, 8], "แรงขับเคลื่อนคู่", "ความมุ่งมั่นภายนอกกับความเข้มแข็งภายในทำงานพร้อมกัน แทบไม่มีอะไรหยุดได้", 1],
+  [[14, 17], "การเยียวยาเต็มที่", "ร่างกายและจิตใจกำลังฟื้นอย่างนุ่มนวล ช่วงเวลาที่ดีสำหรับการรักษาแผล", 1],
+  [[0, 1], "ก้าวแรกของนักมายากล", "ความกล้าเริ่มบวกกับทักษะ เหมาะกับการเริ่มโปรเจกต์หรือเส้นทางใหม่", 1],
+  [[cid("swords", 3), cid("swords", 10)], "แผลซ้อนแผล", "ความเจ็บสะสมถึงจุดสุด แต่ 10 ดาบบอกว่านี่คือจุดต่ำที่สุดแล้ว", -1],
+  [[cid("swords", 9), 18], "ฝันร้ายในหมอก", "ความกังวลกำลังขยายสิ่งที่ไม่ชัดให้น่ากลัวเกินจริง", -1],
+  [[cid("cups", 10), cid("pentacles", 10)], "บ้านที่สมบูรณ์", "ความสุขทางใจกับความมั่นคงทางเงินมาครบ เรื่องบ้านและครอบครัวเด่นมาก", 1],
+  [[cid("pentacles", 1), 10], "โชคการเงินหมุนเข้า", "โอกาสทางเงินใหม่มาพร้อมจังหวะชีวิตที่เป็นใจ", 1],
+  [[cid("cups", 5), 17], "น้ำตาที่กลายเป็นความหวัง", "ความเสียใจกำลังถูกเยียวยา สิ่งที่หายไปจะมีสิ่งใหม่มาแทน", 1],
+  [[cid("wands", 10), cid("swords", 4)], "ถึงเวลาวางภาระ", "แบกมาเกินพอแล้ว ไพ่บอกให้พักก่อนจะหมดแรง", 0],
+  [[15, cid("swords", 8)], "กรงที่สร้างเอง", "พันธนาการส่วนใหญ่อยู่ในความคิด ประตูกรงไม่ได้ล็อกอย่างที่คิด", -1],
+  [[cid("cups", 9), 19], "สมปรารถนา", "ไพ่แห่งคำอธิษฐานพบดวงอาทิตย์ สิ่งที่หวังมีโอกาสเป็นจริงสูงมาก", 1]
+];
+function findCombos(cards) {
+  const out = [], at = id => cards.findIndex(e => e.card.id === id);
+  COMBOS.forEach(([pair, name, desc, sign]) => { const a = at(pair[0]), b = at(pair[1]); if (a >= 0 && b >= 0) out.push({ idx: [a, b], name, desc, sign }); });
+  const majors = cards.filter(e => e.card.major).sort((x, y) => x.card.num - y.card.num);
+  for (let k = 1; k < majors.length; k++) if (majors[k].card.num === majors[k - 1].card.num + 1)
+    out.push({ idx: [majors[k - 1].i, majors[k].i], name: "ขั้นบันไดชะตา", desc: `${majors[k - 1].card.th} ต่อด้วย${majors[k].card.th} เรื่องกำลังเดินจากบทเรียนหนึ่งไปสู่บทถัดไปพอดี`, sign: 0 });
+  const byRank = {};
+  cards.forEach(e => { if (!e.card.major) (byRank[e.card.rank] = byRank[e.card.rank] || []).push(e.i); });
+  Object.entries(byRank).forEach(([r, idx]) => {
+    if (idx.length < 2) return;
+    r = +r;
+    const name = r === 1 ? "ประตูเริ่มต้นหลายบาน" : r > 10 ? `การชุมนุมของ${COURT_TH[r - 11]}` : `เลข ${r} สะท้อนซ้ำ`;
+    out.push({ idx, name, desc: `ไพ่${r === 1 ? "เอซ" : r > 10 ? COURT_TH[r - 11] : "เลข " + r} ออกมา ${idx.length} ใบ ย้ำเรื่อง${RANK_MEANING[r - 1]}`, sign: r === 1 ? 1 : r === 5 ? -1 : 0 });
+  });
+  SUITS.forEach(s => {
+    const k = cards.find(e => e.card.id === cid(s.key, 14)), q = cards.find(e => e.card.id === cid(s.key, 13));
+    if (k && q) out.push({ idx: [q.i, k.i], name: `คู่ครองแห่ง${s.th}`, desc: `ราชินีและราชาของชุด${s.th}ปรากฏพร้อมกัน ผู้ใหญ่สองคนที่มีพลังเรื่อง${SUIT_AREA[s.key]}จะมีบทบาท`, sign: 1 });
+    const a = cards.find(e => e.card.id === cid(s.key, 1)), t = cards.find(e => e.card.id === cid(s.key, 10));
+    if (a && t) out.push({ idx: [a.i, t.i], name: `ต้นจนจบของ${s.th}`, desc: `เอซกับเลขสิบของชุด${s.th} วงจรเรื่อง${SUIT_AREA[s.key]}กำลังเริ่มและจบในคราวเดียว`, sign: 0 });
+  });
+  return out.slice(0, 6);
+}
+const TIMELINE = { ppf: [0, 1, 2], celtic: [3, 0, 5, 9], year12: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] };
+function findTrend(R) {
+  const tl = TIMELINE[R.spreadKey]; if (!tl) return null;
+  const v = tl.map(i => R.cards[i].val), n = v.length, mx = (n - 1) / 2, my = v.reduce((a, b) => a + b, 0) / n;
+  let num = 0, den = 0; v.forEach((y, x) => { num += (x - mx) * (y - my); den += (x - mx) ** 2; });
+  const slope = num / den * (n - 1), inner = v.slice(1, -1), low = Math.min(...inner), high = Math.max(...inner);
+  const kind = low < v[0] - .8 && low < v[n - 1] - .8 ? ["พลิกฟื้น", "ตกลงก่อนแล้วฟื้นกลับขึ้นมา ช่วงกลางคือหุบเหวที่ต้องอดทนผ่าน"]
+    : high > v[0] + .8 && high > v[n - 1] + .8 ? ["ขึ้นแล้วชะลอ", "สว่างที่สุดช่วงกลาง แล้วค่อยๆ ผ่อนลง ควรคว้าโอกาสตอนที่ยังสว่าง"]
+    : slope > .8 ? ["ขาขึ้น", "เรื่องกำลังดีขึ้นตามเวลา ปลายทางสว่างกว่าจุดเริ่ม"]
+    : slope < -.8 ? ["ขาลง", "พลังค่อยๆ อ่อนลงตามเวลา ควรเตรียมรับมือแต่เนิ่นๆ"]
+    : ["ทรงตัว", "ไม่มีการเปลี่ยนแปลงใหญ่ เรื่องจะดำเนินไปในระดับใกล้เคียงเดิม"];
+  return { idx: tl, v, name: kind[0], desc: kind[1], labels: tl.map(i => R.cards[i].pos.ks || R.cards[i].pos.k) };
+}
+const ACTS = [
+  { r: [0, 0], th: "ก่อนออกเดินทาง", d: "ยืนอยู่ที่ประตูแรก ทุกอย่างยังเป็นไปได้" },
+  { r: [1, 7], th: "องก์ที่หนึ่ง · ตัวตนกับโลกภายนอก", d: "บทเรียนเรื่องการสร้างตัว ความสัมพันธ์ และการเลือกทาง" },
+  { r: [8, 14], th: "องก์ที่สอง · บททดสอบภายใน", d: "บทเรียนเรื่องความเข้มแข็ง การปล่อยวาง และสมดุลในใจ" },
+  { r: [15, 21], th: "องก์ที่สาม · การแปรเปลี่ยน", d: "บทเรียนเรื่องการเผชิญเงามืด การตื่นรู้ และความสมบูรณ์" }
+];
+function findJourney(R) {
+  const ms = R.cards.filter(e => e.card.major);
+  if (!ms.length) return { nums: [], act: null, focus: null };
+  const focus = [...ms].sort((a, b) => Math.abs(b.val * b.pos.w) - Math.abs(a.val * a.pos.w))[0];
+  return { nums: ms.map(e => e.card.num), focus, act: ACTS.find(a => focus.card.num >= a.r[0] && focus.card.num <= a.r[1]) };
+}
+
+/* ================= STAR MAP (visual analysis) ================= */
+function journeySVG(J) {
+  const pts = Array.from({ length: 22 }, (_, i) => [16 + i * (328 / 21), 62 + 30 * Math.sin(i * .72)]);
+  const path = "M" + pts.map(p => p.map(n => n.toFixed(1)).join(" ")).join(" L");
+  const acts = [[1, 7], [8, 14], [15, 21]].map(([a, b], k) => `<text x="${((pts[a][0] + pts[b][0]) / 2).toFixed(0)}" y="122" text-anchor="middle" font-size="9" fill="#aea8cc" font-family="Cinzel, serif" letter-spacing="1.5">${["ACT I", "ACT II", "ACT III"][k]}</text>`).join("");
+  const nodes = pts.map((p, i) => {
+    const on = J.nums.includes(i), focus = J.focus && J.focus.card.num === i;
+    return `<g class="jn${on ? " on" : ""}${focus ? " focus" : ""}">${focus ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="11" class="jn-halo"/>` : ""}<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${on ? 5 : 2.2}"/>${on ? `<text x="${p[0].toFixed(1)}" y="${(p[1] - 11).toFixed(1)}" text-anchor="middle">${ROMAN[i]}</text>` : ""}</g>`;
+  }).join("");
+  return `<svg class="journey" viewBox="0 0 360 130" role="img" aria-label="เส้นทางไพ่ชุดใหญ่ 22 ใบ"><path d="${path}" class="jn-path"/>${nodes}${acts}</svg>`;
+}
+function trendSVG(T) {
+  const n = T.v.length, W = 320, H = 96, px = i => 16 + i * ((W - 32) / Math.max(1, n - 1)), py = v => H / 2 - v * 12;
+  const line = T.v.map((v, i) => `${i ? "L" : "M"}${px(i).toFixed(1)} ${py(v).toFixed(1)}`).join(" ");
+  const area = line + ` L${px(n - 1).toFixed(1)} ${H / 2} L${px(0).toFixed(1)} ${H / 2} Z`;
+  const dots = T.v.map((v, i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="${i === n - 1 ? 4.5 : 3}" class="${v >= 0 ? "up" : "dn"}"/>`).join("");
+  const lab = n <= 4 ? T.labels.map((l, i) => `<text x="${px(i).toFixed(1)}" y="${H + 14}" text-anchor="middle">${esc(l)}</text>`).join("") : "";
+  return `<svg class="trend" viewBox="0 0 ${W} ${H + 20}" role="img" aria-label="กราฟแนวโน้ม"><line x1="8" x2="${W - 8}" y1="${H / 2}" y2="${H / 2}" class="zero"/><path d="${area}" class="area"/><path d="${line}" class="ln"/>${dots}${lab}</svg>`;
+}
+function starMapHTML(R) {
+  const nm = i => `<b>${i + 1}</b> ${esc(R.cards[i].card.th)}`;
+  const links = R.links.length ? R.links.slice().sort((a, b) => Math.abs(DIG[b.type].w) - Math.abs(DIG[a.type].w)).slice(0, 6).map(l => `
+    <li class="lk ${l.type}"><span class="lk-ends">${nm(l.i)} <i></i> ${nm(l.j)}</span><span class="lk-type">${DIG[l.type].th}</span></li>`).join("")
+    : `<li class="muted">ไพ่ในการวางแบบนี้ไม่ได้อยู่ติดกัน จึงไม่มีสายสัมพันธ์ธาตุ</li>`;
+  const combos = R.combos.length ? R.combos.map(c => `
+    <div class="combo s${c.sign}"><div class="combo-glyph">${c.idx.slice(0, 2).map(i => `<span>${R.cards[i].card.major ? ROMAN[R.cards[i].card.num] : (i + 1)}</span>`).join("<em>+</em>")}</div>
+    <div><div class="combo-name">COMBO · ${esc(c.name)}</div><p>${esc(c.desc)}</p><small>ใบที่ ${c.idx.map(i => i + 1).join(" · ")}</small></div></div>`).join("")
+    : `<p class="muted">ครั้งนี้ไม่มีคู่ไพ่พิเศษ ไพ่แต่ละใบยืนด้วยพลังของตัวเอง</p>`;
+  const sh = R.shadow;
+  return `
+  <div class="panel starmap">
+    <h3><small>Star Map · Deep Reading</small>แผนที่ดวงดาว</h3>
+    <div class="sm-grid">
+      <div class="sm-block"><h4>สายสัมพันธ์ธาตุ</h4><p class="sm-note">ไพ่ที่วางใกล้กันส่งพลังถึงกัน ธาตุมิตรทำให้ความหมายชัดขึ้น ธาตุศัตรูทำให้อ่อนลง</p><ul class="links">${links}</ul></div>
+      <div class="sm-block"><h4>คอมโบไพ่</h4><div class="combos">${combos}</div></div>
+      ${R.trend ? `<div class="sm-block"><h4>แนวโน้มของเรื่อง · <span class="tr-name">${R.trend.name}</span></h4>${trendSVG(R.trend)}<p>${R.trend.desc}</p></div>` : ""}
+      ${sh ? `<div class="sm-block shadow-block"><h4>ไพ่เงา · รากที่ซ่อนอยู่</h4><div class="sh-row"><button type="button" class="mini${sh.rev ? " rev" : ""}" data-modal="shadow" aria-label="ดูไพ่เงา">${cardFront(sh.card)}</button><div><b>${esc(sh.card.th)}${sh.rev ? " · กลับหัว" : ""}</b><p>${esc(sh.rev ? sh.card.kwR : sh.card.kwU)}</p><p class="muted">ใบล่างสุดของสำรับหลังเลือกไพ่ ตามตำราคือสิ่งที่อยู่ใต้คำถามแต่ยังไม่ถูกพูดถึง</p></div></div></div>` : ""}
+    </div>
+  </div>`;
+}
+function journeyHTML(R) {
+  const J = R.journey;
+  return `<div class="panel">
+    <h3><small>The Fool's Journey</small>เส้นทางของผู้ออกเดินทาง</h3>
+    ${journeySVG(J)}
+    <p>${J.act ? `ไพ่ชุดใหญ่ทั้ง 22 ใบคือการเดินทางหนึ่งรอบของชีวิต ครั้งนี้จุดที่สว่างที่สุดคือ <b>${esc(J.focus.card.th)}</b> คุณจึงอยู่ใน<b>${J.act.th}</b> ${J.act.d}` : "ครั้งนี้ไม่มีไพ่ชุดใหญ่ เรื่องที่ถามจึงอยู่บนถนนของชีวิตประจำวัน ไม่ใช่จุดเปลี่ยนใหญ่ของชะตา"}</p>
+  </div>`;
+}
+/* glowing links between neighbouring cards on the table: gold where elements help, cracked red where they clash */
+function drawLinks(R) {
+  const board = $("#board");
+  board.querySelectorAll(".links-layer").forEach(n => n.remove());
+  if (!R.links.length && !R.combos.length) return;
+  const P = i => R.sp.pos[i];
+  let k = 0;
+  const seg = (l) => {
+    const a = P(l.i), b = P(l.j);
+    if (l.type === "contrary") {
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+      const pts = Array.from({ length: 7 }, (_, t) => { const f = t / 6, o = t % 2 && t < 6 ? 1.6 : 0; return `${(a.x + dx * f + nx * o).toFixed(2)},${(a.y + dy * f + ny * o).toFixed(2)}`; });
+      return `<polyline points="${pts.join(" ")}" class="lnk contrary" pathLength="1" style="animation-delay:${(k++ * .18).toFixed(2)}s" vector-effect="non-scaling-stroke"/>`;
+    }
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="lnk ${l.type}" pathLength="1" style="animation-delay:${(k++ * .18).toFixed(2)}s" vector-effect="non-scaling-stroke"/>`;
+  };
+  const arcs = R.combos.filter(c => c.idx.length === 2).map(c => {
+    const a = P(c.idx[0]), b = P(c.idx[1]), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - 12;
+    return `<path d="M${a.x} ${a.y} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b.x} ${b.y}" class="lnk combo" pathLength="1" style="animation-delay:${(k++ * .18).toFixed(2)}s" vector-effect="non-scaling-stroke"/>`;
+  }).join("");
+  const svg = `<svg class="links-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${R.links.map(seg).join("")}${arcs}</svg>`;
+  board.children[0].insertAdjacentHTML("afterend", svg);
+}
+
+/* ================= THE ORACLE: Claude writes the reading; the house book is the fallback ================= */
+let samplePromise = null;
+const getSample = () => samplePromise || (samplePromise = window.claude && window.claude.use ? window.claude.use("sample").catch(() => null) : Promise.resolve(null));
+const CHAPTERS = {
+  ANSWER: ["คำตอบ", "The Answer"], JOURNEY: ["เส้นทางผ่านไพ่", "The Journey"], DIALOGUE: ["ไพ่สนทนากัน", "The Dialogue"],
+  SHADOW: ["ไพ่เงา", "The Shadow"], ADVICE: ["คำแนะนำ", "The Counsel"], POEM: ["ลำนำปิดท้าย", "The Verse"]
+};
+function oraclePayload(R, A) {
+  const ctx = R.ctx;
+  return {
+    question: R.q.text || "(ไม่ได้ตั้งคำถาม ให้อ่านภาพรวมของช่วงนี้)",
+    asker_name: R.q.name || null,
+    understanding: {
+      about: ctx.subject === "other" ? whoFull(ctx.w) : "ตัวผู้ถามเอง", refer_to_other_person_as: ctx.w || null,
+      topic: TOPICS[ctx.topic].th, question_type: QTYPES[ctx.type].th, choices: ctx.type === "choice" ? [ctx.A, ctx.B] : undefined
+    },
+    spread: R.sp.name,
+    cards: R.cards.map(e => ({
+      n: e.i + 1, position: e.pos.k, position_asks: e.pos.d,
+      speaks_about: aboutOther(e.pos, ctx) ? whoFull(ctx.w) : e.pos.ab === "both" ? "ทั้งสองฝ่าย" : "ผู้ถาม",
+      card: `${e.card.th} (${e.card.en})`, orientation: e.rev ? "กลับหัว" : "ตั้งตรง",
+      keywords: e.rev ? e.card.kwR : e.card.kwU, meaning: e.rev ? e.card.rv : e.card.up, element: "ธาตุ" + EL[e.card.el].th,
+      energy: +e.val.toFixed(1), dignity: e.dig > .08 ? "ได้ธาตุหนุน" : e.dig < -.08 ? "ถูกธาตุต้าน" : "กลาง"
+    })),
+    computed_answer: { verdict: stripTags(A.head), notes: A.lines.map(stripTags) },
+    scores_0_to_100: { overall: R.overall, ...Object.fromEntries(DOMAINS.map(d => [d.th, R.scores[d.k]])) },
+    element_links: R.links.map(l => `ใบ ${l.i + 1} กับใบ ${l.j + 1}: ${DIG[l.type].th}`),
+    combos: R.combos.map(c => `${c.name} (ใบ ${c.idx.map(x => x + 1).join(" กับ ")}): ${c.desc}`),
+    trend: R.trend ? `${R.trend.name}: ${R.trend.desc}` : null,
+    fools_journey: R.journey.act ? `${R.journey.act.th} (${R.journey.act.d}) จุดศูนย์กลางคือ ${R.journey.focus.card.th}` : "ไม่มีไพ่ชุดใหญ่ เรื่องอยู่ในระดับชีวิตประจำวัน",
+    shadow_card: R.shadow ? { card: `${R.shadow.card.th} (${R.shadow.card.en})`, orientation: R.shadow.rev ? "กลับหัว" : "ตั้งตรง", keywords: R.shadow.rev ? R.shadow.card.kwR : R.shadow.card.kwU, meaning: R.shadow.rev ? R.shadow.card.rv : R.shadow.card.up } : null,
+    numerology: R.num ? { life_path: R.num.lp, birth_card: R.num.birth.map(n => DECK[n].th).join(", "), year_card: DECK[R.num.yearCards[0]].th } : null
+  };
+}
+const ORACLE_RULES = `คุณคือ "หมอแห่งหอดารา" นักอ่านไพ่ทาโรต์ผู้มีประสบการณ์ ใจดี เป็นกันเอง พูดภาษาไทยที่สละสลวยและเป็นธรรมชาติ เหมือนหมอดูตัวจริงที่นั่งอ่านไพ่ให้คนตรงหน้า
+
+หลักการ:
+1. ตอบ "คำถามนี้" โดยตรงตั้งแต่ประโยคแรก ไม่ใช่ดูดวงรวมทั่วไป ถ้าเป็นคำถามใช่หรือไม่ ให้ยึดคำตัดสินใน computed_answer.verdict (ห้ามกลับคำตัดสิน) แล้วอธิบายว่าทำไม
+2. ทุกย่อหน้าต้องโยงกลับมาที่คำถามและสถานการณ์จริงของผู้ถาม เมื่อพูดถึงคนอื่นให้เรียกตาม refer_to_other_person_as
+3. อ่านไพ่แต่ละใบตามคำถามของตำแหน่ง (position_asks) และพูดถึงคนตาม speaks_about แล้วร้อยเป็นเรื่องเดียว ให้เห็นว่าใบหนึ่งส่งต่อไปอีกใบยังไง
+4. ใช้ element_links, combos, trend, fools_journey และ shadow_card เป็นข้อเท็จจริงในการวิเคราะห์ อธิบายให้คนไม่รู้เรื่องไพ่เข้าใจ เช่น บอกสั้นๆ ว่าธาตุหนุนหรือธาตุต้านแปลว่าอะไรเมื่อพูดถึงครั้งแรก
+5. ใช้เฉพาะไพ่และตัวเลขที่ให้มา ห้ามแต่งไพ่ใหม่
+6. ภาษา: หลากหลาย ไม่ซ้ำโครงประโยค ไม่ขึ้นต้นทุกย่อหน้าด้วยคำเดิม ไม่ใช้รายการข้อๆ ในบทเล่า มีภาพเปรียบที่ชวนนึกภาพแต่ยังเข้าใจง่าย เรียกผู้ถามว่า "คุณ" (ถ้ามีชื่อ เรียกชื่อได้บ้าง) ไม่ใช้คำลงท้ายครับหรือค่ะ ไม่ใช้อีโมจิ
+7. ไม่รับประกันผลเรื่องสุขภาพ กฎหมาย หรือการเงิน ถ้าเกี่ยวข้องให้แนะนำอย่างอ่อนโยนว่าควรปรึกษาผู้เชี่ยวชาญ ไม่ให้เลขหวย`;
+function buildOraclePrompt(R, A) {
+  return `${ORACLE_RULES}
+
+งาน: เขียนคำทำนายจากการเปิดไพ่ด้านล่าง เป็นบทตามแท็กต่อไปนี้ เรียงตามลำดับ แต่ละแท็กอยู่บรรทัดของตัวเอง ตัวเลขหลัง | คือหมายเลขไพ่ (n) ที่บทนั้นพูดถึง ยาวรวมประมาณ 500 ถึง 800 คำ
+[[ANSWER|n,n]] คำตอบตรงๆ ของคำถาม 1 ย่อหน้า
+[[JOURNEY|n,n,n]] เดินทางผ่านไพ่ทีละใบตามลำดับตำแหน่ง 2 ถึง 3 ย่อหน้า
+[[DIALOGUE|n,n]] ไพ่สนทนากัน: ธาตุหนุนหรือต้าน คอมโบ แนวโน้ม และเส้นทางของไพ่ชุดใหญ่ 1 ถึง 2 ย่อหน้า
+[[SHADOW]] ไพ่เงา: รากที่ซ่อนอยู่ใต้คำถาม 1 ย่อหน้า (ถ้า shadow_card เป็น null ให้ข้ามแท็กนี้)
+[[ADVICE|n]] คำแนะนำที่ทำได้จริง 2 ถึง 3 อย่าง เขียนเป็นย่อหน้าเล่า
+[[POEM]] กลอนสั้น 4 วรรค วรรคละบรรทัด มีสัมผัสคล้องจอง เป็นคำอวยพรที่สรุปคำทำนาย
+[[ASK]] คำถามสั้นๆ 3 ข้อที่ผู้ถามน่าจะอยากถามต่อ ข้อละบรรทัด ไม่มีเลขนำหน้า
+
+ข้อมูลการเปิดไพ่ (JSON):
+${JSON.stringify(oraclePayload(R, A), null, 1)}`;
+}
+function parseChron(text) {
+  const re = /\[\[([A-Z]+)(?:\|([^\]]*))?\]\]/g, out = [];
+  let m, last = null;
+  while ((m = re.exec(text))) {
+    if (last) last.body = text.slice(last.end, m.index);
+    last = { key: m[1], cards: (m[2] || "").split(/[^\d]+/).map(Number).filter(n => n > 0), end: re.lastIndex };
+    out.push(last);
+  }
+  if (last) last.body = text.slice(last.end);
+  return out.map(c => ({ key: c.key, cards: c.cards, body: (c.body || "").replace(/\[\[[^\]]*$/, "").trim() }));
+}
+/* ---------- the house book: a varied rule-based writer used when Claude cannot write ---------- */
+const POEMS = {
+  fire: { good: ["เปลวไฟในอกยังลุกโชน", "ทางที่โค้งจะตรงด้วยใจกล้า", "ก้าวแรกเปิดฟ้าที่รอมา", "ดาวทั้งฟ้าคอยนำทางเดิน"], mid: ["ไฟยังอุ่นแม้ลมจะพัดผ่าน", "ค่อยประคองอย่าให้มอดดับลง", "เติมเชื้อด้วยใจที่มั่นคง", "แสงจะตรงมาหาเมื่อถึงยาม"], bad: ["ไฟที่ร้อนเผาทางข้างหน้า", "หยุดพักกายาให้ใจเย็น", "เถ้าถ่านคือดินให้ต้นเห็น", "วันหน้าจะเป็นไฟอุ่นดวงใหม่"] },
+  water: { good: ["สายน้ำไหลรินถึงฝั่งฝัน", "หัวใจสองดวงพลันพบพาน", "ความอ่อนโยนนำทางผ่าน", "ทุกสิ่งงดงามตามจังหวะใจ"], mid: ["คลื่นน้ำยังสั่นไหวไม่แน่นิ่ง", "รอให้ทุกสิ่งค่อยใสกระจ่าง", "ฟังเสียงใจในความเงียบงาม", "แล้วจะเห็นทางที่ซ่อนอยู่"], bad: ["ฝนพรำหนักในค่ำคืนนี้", "น้ำตาที่มีจะชำระใจ", "หลังพายุฟ้าย่อมสดใส", "ดอกบัวใหม่บานกลางน้ำนิ่ง"] },
+  air: { good: ["ลมพัดความคิดให้โบยบิน", "ทุกถ้อยคำกลายเป็นปีกกล้า", "เห็นทางชัดดั่งฟ้าไร้เมฆา", "ตัดสินใจเถิดเวลารออยู่"], mid: ["ความคิดดั่งเมฆลอยหลายสาย", "อย่าเพิ่งวุ่นวายรีบตัดสิน", "ให้ลมพัดฝุ่นในใจสิ้น", "คำตอบจะรินมาเมื่อใจนิ่ง"], bad: ["ลมพายุพัดคำพูดบาดลึก", "สงบนึกก่อนเอ่ยสิ่งใด", "ดาบที่คมวางลงข้างกาย", "ใจที่ใสจะพาให้รอด"] },
+  earth: { good: ["เมล็ดที่หว่านไว้ผลิใบงาม", "ความพยายามออกรวงทองอร่าม", "มั่นคงดั่งผืนดินยามคราม", "ทุกก้าวงามบนทางที่สร้างเอง"], mid: ["ดินยังชื้นรอฝนอีกสักครา", "อดทนรักษาต้นกล้าไว้", "ทีละก้าวช้าแต่ไม่หวั่นไหว", "ผลจะได้เมื่อถึงฤดูกาล"], bad: ["แผ่นดินแห้งแล้งในวันนี้", "แต่รากยังมีอยู่ใต้ดินลึก", "อดทนเถิดให้ใจได้ตรึก", "ฝนจะกลับมาปลุกให้งอกงาม"] }
+};
+const FOLLOW_UPS = {
+  yesno: ["ต้องทำอะไรเพื่อให้คำตอบเป็นใช่", "ช่วงเวลาไหนที่ควรขยับ", "อะไรคือสิ่งที่ฉันมองข้ามไป"],
+  mind: ["เขาจะติดต่อมาไหม", "ควรเป็นฝ่ายเริ่มคุยก่อนไหม", "เขามองอนาคตกับฉันไว้แบบไหน"],
+  choice: ["ถ้าเลือกทางที่ไพ่ไม่แนะนำ ต้องระวังอะไร", "มีทางที่สามไหม", "ควรตัดสินใจเมื่อไหร่"],
+  timing: ["ระหว่างรอควรเตรียมอะไร", "มีสัญญาณอะไรบอกว่าถึงเวลาแล้ว", "อะไรทำให้เรื่องนี้ช้าลง"],
+  general: ["อธิบายไพ่เงาให้ละเอียดขึ้น", "ควรเริ่มจากอะไรก่อน", "มีอะไรที่ต้องระวังเป็นพิเศษ"]
+};
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function houseChronicle(R, A) {
+  const rng = mulberry(parseInt(R.code, 16) || 7), pick = a => a[Math.floor(rng() * a.length)];
+  const ctx = R.ctx, K = plainKit(R), tone = A.tone || "mid", n = R.cards.length;
+  const nums = list => list.map(i => i + 1).join(",");
+  const name = R.q.name ? "คุณ" + R.q.name : "คุณ";
+  const open = {
+    good: ["แสงเทียนบนโต๊ะไพ่ตั้งตรงไม่ไหวติง เหมือนรู้ว่าคำตอบครั้งนี้ใจดีกับคุณ", "ไพ่ชุดนี้วางตัวอย่างอ่อนโยน ราวกับรอเล่าเรื่องดีให้ฟัง", "ดาวเหนือหอดาราคืนนี้ส่องเข้าข้างคุณ"],
+    mid: ["ไพ่ชุดนี้พูดเบาๆ และมีหลายชั้นให้ฟัง", "แสงกับเงาบนโต๊ะไพ่วันนี้แบ่งกันคนละครึ่ง", "ไพ่ยังไม่ปิดประตู แต่ก็ยังไม่เปิดกว้าง"],
+    bad: ["ไพ่ชุดนี้วางตัวหนักแน่นและตรงไปตรงมา", "ลมเย็นพัดผ่านโต๊ะไพ่ คำตอบวันนี้ต้องฟังด้วยใจที่นิ่ง", "เงาบนโต๊ะไพ่ยาวกว่าแสง แต่ไม่ได้มืดสนิท"]
+  }[tone];
+  const out = [];
+  out.push(`[[ANSWER|${nums([R.sp.key, R.sp.out].filter((x, i, a) => a.indexOf(x) === i))}]]`);
+  out.push(`${pick(open)} ${R.q.text ? `สำหรับคำถาม “${R.q.text}” ` : ""}คำตอบของหมอคือ **${stripTags(A.head)}** ${A.lines.slice(0, 2).map(stripTags).join(" ")}`);
+  const first = ["เรื่องเริ่มที่", "จุดตั้งต้นอยู่ที่", "ไพ่ใบแรกที่เปิดคือ"], mids = ["จากนั้น", "ถัดมา", "เรื่องไหลต่อไปยัง", "แล้วไพ่ก็พาเราไปพบ", "ต่อจากนั้นคือ"], lasts = ["และที่ปลายทาง", "สุดท้าย", "ไพ่ใบปิดท้ายคือ"];
+  let lastAbout = null;
+  const sentences = R.cards.map((e, k) => {
+    const lead = k === 0 ? pick(first) : k === n - 1 ? pick(lasts) : pick(mids);
+    /* name who the card speaks about only when that changes from the card before */
+    const about = aboutOther(e.pos, ctx) ? whoFull(ctx.w) : e.pos.ab === "both" ? "ทั้งสองฝ่าย" : "คุณ";
+    const who = about !== lastAbout && (about !== "คุณ" || lastAbout) ? ` ซึ่งพูดถึง${about === "คุณ" ? "ตัวคุณเอง" : about}` : "";
+    lastAbout = about;
+    return `${lead} **${e.card.th}**${e.rev ? "ที่กลับหัว" : ""} ในตำแหน่ง “${e.pos.k}”${who} ${voice(e.rev ? e.card.rv : e.card.up, e.pos, ctx)} ${stripTags(relevance(R, e))}`;
+  });
+  out.push(`[[JOURNEY|${nums(R.cards.map(e => e.i))}]]`);
+  for (let k = 0; k < sentences.length; k += 3) out.push(sentences.slice(k, k + 3).join(" ") + "\n");
+  const dl = [];
+  const strong = R.links.slice().sort((a, b) => Math.abs(DIG[b.type].w) - Math.abs(DIG[a.type].w)).slice(0, 2);
+  if (strong.length) {
+    dl.push("ในตำราไพ่ ไพ่ที่วางใกล้กันจะส่งพลังถึงกันผ่านธาตุ ธาตุที่เป็นมิตรช่วยให้ความหมายชัดขึ้น ส่วนธาตุที่ขัดกันทำให้พลังอ่อนลง");
+    strong.forEach(l => {
+      const a = R.cards[l.i], b = R.cards[l.j];
+      dl.push(l.type === "contrary"
+        ? `${a.card.th} (ธาตุ${EL[a.card.el].th}) กับ${b.card.th} (ธาตุ${EL[b.card.el].th}) วางติดกันแต่ธาตุต้านกัน ${pick(["พลังของทั้งคู่จึงหักล้างกันบางส่วน", "เหมือนน้ำกับไฟที่ต่างฝ่ายต่างลดทอนกัน", "ความหมายของทั้งสองใบจึงเบาลงกว่าปกติ"])}`
+        : `${a.card.th} กับ${b.card.th} ${l.type === "same" ? "เป็นธาตุเดียวกัน" : "เป็นธาตุที่หนุนกัน"} ${pick(["พลังจึงไหลต่อกันอย่างราบรื่น", "ต่างฝ่ายต่างขยายความหมายของกันและกัน", "ทำให้เรื่องตรงนี้ชัดเจนเป็นพิเศษ"])}`);
+    });
+  }
+  R.combos.slice(0, 3).forEach(c => dl.push(`คู่ไพ่ “${c.name}” จากใบที่ ${c.idx.map(i => i + 1).join(" กับ ")} ${c.desc}`));
+  if (R.trend) dl.push(`ถ้ามองเป็นเส้นเวลา เรื่องนี้เป็นแบบ “${R.trend.name}” ${R.trend.desc}`);
+  dl.push(R.journey.act ? `ส่วนไพ่ชุดใหญ่บอกว่าคุณอยู่ใน${R.journey.act.th} ${R.journey.act.d}` : "และเพราะไม่มีไพ่ชุดใหญ่ เรื่องนี้จึงอยู่ในมือของการกระทำในชีวิตประจำวันเกือบทั้งหมด");
+  out.push(`[[DIALOGUE|${nums([...new Set([...strong.flatMap(l => [l.i, l.j]), ...R.combos.flatMap(c => c.idx)])])}]]`);
+  out.push(dl.join(" "));
+  if (R.shadow) {
+    const s = R.shadow, sv = s.rev ? s.card.vr : s.card.v;
+    out.push("[[SHADOW]]");
+    out.push(`${pick(["ใต้สำรับ ไพ่ที่ซ่อนตัวอยู่ล่างสุดคือ", "เมื่อพลิกสำรับดู ไพ่เงาที่รออยู่ใต้สุดคือ", "รากที่ซ่อนอยู่ใต้คำถามนี้คือ"])} **${s.card.th}**${s.rev ? "ที่กลับหัว" : ""} ${s.rev ? s.card.rv : s.card.up} ${sv >= 0 ? pick(["ลึกๆ แล้วเรื่องนี้มีแรงหนุนซ่อนอยู่มากกว่าที่เห็น", "นี่คือของดีที่คุณมีอยู่แล้วแต่อาจยังไม่ได้หยิบมาใช้"]) : pick(["ลึกๆ ยังมีเรื่องค้างใจที่ต้องยอมรับก่อน คำตอบจึงจะชัด", "นี่คือเงาที่ต้องมองให้เห็นก่อนจะก้าวต่อ"])}`);
+  }
+  out.push(`[[ADVICE|${R.sp.adv + 1}]]`);
+  out.push(`${pick(["ถ้าให้หมอแนะนำ", "สิ่งที่หมออยากฝากไว้คือ", "ทางที่ไพ่ชี้ให้เดินคือ"])} ${K.dos[0]} ${pick(["และ", "ควบคู่ไปกับการ", "อีกเรื่องคือ"])}${K.dos[1] || ""} ส่วนสิ่งที่ควรระวังคือ${K.avoids[0].replace(/^ระวัง/, "")} ${pick(["ไพ่บอกทิศทางลม แต่คนถือหางเสือคือคุณ", "ทุกคำทำนายเปลี่ยนได้ด้วยการกระทำของคุณเอง", "ขอให้ใจนิ่ง แล้วทางจะชัดเอง"])}${R.q.name ? " " + name : ""}`);
+  const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
+  out.push("[[POEM]]");
+  out.push(POEMS[domEl][tone].join("\n"));
+  out.push("[[ASK]]");
+  out.push((FOLLOW_UPS[ctx.type] || FOLLOW_UPS.general).join("\n"));
+  return out.join("\n");
+}
+/* ---------- chronicle player: one chapter at a time, cards it speaks of light up ---------- */
+const THINKING = ["หมอกำลังเพ่งไพ่…", "กำลังฟังเสียงธาตุของไพ่แต่ละใบ…", "กำลังอ่านไพ่เงาใต้สำรับ…", "กำลังร้อยเรื่องให้ตรงกับคำถามของคุณ…"];
+const Chron = {
+  R: null, chapters: [], cur: 0, follow: true, live: false, text: "", src: "", ctl: null, timer: null, playT: null,
+  mount(R) {
+    this.R = R; this.chapters = []; this.cur = 0; this.follow = true; this.text = ""; this.live = false;
+    $("#chron-stage").innerHTML = ""; $("#chron-tabs").innerHTML = "";
+    $("#chron-nav").hidden = true;
+  },
+  thinking(on) {
+    clearInterval(this.timer);
+    const st = $("#chron-stage");
+    if (!on) return;
+    let k = 0;
+    st.innerHTML = `<div class="oracle-wait"><div class="orb" aria-hidden="true"><i></i><i></i><i></i></div><p id="wait-line">${THINKING[0]}</p><button type="button" class="icon-btn" id="chron-stop">ใช้ตำราของหอดาราแทน</button></div>`;
+    $("#chron-stop").addEventListener("click", () => this.ctl && this.ctl.abort());
+    this.timer = setInterval(() => { const l = $("#wait-line"); if (l) l.textContent = THINKING[++k % THINKING.length]; }, 2600);
+  },
+  status(src, extra) {
+    this.src = src;
+    const label = src === "claude" ? "✦ Claude เขียนคำทำนายนี้สดสำหรับคำถามของคุณ" : src === "claude-partial" ? "✦ Claude เขียนไว้บางส่วน" : "อ่านจากตำราของหอดารา";
+    $("#chron-status").innerHTML = `<span class="src ${src.startsWith("claude") ? "ai" : "book"}">${label}</span>${extra ? ` <span class="muted">${extra}</span>` : ""}`;
+  },
+  update(text, live) {
+    this.text = text; this.live = live;
+    this.chapters = parseChron(text).filter(c => CHAPTERS[c.key] && (c.body || live));
+    if (!this.chapters.length) return;
+    if (this.follow) this.cur = this.chapters.length - 1;
+    this.render();
+  },
+  go(i) { this.follow = false; this.cur = clamp(i, 0, this.chapters.length - 1); this.render(true); },
+  render(anim) {
+    const c = this.chapters[this.cur]; if (!c) return;
+    $("#chron-tabs").innerHTML = this.chapters.map((ch, i) => `<button type="button" class="ctab${i === this.cur ? " on" : ""}" data-ci="${i}"><b>${ROMAN[i + 1] || i + 1}</b>${CHAPTERS[ch.key][0]}</button>`).join("");
+    const minis = c.cards.filter(n => this.R.cards[n - 1]).map(n => { const e = this.R.cards[n - 1]; return `<button type="button" class="cmini${e.rev ? " rev" : ""}" data-modal="${n - 1}" title="${esc(e.card.th)}">${cardFront(e.card)}</button>`; }).join("");
+    const shadowMini = c.key === "SHADOW" && this.R.shadow ? `<button type="button" class="cmini shadow${this.R.shadow.rev ? " rev" : ""}" data-modal="shadow">${cardFront(this.R.shadow.card)}</button>` : "";
+    const body = esc(c.body).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    const html = c.key === "POEM" ? `<div class="poem">${body.split(/\n+/).filter(Boolean).map(l => `<span>${l}</span>`).join("")}</div>` : body.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+    const isLast = this.cur === this.chapters.length - 1;
+    const st = $("#chron-stage");
+    const same = st.dataset.ci === String(this.cur);
+    st.dataset.ci = this.cur;
+    st.innerHTML = `<div class="chapter${same && !anim ? "" : " enter"}">
+      <div class="ch-head"><span class="ch-num">${ROMAN[this.cur + 1] || ""}</span><div><div class="eyebrow">${CHAPTERS[c.key][1]}</div><h3>${CHAPTERS[c.key][0]}</h3></div>${minis || shadowMini ? `<div class="ch-cards">${minis}${shadowMini}</div>` : ""}</div>
+      <div class="ch-body">${html}${this.live && isLast ? '<span class="caret"></span>' : ""}</div></div>`;
+    const nav = $("#chron-nav");
+    nav.hidden = this.live && this.chapters.length < 2;
+    $("#chron-prev").disabled = this.cur === 0;
+    $("#chron-next").disabled = isLast;
+    $$("#board .card").forEach((b, k) => b.classList.toggle("chron-glow", c.cards.includes(k + 1)));
+  },
+  /* the house book is played out like a stream so both sources feel the same */
+  play(text, src, extra) {
+    this.status(src, extra);
+    clearInterval(this.playT);
+    if (REDUCED) { this.update(text, false); return this.done(text, src, extra); }
+    let k = 0;
+    this.playT = setInterval(() => {
+      k = Math.min(text.length, k + 14);
+      this.update(text.slice(0, k), k < text.length);
+      if (k >= text.length) { clearInterval(this.playT); this.done(text, src, extra); }
+    }, 24);
+  },
+  done(text, src, extra) {
+    /* a live or played-out chronicle ends on its last chapter; a reopened one starts from the first */
+    this.follow = src !== "replay";
+    this.status(src, extra);
+    this.update(text, false);
+    this.follow = false;
+    if (src === "replay") { this.cur = 0; this.render(true); }
+    const ask = parseChron(text).find(c => c.key === "ASK");
+    Chat.suggest(ask ? ask.body.split(/\n+/).map(s => s.replace(/^[\s\d.\-•)]+/, "").trim()).filter(Boolean).slice(0, 3) : FOLLOW_UPS[this.R.ctx.type] || FOLLOW_UPS.general);
+    if (this.R && src !== "replay") { this.R.chron = text; this.R.chronSrc = src; patchHistory(this.R); }
+  }
+};
+const Oracle = {
+  async start(R) {
+    Chron.mount(R);
+    const A = answerFor(R);
+    if (R.chron) { Chron.status(R.chronSrc || "book"); Chron.update(R.chron, false); Chron.done(R.chron, "replay"); Chron.status(R.chronSrc || "book"); this.chatReady(); return; }
+    Chron.thinking(true);
+    const sample = await getSample();
+    if (!sample) { Chron.thinking(false); Chron.play(houseChronicle(R, A), "book", "เปิดหน้านี้ใน claude.ai แล้ว Claude จะเขียนคำทำนายเฉพาะคุณ"); this.chatReady(); return; }
+    const ctl = new AbortController(); Chron.ctl = ctl;
+    let started = false;
+    try {
+      const res = await sample(buildOraclePrompt(R, A), {
+        signal: ctl.signal, modelTier: "default",
+        onText: ({ text }) => { if (!started) { started = true; Chron.thinking(false); Chron.status("claude"); } Chron.update(text, true); }
+      });
+      Chron.thinking(false);
+      Chron.done(res.text, "claude", res.truncated ? "คำทำนายถูกตัดตอนท้ายเพราะยาวเกิน" : "");
+      this.chatReady(sample);
+    } catch (e) {
+      Chron.thinking(false);
+      if (e.text && e.code !== "refused") { Chron.done(e.text, "claude-partial", e.code === "cancelled" ? "หยุดไว้ตรงนี้" : "การเชื่อมต่อขาดช่วง"); this.chatReady(sample); return; }
+      const blocked = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code);
+      Chron.play(houseChronicle(R, A), "book", e.code === "cancelled" ? "" : blocked ? "ยังไม่ได้อนุญาตให้ Claude เขียน" : "Claude ไม่ว่างชั่วคราว");
+      this.chatReady(blocked ? null : sample, !blocked && e.code !== "cancelled");
+    }
+  },
+  async chatReady(sample, offerRetry) {
+    sample = sample === undefined ? await getSample() : sample;
+    $("#askmore").hidden = !sample;
+    const rt = $("#chron-retry");
+    rt.hidden = !offerRetry;
+    rt.onclick = () => { rt.hidden = true; Chron.R.chron = null; this.start(Chron.R); };
+  }
+};
+/* ---------- follow-up questions to the same oracle ---------- */
+const Chat = {
+  turns: [], busy: false, ctl: null,
+  reset() { this.turns = []; $("#chat").innerHTML = ""; },
+  suggest(list) {
+    $("#sug").innerHTML = list.map(q => `<button type="button" class="sug">${esc(q)}</button>`).join("");
+  },
+  rules(R) {
+    return `${ORACLE_RULES}
+
+ผู้ถามได้อ่านคำทำนายด้านล่างแล้ว และกำลังถามต่อ ตอบโดยอิงไพ่ชุดนี้เท่านั้น 1 ถึง 3 ย่อหน้าสั้นๆ ไม่ใช้หัวข้อหรือรายการข้อ ถ้าคำถามต้องการข้อมูลที่ไพ่ไม่ได้บอก ให้ตีความจากไพ่ที่มีอยู่หรือไพ่เงาอย่างตรงไปตรงมา และบอกว่าไพ่ชุดนี้ตอบได้แค่ไหน
+
+ข้อมูลการเปิดไพ่ (JSON):
+${JSON.stringify(oraclePayload(R, answerFor(R)))}
+
+คำทำนายที่เล่าไปแล้ว:
+${stripTags(R.chron || "").replace(/\[\[ASK\]\][\s\S]*$/, "").slice(0, 6000)}`;
+  },
+  bubble(role, text) {
+    const d = document.createElement("div");
+    d.className = "bub " + role;
+    d.innerHTML = text;
+    $("#chat").appendChild(d);
+    return d;
+  },
+  async ask(q) {
+    q = q.trim(); if (!q || this.busy) return;
+    const sample = await getSample(); if (!sample) return;
+    this.busy = true; $("#ask-in").value = ""; $("#ask-send").disabled = true; $("#ask-stop").hidden = false;
+    this.bubble("me", esc(q));
+    const out = this.bubble("oracle", `<span class="dots">หมอกำลังเพ่งไพ่<i>.</i><i>.</i><i>.</i></span>`);
+    out.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+    const ctl = this.ctl = new AbortController();
+    const fmt = t => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+    try {
+      const input = [{ role: "user", content: this.rules(Chron.R) }, ...this.turns.slice(-8), { role: "user", content: q }];
+      const res = await sample(input, { cache: false, signal: ctl.signal, modelTier: "default", onText: ({ text }) => { out.innerHTML = fmt(text); } });
+      out.innerHTML = fmt(res.text);
+      this.turns.push({ role: "user", content: q }, { role: "assistant", content: res.text });
+    } catch (e) {
+      if (e.text) out.innerHTML = fmt(e.text) + `<p class="muted">${e.code === "cancelled" ? "หยุดไว้ตรงนี้" : "การเชื่อมต่อขาดช่วง"}</p>`;
+      else out.innerHTML = `<p class="muted">${e.code === "cancelled" ? "ยกเลิกคำถามแล้ว" : e.code === "rate_limited" ? "ถามถี่เกินไป รอสักครู่แล้วลองใหม่" : ["not_granted", "sampling_disabled"].includes(e.code) ? "ยังไม่ได้อนุญาตให้ Claude ตอบ" : "หมอตอบไม่ได้ในตอนนี้ ลองถามใหม่อีกครั้ง"}</p>`;
+      if (["not_granted", "sampling_disabled", "not_declared"].includes(e.code)) $("#askmore").hidden = true;
+    } finally {
+      this.busy = false; $("#ask-send").disabled = false; $("#ask-stop").hidden = true;
+    }
+  }
+};
+function patchHistory(R) {
+  const list = store(HKEY) || [];
+  const h = list.find(x => x.code === R.code && x.t === R.date.getTime());
+  if (!h) return;
+  h.chron = (R.chron || "").slice(0, 9000); h.cs = R.chronSrc;
+  store(HKEY, list);
+}
+
+/* ---------- the shadow card: the bottom of the deck, revealed last ---------- */
+function pickShadow() {
+  for (let k = S.deck.length - 1; k >= 0; k--) if (!S.picks.includes(k)) return S.deck[k];
+  return null;
+}
+function buildShadowSlot(open) {
+  const slot = $("#shadow-slot");
+  if (!S.shadow) { slot.hidden = true; slot.innerHTML = ""; return; }
+  const card = DECK[S.shadow.id];
+  slot.innerHTML = `<button type="button" class="card shadow-card${S.shadow.rev ? " rev" : ""}${open ? " flipped" : ""}" aria-label="ไพ่เงา"><div class="tilt"><div class="card-inner"><div class="face back">${backSVG()}<i class="glare"></i></div><div class="face front">${cardFront(card)}<i class="glare"></i></div></div></div></button>
+    <div class="shadow-cap"><span class="eyebrow">The Shadow</span><b>ไพ่เงา · รากที่ซ่อนอยู่</b><span class="muted">${open ? esc(card.th) + (S.shadow.rev ? " · กลับหัว" : "") : "ใบล่างสุดของสำรับ"}</span></div>`;
+  slot.hidden = !open;
+  slot.querySelector(".card").addEventListener("click", () => openModal("shadow"));
+}
+
 /* ================= RENDER READING ================= */
 function renderReading(R) {
   const el = $("#reading");
@@ -2451,6 +3102,23 @@ function renderReading(R) {
       ${K.ans.bars}
       ${K.ans.lines.map(l => `<p>${l}</p>`).join("")}
     </div>
+    <div class="panel chron" id="chron">
+      <div class="chron-top"><div><div class="eyebrow">The Oracle's Chronicle</div><h3 class="chron-h">บทพยากรณ์</h3></div><div class="chron-status" id="chron-status"></div></div>
+      <div class="chron-tabs" id="chron-tabs"></div>
+      <div class="chron-stage" id="chron-stage" aria-live="polite"></div>
+      <div class="chron-nav" id="chron-nav" hidden>
+        <button class="btn ghost" type="button" id="chron-prev">บทก่อน</button>
+        <button class="btn ghost" type="button" id="chron-retry" hidden>ให้ Claude เขียนอีกครั้ง</button>
+        <button class="btn" type="button" id="chron-next">บทถัดไป</button>
+      </div>
+    </div>
+    <div class="panel askmore" id="askmore" hidden>
+      <h3><small>Ask the Oracle</small>ถามหมอต่อ</h3>
+      <div class="sugs" id="sug"></div>
+      <div class="chat" id="chat"></div>
+      <form class="ask-form" id="ask-form"><input type="text" id="ask-in" maxlength="300" placeholder="ถามต่อจากคำทำนายนี้ เช่น ควรเริ่มจากอะไรก่อน" autocomplete="off"><button class="btn" id="ask-send" type="submit">ถาม</button><button class="btn ghost" id="ask-stop" type="button" hidden>หยุด</button></form>
+    </div>
+    ${starMapHTML(R)}
     <div class="panel plain" id="plain">
 
       <h3><small>In Plain Words</small>สรุปแบบเข้าใจง่าย</h3>
@@ -2478,11 +3146,7 @@ function renderReading(R) {
         <div class="dom">${ord.map(d => { const s = R.scores[d.k]; return `<div class="dom-row${d.k === td ? " asked" : ""}"><span>${d.th}${d.k === td ? " ✦" : ""}</span><div class="bar"><i class="${s >= 60 ? "good" : s >= 45 ? "mid" : "low"}" style="width:${s}%"></i></div><span class="stars"><span class="val">${s}</span></span></div>`; }).join("")}</div>
         <div class="dom-notes">${ord.map(d => `<p><b>${d.th} <span class="stars" style="color:var(--gold);font-family:var(--f-sym)">${stars(R.scores[d.k])}</span></b><br>${DOMAIN_TXT[d.k][band(R.scores[d.k])]}</p>`).join("")}</div>
       </div>
-      <div class="panel narrative">
-        <h3><small>The Oracle Speaks</small>บทอ่านจากหอดารา</h3>
-        ${N.paras.map(p => `<p>${p}</p>`).join("")}
-        <p class="advice">${N.advice}</p>
-      </div>
+      ${journeyHTML(R)}
     </div>
     <div class="panel">
       <h3><small>Card by Card</small>ไพ่แต่ละตำแหน่ง</h3>
@@ -2540,7 +3204,18 @@ function renderReading(R) {
   $("#reveal-hint").textContent = "แตะไพ่ใบไหนก็ได้เพื่อดูความหมายเต็ม เลื่อนลงเพื่ออ่านคำทำนาย";
   goStage("reading");
   Director.sweep();
-  $$("[data-modal]", el).forEach(b => b.addEventListener("click", () => openModal(+b.dataset.modal)));
+  el.onclick = e => {
+    const m = e.target.closest("[data-modal]"); if (m) return openModal(m.dataset.modal === "shadow" ? "shadow" : +m.dataset.modal);
+    const t = e.target.closest("[data-ci]"); if (t) return Chron.go(+t.dataset.ci);
+    const g = e.target.closest(".sug"); if (g) return Chat.ask(g.textContent);
+  };
+  $("#chron-prev").addEventListener("click", () => Chron.go(Chron.cur - 1));
+  $("#chron-next").addEventListener("click", () => Chron.go(Chron.cur + 1));
+  $("#ask-form").addEventListener("submit", e => { e.preventDefault(); Chat.ask($("#ask-in").value); });
+  $("#ask-stop").addEventListener("click", () => Chat.ctl && Chat.ctl.abort());
+  drawLinks(R);
+  Chat.reset();
+  Oracle.start(R);
   $("#btn-again").addEventListener("click", () => { goStage("ask"); renderHistory(); });
   $("#btn-copy").addEventListener("click", () => copyReading(R, N, K));
   $("#btn-story").addEventListener("click", () => openStory(R));
@@ -2558,7 +3233,7 @@ function copyReading(R, N, K) {
     "",
     "คะแนนรวม " + R.overall + "/100 · " + DOMAINS.map(d => d.th + " " + R.scores[d.k]).join(" · "),
     "",
-    ...N.paras.map(strip), strip(N.advice),
+    ...(R.chron ? parseChron(R.chron).filter(c => CHAPTERS[c.key]).flatMap(c => ["", "— " + CHAPTERS[c.key][0] + " —", strip(c.body.replace(/\*\*/g, ""))]) : [...N.paras.map(strip), strip(N.advice)]),
     "", "สรุปแบบเข้าใจง่าย: " + strip(K.verdict), strip(K.lines.join(" ")),
     "", "สิ่งที่ควรทำ", ...K.dos.map((d, i) => `${i + 1}. ${d}`),
     "", "สิ่งที่ควรเลี่ยง", ...K.avoids.map((d, i) => `${i + 1}. ${d}`),
@@ -2577,7 +3252,29 @@ function fallbackCopy(text) {
 }
 
 /* ================= MODAL ================= */
+function openShadowModal() {
+  const sh = S.reading && S.reading.shadow ? S.reading.shadow : S.shadow && { card: DECK[S.shadow.id], rev: S.shadow.rev };
+  if (!sh) return;
+  const { card, rev } = sh;
+  $("#modal-box").innerHTML = `
+    <button class="icon-btn close-x" type="button" id="modal-close">ปิด</button>
+    <div class="bigcard${rev ? " rev" : ""}"><div class="tilt tilt-flow">${cardFront(card)}<i class="glare"></i></div></div>
+    <div>
+      <div class="eyebrow">The Shadow · ไพ่เงา</div>
+      <h3 id="modal-title">${esc(card.th)}</h3>
+      <div class="en">${esc(card.en)}${card.major ? " · " + ROMAN[card.num] : ""}</div>
+      <p class="muted" style="font-size:14px">ใบล่างสุดของสำรับหลังเลือกไพ่ครบ ตามตำราคือรากที่ซ่อนอยู่ใต้คำถาม สิ่งที่มีผลแต่ยังไม่ถูกพูดถึง</p>
+      <p><span class="tag ${rev ? "rv" : "up"}" style="margin-left:0">${rev ? "กลับหัว" : "ตั้งตรง"}</span></p>
+      <div class="kw">${esc(rev ? card.kwR : card.kwU)}</div>
+      <p>${esc(rev ? card.rv : card.up)}</p>
+      <dl><dt>ธาตุ</dt><dd>${EL[card.el].th}</dd><dt>คำแนะนำ</dt><dd>${esc(card.adv)}</dd></dl>
+    </div>`;
+  $("#modal").hidden = false;
+  $("#modal-close").focus();
+  $("#modal-close").addEventListener("click", closeModal);
+}
 function openModal(i) {
+  if (i === "shadow") return openShadowModal();
   const R = S.reading;
   const sp = S.sp;
   const c = S.deck[S.picks[i]], card = DECK[c.id], rev = c.rev, pos = sp.pos[i];
@@ -2627,7 +3324,7 @@ bindTerms($("#st-body"));
 const HKEY = "astral-tarot-history-v1";
 function saveHistory(R) {
   const list = store(HKEY) || [];
-  list.unshift({ t: R.date.getTime(), sp: R.spreadKey, q: R.q, picks: R.cards.map(({ card, rev }) => [card.id, rev ? 1 : 0]), ov: R.overall, code: R.code, r: R.riffles });
+  list.unshift({ t: R.date.getTime(), sp: R.spreadKey, q: R.q, picks: R.cards.map(({ card, rev }) => [card.id, rev ? 1 : 0]), ov: R.overall, code: R.code, r: R.riffles, sh: R.shadow ? [R.shadow.card.id, R.shadow.rev ? 1 : 0] : null });
   store(HKEY, list.slice(0, 12));
 }
 function renderHistory() {
@@ -2645,10 +3342,12 @@ function reopen(h) {
   S.deck = h.picks.map(([id, rev]) => ({ id, rev: !!rev }));
   S.picks = S.deck.map((_, i) => i);
   S.flipped = S.deck.map(() => true);
+  S.shadow = h.sh ? { id: h.sh[0], rev: !!h.sh[1] } : null;
   goStage("reveal");
   $("#reveal-controls").hidden = true;
   buildBoard(S.sp, true);
   const R = computeReading(); R.date = new Date(h.t);
+  R.chron = h.chron || null; R.chronSrc = h.cs;
   S.reading = R;
   renderReading(R);
 }
@@ -2669,4 +3368,5 @@ $("#sound-btn").addEventListener("click", e => {
 (() => { const s = store("astral-tarot-sound"); if (s === false) { Sound.on = false; $("#sound-btn").textContent = "เสียง: ปิด"; $("#sound-btn").setAttribute("aria-pressed", "false"); } })();
 let rT; addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(() => { if (S.stage === "pick") layoutFan(false); }, 120); });
 goStage("ask");
+getSample();
 </script>
