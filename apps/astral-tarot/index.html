@@ -410,6 +410,77 @@ body.story-open .wrap { padding-bottom: 56vh; }
 .board .card.spot { z-index: 20 !important; scale: 1.1; }
 .board .card.spot .front { box-shadow: 0 0 0 2px var(--gold-hi), 0 0 44px rgba(232,196,106,.75); }
 .board .card .card-inner { transition: transform 1s cubic-bezier(.2,.75,.2,1), translate .25s ease; }
+/* ---------- motion: nebula, light, camera, pointer ---------- */
+@property --vig { syntax: "<number>"; inherits: false; initial-value: .45; }
+#neb { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; transition: filter .9s ease; }
+#sky { transition: filter .9s ease; }
+body.dof #neb { filter: blur(6px) brightness(.72); }
+body.dof #sky { filter: blur(2.5px) brightness(.65); }
+.keylight {
+  position: fixed; left: 0; top: 0; width: 130vmax; height: 130vmax; margin: -65vmax 0 0 -65vmax; border-radius: 50%;
+  pointer-events: none; z-index: 2; color: rgba(140,190,255,.10); mix-blend-mode: screen;
+  background: radial-gradient(circle, currentColor 0%, transparent 55%);
+  transform: translate(78vw, 16vh); transition: transform 1.8s cubic-bezier(.22,.7,.2,1), color 1.4s ease;
+}
+.grade-tint { position: fixed; inset: 0; pointer-events: none; z-index: 2; mix-blend-mode: soft-light; opacity: .3; background-color: rgb(40,70,150); transition: background-color 1.4s ease; }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; --vig: .45; transition: --vig 1.4s ease; background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgb(2 2 10 / var(--vig)) 100%); }
+.letterbox::before, .letterbox::after { content: ""; position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 50; pointer-events: none; transition: height .9s cubic-bezier(.22,.7,.2,1); }
+.letterbox::before { top: 0; }
+.letterbox::after { bottom: 0; }
+body.lb .letterbox::before, body.lb .letterbox::after { height: 7vh; }
+.dip { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 58; }
+.sweep { position: fixed; inset: 0; pointer-events: none; z-index: 3; mix-blend-mode: screen; opacity: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,226,170,.22) 48%, rgba(255,255,255,.08) 50%, transparent 62%); background-size: 260% 100%; }
+.halo {
+  position: fixed; left: 0; top: 0; width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%; pointer-events: none; z-index: 61;
+  border: 1px solid rgba(232,196,106,.45); box-shadow: 0 0 18px rgba(232,196,106,.22), inset 0 0 12px rgba(232,196,106,.14);
+  opacity: 0; transition: width .3s, height .3s, margin .3s, opacity .4s, border-color .3s;
+}
+.halo.on { opacity: 1; }
+.halo.hot { width: 68px; height: 68px; margin: -34px 0 0 -34px; border-color: rgba(255,240,194,.85); }
+@media (pointer: coarse) { .halo { display: none; } }
+.top { position: relative; z-index: 4; }
+html { overflow-x: clip; }
+.circle { translate: calc(var(--px, 0) * 18px) calc(var(--py, 0) * 14px); }
+.hero h1 { translate: calc(var(--px, 0) * -7px) calc(var(--py, 0) * -5px); }
+.altar { translate: calc(var(--px, 0) * 12px) calc(var(--py, 0) * 9px); }
+.fan { translate: calc(var(--px, 0) * -14px) 0; }
+#table, #fan, #board { transform-origin: 50% 50%; will-change: transform; }
+/* 3D tilt + foil glare */
+.tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.tilt.tilting { transition: transform .12s linear; }
+.tilt-flow { position: relative; inset: auto; }
+.glare {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity .5s; mix-blend-mode: screen; z-index: 2;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255,240,205,.45), transparent 42%),
+    linear-gradient(115deg, transparent 28%, rgba(255,226,170,.12) 45%, rgba(170,190,255,.10) 55%, transparent 72%);
+  background-size: 100% 100%, 220% 220%; background-position: 0 0, calc(var(--gx, 50%) * -1 + 100%) 50%;
+}
+.tilting .glare { opacity: 1; }
+.altar .peek { perspective: 800px; }
+.altar .peek .tilt { border-radius: 9px; animation: float 7s ease-in-out infinite; }
+.altar .peek:nth-child(3) .tilt { animation-delay: -2.3s; }
+.altar .peek:nth-child(4) .tilt { animation-delay: -4.6s; }
+@keyframes float { 50% { translate: 0 -7px; } }
+.modal-box .bigcard { perspective: 1000px; }
+.modal-box .bigcard .tilt { border-radius: 12px; }
+/* reveal shots */
+#stage-reveal .stage-head, #legend, #reveal-controls { transition: opacity .6s ease; }
+#stage-reveal.focusing .stage-head, #stage-reveal.focusing #legend, #stage-reveal.focusing #reveal-controls { opacity: .08; }
+.board .card { transition: opacity .5s, filter .6s, scale .5s; }
+.board.focusing .card:not(.infocus) { filter: blur(3px) brightness(.45) saturate(.6); }
+.board .card.infocus { z-index: 30 !important; }
+.board .card.infocus .front { box-shadow: 0 0 0 1.5px var(--gold-hi), 0 0 60px rgba(232,196,106,.7), 0 20px 40px rgba(0,0,0,.6); }
+.board.story-on .card:not(.spot) { filter: saturate(.4) blur(1.5px); }
+.wave, .rays { position: absolute; pointer-events: none; translate: -50% -50%; border-radius: 50%; }
+.wave { width: var(--cw); aspect-ratio: 1; border: 2px solid var(--rc, #e8c46a); box-shadow: 0 0 24px var(--rc, #e8c46a); animation: wave 1.3s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes wave { from { transform: scale(.4); opacity: .95; } to { transform: scale(4); opacity: 0; } }
+.rays {
+  width: calc(var(--cw) * 6); aspect-ratio: 1; mix-blend-mode: screen;
+  background: repeating-conic-gradient(from 0deg, transparent 0deg 7deg, color-mix(in srgb, var(--rc, #e8c46a) 40%, transparent) 9deg 11deg, transparent 13deg 20deg);
+  -webkit-mask: radial-gradient(circle, #000 14%, transparent 66%); mask: radial-gradient(circle, #000 14%, transparent 66%);
+  animation: rays 3.4s ease-out forwards;
+}
+@keyframes rays { 0% { opacity: 0; transform: rotate(0deg) scale(.4); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(45deg) scale(1.15); } }
 @media (max-width: 900px) {
   .intro { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
@@ -435,8 +506,16 @@ body.story-open .wrap { padding-bottom: 56vh; }
 </style>
 
 <div class="nebula"></div>
+<canvas id="neb" aria-hidden="true"></canvas>
 <canvas id="sky"></canvas>
 <canvas id="fx"></canvas>
+<div class="keylight" id="keylight" aria-hidden="true"></div>
+<div class="grade-tint" id="grade-tint" aria-hidden="true"></div>
+<div class="vignette" id="vignette" aria-hidden="true"></div>
+<div class="sweep" id="sweep" aria-hidden="true"></div>
+<div class="letterbox" aria-hidden="true"></div>
+<div class="dip" id="dip" aria-hidden="true"></div>
+<div class="halo" id="halo" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs-host"></svg>
 
 <div class="wrap">
@@ -1188,6 +1267,8 @@ const Sound = {
 };
 
 /* ================= CANVAS: SKY + FX ================= */
+/* pointer position: raw (x, y), smoothed for the halo (hx, hy), and normalised for parallax (tx, ty → px, py) */
+const Ptr = { x: innerWidth / 2, y: innerHeight / 2, hx: innerWidth / 2, hy: innerHeight / 2, tx: 0, ty: 0, px: 0, py: 0, lastTrail: 0 };
 const Sky = (() => {
   const cv = $("#sky"), ctx = cv.getContext("2d");
   let stars = [], W = 0, H = 0, dpr = 1, shoot = null, last = 0;
@@ -1195,15 +1276,17 @@ const Sky = (() => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
     W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const n = Math.round(W * H / 4200);
-    stars = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.3 + .2, p: Math.random() * 6.28, s: Math.random() * 1.5 + .3, gold: Math.random() < .18 }));
+    stars = Array.from({ length: n }, (_, i) => { const d = [.25, .55, 1][i % 3]; return { x: Math.random() * W, y: Math.random() * H, d, r: (Math.random() * .9 + .3) * (.6 + d * .7), p: Math.random() * 6.28, s: Math.random() * 1.5 + .3, gold: Math.random() < .18 }; });
     if (REDUCED) draw(0);
   }
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
+    const ox = -Ptr.px * 26, oy = -Ptr.py * 18, drift = t * .004;
     for (const s of stars) {
       const a = .35 + .65 * (0.5 + 0.5 * Math.sin(s.p + t * .001 * s.s));
       ctx.fillStyle = s.gold ? `rgba(255,226,150,${a})` : `rgba(220,226,255,${a * .85})`;
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+      const x = ((s.x + ox * s.d + drift * s.d) % W + W) % W, y = s.y + oy * s.d;
+      ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill();
     }
     if (shoot) {
       shoot.x += shoot.vx; shoot.y += shoot.vy; shoot.life -= 1;
@@ -1245,9 +1328,252 @@ const FX = (() => {
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
     if (parts.length) requestAnimationFrame(step); else { running = false; ctx.clearRect(0, 0, W, H); }
   }
-  return { burst };
+  /* stardust that trails the pointer */
+  function trail(x, y) {
+    for (let i = 0; i < 2; i++) parts.push({ x: x + (Math.random() - .5) * 6, y: y + (Math.random() - .5) * 6, vx: (Math.random() - .5) * .5, vy: (Math.random() - .5) * .5 - .25, life: .9, decay: .025 + Math.random() * .025, r: Math.random() * 1.3 + .4, c: Math.random() < .7 ? "#ffe2a0" : "#c9b8ff", star: Math.random() < .3 });
+    if (!running) { running = true; requestAnimationFrame(step); }
+  }
+  return { burst, trail };
 })();
 const burstAt = (el, n, spread) => { const r = el.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, n, spread); };
+/* ================= MOTION: pointer, parallax, tilt, grading, nebula, camera ================= */
+const halo = $("#halo");
+let tiltEl = null;
+function resetTilt() {
+  if (!tiltEl) return;
+  tiltEl.classList.remove("tilting"); tiltEl.style.setProperty("--rx", "0deg"); tiltEl.style.setProperty("--ry", "0deg");
+  tiltEl = null;
+}
+/* a card leans toward the pointer and a foil glint follows it across the face */
+function tiltAt(e) {
+  const t = e.target.closest && e.target.closest(".tilt");
+  if (tiltEl !== t) resetTilt();
+  if (!t) return;
+  tiltEl = t;
+  const r = t.parentElement.getBoundingClientRect();
+  const u = clamp((e.clientX - r.left) / r.width, 0, 1), v = clamp((e.clientY - r.top) / r.height, 0, 1);
+  t.classList.add("tilting");
+  t.style.setProperty("--rx", ((.5 - v) * 18).toFixed(2) + "deg");
+  t.style.setProperty("--ry", ((u - .5) * 22).toFixed(2) + "deg");
+  t.style.setProperty("--gx", (u * 100).toFixed(1) + "%");
+  t.style.setProperty("--gy", (v * 100).toFixed(1) + "%");
+}
+addEventListener("pointermove", e => {
+  Ptr.x = e.clientX; Ptr.y = e.clientY;
+  Ptr.tx = e.clientX / innerWidth * 2 - 1; Ptr.ty = e.clientY / innerHeight * 2 - 1;
+  if (!REDUCED) {
+    const now = performance.now();
+    if (now - Ptr.lastTrail > 20) { Ptr.lastTrail = now; FX.trail(e.clientX, e.clientY); }
+    tiltAt(e);
+  }
+  if (e.pointerType === "mouse") {
+    halo.classList.add("on");
+    halo.classList.toggle("hot", !!(e.target.closest && e.target.closest("button, a, .card, label, select, input, textarea, summary")));
+  }
+}, { passive: true });
+addEventListener("pointerup", e => { if (e.pointerType !== "mouse") resetTilt(); }, { passive: true });
+addEventListener("pointerdown", e => { if (!REDUCED) FX.burst(e.clientX, e.clientY, 10, 2, ["#fff0c2", "#c9b8ff", "#e8c46a"]); }, { passive: true });
+document.documentElement.addEventListener("pointerleave", () => halo.classList.remove("on"));
+/* smoothed pointer drives the parallax layers through --px / --py */
+(function motionLoop() {
+  if (!REDUCED) {
+    const nx = Ptr.px + (Ptr.tx - Ptr.px) * .05, ny = Ptr.py + (Ptr.ty - Ptr.py) * .05;
+    if (Math.abs(nx - Ptr.px) + Math.abs(ny - Ptr.py) > .0004) {
+      Ptr.px = nx; Ptr.py = ny;
+      document.documentElement.style.setProperty("--px", nx.toFixed(4));
+      document.documentElement.style.setProperty("--py", ny.toFixed(4));
+    }
+  }
+  Ptr.hx += (Ptr.x - Ptr.hx) * .2; Ptr.hy += (Ptr.y - Ptr.hy) * .2;
+  halo.style.transform = `translate3d(${Ptr.hx.toFixed(1)}px, ${Ptr.hy.toFixed(1)}px, 0)`;
+  requestAnimationFrame(motionLoop);
+})();
+
+/* colour grade per stage of the ritual: nebula colours (linear 0..1), screen tint, vignette and key light */
+const GRADES = {
+  ask: { c1: [.02, .03, .09], c2: [.10, .13, .34], c3: [.06, .30, .36], glow: .95, tint: "rgb(40,70,150)", vig: .45, keyC: "rgba(140,190,255,.10)", key: [.78, .16] },
+  shuffle: { c1: [.04, .02, .11], c2: [.28, .08, .42], c3: [.58, .24, .66], glow: 1.05, tint: "rgb(120,50,170)", vig: .55, keyC: "rgba(200,140,255,.14)", key: [.5, .42] },
+  pick: { c1: [.01, .01, .035], c2: [.07, .05, .2], c3: [.2, .12, .38], glow: .7, tint: "rgb(30,25,90)", vig: .7, keyC: "rgba(160,150,255,.08)", key: [.5, .12] },
+  reveal: { c1: [.035, .025, .05], c2: [.26, .17, .09], c3: [.68, .48, .18], glow: .95, tint: "rgb(170,120,40)", vig: .55, keyC: "rgba(255,215,140,.15)", key: [.5, .32] },
+  reading: { c1: [.045, .02, .045], c2: [.28, .11, .15], c3: [.58, .33, .22], glow: .85, tint: "rgb(160,80,70)", vig: .3, keyC: "rgba(255,170,120,.10)", key: [.25, .85] }
+};
+const ELEMENT_GRADE = {
+  fire: { acc: [.95, .38, .12], tint: "rgb(255,110,40)", key: "rgba(255,150,90,.2)" },
+  water: { acc: [.18, .48, .95], tint: "rgb(50,120,255)", key: "rgba(110,170,255,.2)" },
+  air: { acc: [.78, .84, .98], tint: "rgb(200,215,255)", key: "rgba(220,230,255,.18)" },
+  earth: { acc: [.28, .78, .4], tint: "rgb(70,190,100)", key: "rgba(130,220,140,.18)" }
+};
+const Grade = {
+  name: "ask", cur: null, tgt: GRADES.ask, acc: [1, 1, 1], accAmt: 0, accTgt: 0, boost: 0,
+  set(name) {
+    const g = GRADES[name] || GRADES.ask;
+    this.name = name; this.tgt = g;
+    if (!this.cur) this.cur = { c1: [...g.c1], c2: [...g.c2], c3: [...g.c3], glow: g.glow };
+    $("#keylight").style.color = g.keyC;
+    this.light(g.key[0], g.key[1]);
+    $("#grade-tint").style.backgroundColor = g.tint;
+    $("#vignette").style.setProperty("--vig", g.vig);
+  },
+  light(x, y) { $("#keylight").style.transform = `translate(${(x * 100).toFixed(1)}vw, ${(y * 100).toFixed(1)}vh)`; },
+  /* the room takes on the colour of the element just revealed, then settles back */
+  flash(el, amt) {
+    const e = ELEMENT_GRADE[el];
+    this.acc = e.acc; this.accTgt = amt;
+    $("#grade-tint").style.backgroundColor = e.tint;
+    $("#keylight").style.color = e.key;
+    clearTimeout(this.ft);
+    this.ft = setTimeout(() => { this.accTgt = 0; $("#grade-tint").style.backgroundColor = this.tgt.tint; $("#keylight").style.color = this.tgt.keyC; }, 2400 * SPEED);
+  },
+  pulse(v = .35) { this.boost = Math.max(this.boost, v); },
+  step() {
+    if (!this.cur) this.set(this.name);
+    const k = .035, c = this.cur, t = this.tgt;
+    ["c1", "c2", "c3"].forEach(n => { for (let i = 0; i < 3; i++) c[n][i] += (t[n][i] - c[n][i]) * k; });
+    c.glow += (t.glow - c.glow) * k;
+    this.accAmt += (this.accTgt - this.accAmt) * .05;
+    this.boost *= .93;
+  }
+};
+
+/* flowing nebula: domain-warped fbm noise in a fragment shader, rendered at reduced resolution */
+const Neb = (() => {
+  const cv = $("#neb");
+  const fail = () => { cv.remove(); return { ok: false }; };
+  let gl = null;
+  try { gl = cv.getContext("webgl", { alpha: false, antialias: false, depth: false, powerPreference: "low-power" }); } catch (e) { }
+  if (!gl) return fail();
+  const VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+  const FS = `precision mediump float;
+uniform vec2 uRes;uniform float uTime;uniform vec2 uPar;uniform vec3 uC1;uniform vec3 uC2;uniform vec3 uC3;uniform vec3 uAcc;uniform float uAccAmt;uniform float uGlow;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
+return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p;a*=.5;}return v;}
+void main(){
+vec2 p=(gl_FragCoord.xy-.5*uRes)/uRes.y;
+p+=uPar*.05;
+float t=uTime*.022;
+vec2 q=vec2(fbm(p*1.5+vec2(t,-t*.6)),fbm(p*1.5+vec2(5.2,1.3)-t));
+vec2 r=vec2(fbm(p*1.3+2.*q+vec2(1.7,9.2)+t*1.4),fbm(p*1.3+2.*q+vec2(8.3,2.8)-t*1.1));
+float f=fbm(p*1.15+2.6*r);
+vec3 col=mix(uC1,uC2,clamp(f*f*1.9,0.,1.));
+col=mix(col,uC3,clamp(length(q)*.62-.3,0.,1.)*.85);
+col=mix(col,uAcc*.55,uAccAmt*smoothstep(.3,.95,f));
+col*=.5+.95*f;
+float filament=smoothstep(.62,.9,fbm(p*3.2+r*3.-t*2.));
+col+=uC3*filament*.18;
+float vig=smoothstep(1.3,.2,length(p*vec2(.82,1.)));
+col*=mix(.32,1.,vig)*uGlow;
+gl_FragColor=vec4(col,1.);}`;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
+  const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, FS);
+  if (!v || !f) return fail();
+  const pr = gl.createProgram(); gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return fail();
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const U = {}; ["uRes", "uTime", "uPar", "uC1", "uC2", "uC3", "uAcc", "uAccAmt", "uGlow"].forEach(n => U[n] = gl.getUniformLocation(pr, n));
+  let scale = innerWidth < 700 ? .35 : .5, last = 0, slow = 0, frames = 0;
+  function resize() { cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height); }
+  addEventListener("resize", resize); resize();
+  const t0 = performance.now();
+  function draw(t) {
+    Grade.step();
+    const g = Grade.cur;
+    gl.uniform2f(U.uRes, cv.width, cv.height);
+    gl.uniform1f(U.uTime, REDUCED ? 40 : (t - t0) / 1000);
+    gl.uniform2f(U.uPar, Ptr.px, -Ptr.py);
+    gl.uniform3fv(U.uC1, g.c1); gl.uniform3fv(U.uC2, g.c2); gl.uniform3fv(U.uC3, g.c3);
+    gl.uniform3fv(U.uAcc, Grade.acc); gl.uniform1f(U.uAccAmt, Grade.accAmt); gl.uniform1f(U.uGlow, g.glow + Grade.boost);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  function loop(t) {
+    requestAnimationFrame(loop);
+    if (document.hidden) return;
+    const dt = t - last;
+    if (dt < (REDUCED ? 400 : 30)) return;
+    last = t;
+    /* drop resolution on devices that cannot keep up */
+    if (!REDUCED) { frames++; if (dt > 60) slow++; if (frames >= 90) { if (slow > 30 && scale > .26) { scale -= .08; resize(); } frames = slow = 0; } }
+    draw(t);
+  }
+  draw(performance.now());
+  requestAnimationFrame(loop);
+  return { ok: true };
+})();
+
+/* virtual camera: each stage's stage-area gets dolly, pan, tilt and dutch-angle moves */
+const Cam = {
+  set(el, o = {}, dur = 1.2) {
+    if (!el) return;
+    const { s = 1, x = 0, y = 0, rx = 0, rz = 0 } = o;
+    el.style.transition = `transform ${(REDUCED ? 0 : dur * SPEED).toFixed(2)}s cubic-bezier(.22,.68,.16,1)`;
+    el.style.transform = REDUCED ? "" : `perspective(1600px) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotateX(${rx}deg) rotateZ(${rz}deg) scale(${s})`;
+  },
+  cut(el, o) { this.set(el, o, 0); void el.offsetWidth; },
+  letterbox(on) { document.body.classList.toggle("lb", !!on && !REDUCED); },
+  dof(on) { document.body.classList.toggle("dof", !!on && !REDUCED); },
+  dip() { if (!REDUCED) $("#dip").animate([{ opacity: 0 }, { opacity: .9, offset: .35 }, { opacity: 0 }], { duration: 950, easing: "ease-in-out" }); }
+};
+/* the reveal is shot like a film: push in on each card as it turns, light it in its element, then pull back */
+const Director = {
+  tok: 0,
+  focus(i, fast) {
+    if (REDUCED) return new Promise(res => setTimeout(res, 300));
+    const board = $("#board"), sp = S.sp, p = sp.pos[i];
+    const W = board.offsetWidth, H = board.offsetHeight, cw = W * sp.cw / 100, ch = cw * 1.7;
+    const s = clamp(Math.min(.58 * innerHeight / ch, .72 * innerWidth / cw), 1.1, 2);
+    const cx = W * p.x / 100, cy = H * p.y / 100;
+    const tok = ++this.tok;
+    const r = $("#board-wrap").getBoundingClientRect();
+    scrollTo({ top: Math.max(0, scrollY + r.top + r.height / 2 - innerHeight / 2), behavior: "smooth" });
+    $("#stage-reveal").classList.add("focusing");
+    board.classList.add("focusing");
+    $$("#board .card").forEach((c, k) => c.classList.toggle("infocus", k === i));
+    Cam.dof(true);
+    Cam.set(board, { s, x: -s * (cx - W / 2), y: -s * (cy - H / 2), rz: p.rot ? 0 : (i % 2 ? 1.2 : -1.2) }, fast ? .7 : 1.15);
+    Grade.light(.5, .4);
+    return new Promise(res => setTimeout(() => { if (tok === this.tok) this.release(); res(); }, (fast ? 900 : 1900) * SPEED));
+  },
+  release() {
+    const board = $("#board");
+    Cam.set(board, {}, 1.1);
+    board.classList.remove("focusing");
+    $("#stage-reveal").classList.remove("focusing");
+    $$("#board .card").forEach(c => c.classList.remove("infocus"));
+    Cam.dof(false);
+    Grade.light(...GRADES.reveal.key);
+  },
+  effects(i, card) {
+    Grade.flash(card.el, card.major ? 1 : .7);
+    Grade.pulse(card.major ? .45 : .25);
+    if (REDUCED) return;
+    const board = $("#board"), p = S.sp.pos[i];
+    const make = cls => {
+      const d = document.createElement("div");
+      d.className = cls; d.style.left = p.x + "%"; d.style.top = p.y + "%"; d.style.setProperty("--rc", EL[card.el].color);
+      board.insertBefore(d, board.children[1] || null);
+      setTimeout(() => d.remove(), 3600);
+    };
+    setTimeout(() => { make("wave"); if (card.major) make("rays"); }, 420 * SPEED);
+    const mc = board.querySelector(".circle");
+    if (mc) mc.animate([{ opacity: .4 }, { opacity: .95 }, { opacity: .4 }], { duration: 1600, easing: "ease-out" });
+  },
+  finale() {
+    return new Promise(res => {
+      if (REDUCED) return setTimeout(res, 500);
+      const board = $("#board");
+      this.release();
+      Cam.letterbox(true);
+      Cam.set(board, { s: .9, rx: 12 }, .9);
+      setTimeout(() => { Cam.set(board, {}, 1.2); Cam.letterbox(false); res(); }, 950 * SPEED);
+    });
+  },
+  sweep() { if (!REDUCED) $("#sweep").animate([{ opacity: 0, backgroundPosition: "130% 0" }, { opacity: 1, offset: .3 }, { opacity: 0, backgroundPosition: "-30% 0" }], { duration: 1800, easing: "ease-in-out" }); }
+};
+
 
 /* ================= SHUFFLE MATH ================= */
 /* Gilbert–Shannon–Reeds riffle: binomial cut, then cards drop from each packet in proportion to its size. */
@@ -1293,6 +1619,8 @@ const freshDeck = () => DECK.map(c => ({ id: c.id, rev: false }));
 
 function goStage(name) {
   if (typeof closeStory === "function") closeStory();
+  if (S.stage !== name && name !== "reading") Cam.dip();
+  Grade.set(name);
   S.stage = name;
   ["ask", "shuffle", "pick", "reveal"].forEach(s => $("#stage-" + s).hidden = !(s === name || (name === "reading" && s === "reveal")));
   const order = ["ask", "shuffle", "pick", "reveal", "reading"], idx = order.indexOf(name);
@@ -1461,7 +1789,7 @@ function initAsk() {
   box.innerHTML = Object.entries(SPREADS).map(([k, sp]) => `
     <div class="spread-opt"><input type="radio" name="spread" id="sp-${k}" value="${k}" ${k === S.spreadKey ? "checked" : ""}>
     <label for="sp-${k}">${spreadIcon(resolveSpread(k))}<div><b>${sp.name}</b><span>${sp.sub}</span></div></label></div>`).join("");
-  const peeks = [17, 19, 18].map(id => `<div class="peek">${cardFront(DECK[id])}</div>`).join("");
+  const peeks = [17, 19, 18].map(id => `<div class="peek"><div class="tilt">${cardFront(DECK[id])}<i class="glare"></i></div></div>`).join("");
   $("#altar").innerHTML = magicCircle("a") + peeks;
   $("#qa-topic").innerHTML = Object.entries(TOPICS).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
   $("#qa-type").innerHTML = Object.entries(QTYPES).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
@@ -1523,6 +1851,9 @@ function startShuffle() {
   $("#shuffle-controls").hidden = false;
   goStage("shuffle");
   updateMeter();
+  /* opening shot: high and wide, then descend to the table */
+  Cam.cut(t, { s: .75, rx: 32, y: 40 });
+  requestAnimationFrame(() => Cam.set(t, { s: 1, rx: 14 }, 1.8));
 }
 function updateMeter() {
   const tv = tvDistance(78, S.riffles), pct = Math.round((1 - tv) * 100);
@@ -1571,12 +1902,18 @@ async function riffleAnim(rotated, fast) {
 async function doRiffles(count) {
   if (S.busy) return;
   S.busy = true; updateMeter();
+  const t = $("#table");
+  /* a run of riffles is a close-up with letterbox; each riffle nudges the camera like a handheld shot */
+  if (count > 1) { Cam.letterbox(true); Cam.set(t, { s: 1.14, rx: 22 }, 1); }
   for (let n = 0; n < count; n++) {
     const res = riffle(S.deck, S.allowRev);
     S.deck = res.deck;
+    Cam.set(t, count > 1 ? { s: 1.14 + (n % 2 ? .035 : 0), rx: 22, rz: n % 2 ? 1.4 : -1.4 } : { s: 1.07, rx: 18 }, .5);
+    Grade.pulse(.22);
     await riffleAnim(res.rotated, count > 1);
     S.riffles++; S.busy = n < count - 1; updateMeter();
   }
+  Cam.set(t, { s: 1, rx: 14 }, 1.2); Cam.letterbox(false);
   S.busy = false; updateMeter();
 }
 async function cutDeck() {
@@ -1589,6 +1926,7 @@ async function cutDeck() {
   const ps = S.proxies, n1 = 8 + Math.floor(rnd() * 3), n2 = 8 + Math.floor(rnd() * 3);
   const groups = [ps.slice(ps.length - n1), ps.slice(ps.length - n1 - n2, ps.length - n1), ps.slice(0, ps.length - n1 - n2)];
   const xs = [-gap, 0, gap];
+  Cam.set(t, { s: 1.03, rx: 30, y: 10 }, 1.1);
   for (let g = 0; g < 3; g++) {
     groups[g].forEach((el, i) => { el.style.zIndex = 100 * g + i; el.style.transform = `translate(${xs[g] - i * .18}px, ${-i * .55}px)`; });
     Sound.tick(); await wait(260);
@@ -1608,12 +1946,15 @@ async function cutDeck() {
     if (S.busy) return; S.busy = true;
     btns.forEach(b => b.remove());
     groups[g].forEach((el, i) => el.style.transform = `translate(${xs[g]}px, ${-40 - i * .55}px)`);
+    Cam.set(t, { s: 1.28, x: -xs[g] * 1.28, rx: 24, y: 6 }, .7);
+    Grade.pulse(.4);
     const r = groups[g][0].getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, 40, 5);
     Sound.chime(523);
     await wait(420);
     const rest = [0, 1, 2].filter(x => x !== g);
     const ordered = [...rest.flatMap(x => groups[x]), ...groups[g]];
     ordered.forEach((el, i) => { el.style.zIndex = i; el.style.transform = proxyBase(i); });
+    Cam.set(t, { s: 1, rx: 14 }, .8);
     S.proxies = ordered;
     S.deck = [...piles[g], ...rest.flatMap(x => piles[x])];
     S.code = deckCode(S.deck);
@@ -1636,11 +1977,15 @@ function startPick() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "card"; b.dataset.i = i;
     b.setAttribute("aria-label", "ไพ่คว่ำใบที่ " + (i + 1));
-    b.innerHTML = `<div class="card-inner"><div class="face back">${backSVG()}</div></div>`;
+    b.innerHTML = `<div class="tilt"><div class="card-inner"><div class="face back">${backSVG()}<i class="glare"></i></div></div></div>`;
     b.addEventListener("click", () => pickCard(i, b));
     fan.appendChild(b);
   });
   layoutFan(true);
+  Cam.cut(fan, { s: 1.32, x: fan.clientWidth * .3, rx: 20, rz: -4 });
+  Cam.letterbox(true);
+  requestAnimationFrame(() => Cam.set(fan, { s: 1, rx: 6 }, 2.4));
+  setTimeout(() => Cam.letterbox(false), 2200 * SPEED);
 }
 function layoutFan(entrance) {
   const fan = $("#fan"); if (!fan.children.length) return;
@@ -1676,7 +2021,11 @@ function pickCard(i, el) {
   Object.assign(fly.style, { left: from.left + "px", top: from.top + "px", width: el.offsetWidth + "px" });
   document.body.appendChild(fly);
   el.classList.add("taken");
+  resetTilt();
   FX.burst(from.left + from.width / 2, from.top + from.height / 2, 24, 3);
+  const fanEl = $("#fan"), last = S.picks.length === sp.pos.length;
+  Cam.set(fanEl, { s: 1.03, rx: 6 }, .25);
+  setTimeout(() => last ? (Cam.letterbox(true), Cam.set(fanEl, { s: .88, y: 40, rx: 24 }, .9)) : Cam.set(fanEl, { rx: 6 }, .6), 260 * SPEED);
   const dx = to.left - from.left, dy = to.top - from.top, sc = to.width / el.offsetWidth;
   const anim = fly.animate([
     { transform: "translate(0,0) scale(1) rotate(0deg)" },
@@ -1700,6 +2049,10 @@ function startReveal() {
   $("#reveal-hint").textContent = "แตะไพ่เพื่อเปิด เปิดตามลำดับตัวเลขจะได้อารมณ์ที่สุด";
   goStage("reveal");
   buildBoard(sp, false);
+  const board = $("#board");
+  Cam.cut(board, { s: .8, rx: 26, y: 30 });
+  requestAnimationFrame(() => Cam.set(board, {}, 1.6));
+  Cam.letterbox(false);
 }
 function buildBoard(sp, open) {
   const wrap = $("#board-wrap"), board = $("#board");
@@ -1718,7 +2071,7 @@ function buildBoard(sp, open) {
     b.style.setProperty("--rot", (p.rot || 0) + "deg");
     if (p.rot) b.style.zIndex = 5;
     b.setAttribute("aria-label", `ตำแหน่ง ${i + 1} ${p.k}`);
-    b.innerHTML = `<span class="badge">${i + 1}</span><div class="card-inner"><div class="face back">${backSVG()}</div><div class="face front">${cardFront(card)}</div></div>` +
+    b.innerHTML = `<span class="badge">${i + 1}</span><div class="tilt"><div class="card-inner"><div class="face back">${backSVG()}<i class="glare"></i></div><div class="face front">${cardFront(card)}<i class="glare"></i></div></div></div>` +
       (sp.cap ? `<span class="cap">${esc(p.ks || p.k)}<small class="cap-name"></small></span>` : "");
     /* the crossing card lies on top of the card beneath it, so the first tap opens the covered card */
     b.addEventListener("click", () => p.rot && !S.flipped[i - 1] ? flip(i - 1) : S.flipped[i] ? openModal(i) : flip(i));
@@ -1736,7 +2089,7 @@ function setCap(btn, i) {
   if (btn) { const s = btn.querySelector(".cap-name"); if (s) s.textContent = label; }
   const lg = $("#lg-" + i); if (lg) lg.querySelector(".lg-name").textContent = "· " + label;
 }
-function flip(i, quiet) {
+function flip(i, quiet, fast) {
   if (S.flipped[i]) return;
   S.flipped[i] = true;
   const btn = $$("#board .card")[i];
@@ -1744,15 +2097,19 @@ function flip(i, quiet) {
   setCap(btn, i);
   const card = DECK[S.deck[S.picks[i]].id];
   if (!quiet) Sound.chime(card.major ? 523 : 659);
-  setTimeout(() => burstAt(btn, card.major ? 90 : 50, card.major ? 7 : 5), 380 * SPEED);
+  const shot = Director.focus(i, fast);
+  Director.effects(i, card);
+  setTimeout(() => burstAt(btn, card.major ? 90 : 50, card.major ? 7 : 5), (REDUCED ? 380 : fast ? 650 : 950) * SPEED);
   if (S.flipped.every(Boolean)) {
     $("#reveal-controls").hidden = true;
-    setTimeout(() => { Sound.swell(); finishReading(); }, 1100 * SPEED);
+    shot.then(() => Director.finale()).then(() => { Sound.swell(); finishReading(); });
   }
 }
+/* the camera hops from card to card */
 async function revealAll() {
   const sp = S.sp;
-  for (let i = 0; i < sp.pos.length; i++) { if (!S.flipped[i]) { flip(i, i > 0); await wait(sp.pos.length > 5 ? 220 : 380); } }
+  Cam.letterbox(true);
+  for (let i = 0; i < sp.pos.length; i++) { if (!S.flipped[i]) { flip(i, i > 0, true); await wait(sp.pos.length > 5 ? 560 : 900); } }
 }
 
 /* ================= CALCULATIONS ================= */
@@ -2182,6 +2539,7 @@ function renderReading(R) {
   $("#reveal-title").textContent = "ไพ่ทั้งหมดเปิดแล้ว";
   $("#reveal-hint").textContent = "แตะไพ่ใบไหนก็ได้เพื่อดูความหมายเต็ม เลื่อนลงเพื่ออ่านคำทำนาย";
   goStage("reading");
+  Director.sweep();
   $$("[data-modal]", el).forEach(b => b.addEventListener("click", () => openModal(+b.dataset.modal)));
   $("#btn-again").addEventListener("click", () => { goStage("ask"); renderHistory(); });
   $("#btn-copy").addEventListener("click", () => copyReading(R, N, K));
@@ -2225,7 +2583,7 @@ function openModal(i) {
   const c = S.deck[S.picks[i]], card = DECK[c.id], rev = c.rev, pos = sp.pos[i];
   $("#modal-box").innerHTML = `
     <button class="icon-btn close-x" type="button" id="modal-close">ปิด</button>
-    <div class="bigcard${rev ? " rev" : ""}">${cardFront(card)}</div>
+    <div class="bigcard${rev ? " rev" : ""}"><div class="tilt tilt-flow">${cardFront(card)}<i class="glare"></i></div></div>
     <div>
       <div class="eyebrow">Position ${i + 1} · ${esc(pos.k)}</div>
       <h3 id="modal-title">${esc(card.th)}</h3>
