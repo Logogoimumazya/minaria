@@ -1,0 +1,1591 @@
+<title>หอดาราทาโรต์</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Noto+Sans+Symbols&family=Noto+Serif+Thai:wght@400;500;700&family=Srisakdi:wght@700&display=swap">
+<style>
+/* Layout: one ritual table at a time. Stages run in order: set intent, shuffle, choose, reveal, reading.
+   Deliberately single-theme: a night sky of deep indigo lit by gold leaf. */
+:root {
+  --void: #070814;
+  --night: #10143a;
+  --panel: rgba(17, 21, 52, 0.78);
+  --panel-solid: #121636;
+  --line: rgba(232, 196, 106, 0.26);
+  --line-strong: rgba(232, 196, 106, 0.6);
+  --gold: #e8c46a;
+  --gold-hi: #fff0c2;
+  --gold-deep: #a8792e;
+  --ivory: #f4ecd8;
+  --mist: #aea8cc;
+  --ink: #1a1206;
+  --good: #8fe3b0;
+  --warn: #f0c060;
+  --bad: #f08a9b;
+  --fire: #ff9a62;
+  --water: #6fb2ff;
+  --air: #dfe9ff;
+  --earth: #8ed689;
+  --f-title: "Srisakdi", "Noto Serif Thai", serif;
+  --f-latin: "Cinzel", "Times New Roman", serif;
+  --f-deco: "Cinzel Decorative", "Cinzel", serif;
+  --f-body: "Noto Serif Thai", "Sarabun", Georgia, serif;
+  --f-sym: "Noto Sans Symbols", "Segoe UI Symbol", "DejaVu Sans", serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--void);
+  color: var(--ivory);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+.nebula {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 45% at 18% 8%, rgba(98, 64, 178, 0.36), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 88% 28%, rgba(32, 96, 170, 0.30), transparent 70%),
+    radial-gradient(ellipse 70% 40% at 50% 104%, rgba(168, 112, 46, 0.26), transparent 70%),
+    linear-gradient(180deg, #080a1c 0%, #070814 60%, #0b0918 100%);
+}
+#sky, #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#sky { z-index: 0; }
+#fx { z-index: 60; }
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 56px;
+}
+/* ---------- header ---------- */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding-block: 8px 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; color: var(--gold); font-family: var(--f-latin); letter-spacing: 0.18em; font-size: 13px; font-weight: 600; }
+.brand svg { width: 22px; height: 22px; }
+.steps { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.steps li {
+  font-size: 12.5px; color: var(--mist); padding: 3px 10px; border-radius: 99px;
+  border: 1px solid transparent; white-space: nowrap;
+}
+.steps li b { font-family: var(--f-latin); color: var(--gold-deep); margin-right: 4px; font-weight: 600; }
+.steps li.on { color: var(--ivory); border-color: var(--line-strong); background: rgba(232,196,106,.08); }
+.steps li.on b, .steps li.done b { color: var(--gold); }
+.steps li.done { color: var(--ivory); }
+.icon-btn {
+  background: transparent; border: 1px solid var(--line); color: var(--mist); border-radius: 99px;
+  font: inherit; font-size: 13px; padding: 4px 12px; cursor: pointer;
+}
+.icon-btn:hover { color: var(--gold); border-color: var(--line-strong); }
+/* ---------- shared ---------- */
+h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 700; }
+.eyebrow { font-family: var(--f-latin); letter-spacing: 0.24em; font-size: 12px; color: var(--gold); text-transform: uppercase; }
+.panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+  padding: clamp(16px, 3vw, 28px);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  min-width: 0;
+}
+.panel h3 { font-size: 19px; color: var(--gold-hi); margin-bottom: 12px; }
+.panel h3 small { display: block; font-family: var(--f-latin); font-size: 11px; letter-spacing: .22em; color: var(--gold-deep); font-weight: 600; text-transform: uppercase; }
+.btn {
+  font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; border-radius: 99px;
+  padding: 11px 26px; border: 1px solid var(--gold); color: var(--ink);
+  background: linear-gradient(180deg, var(--gold-hi), var(--gold) 45%, var(--gold-deep));
+  box-shadow: 0 0 0 0 rgba(232,196,106,.5), 0 8px 24px rgba(232,196,106,.18);
+  transition: transform .15s, box-shadow .3s, opacity .2s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 0 22px rgba(232,196,106,.45), 0 8px 24px rgba(232,196,106,.2); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.ghost { background: rgba(232,196,106,.06); color: var(--gold-hi); border-color: var(--line-strong); box-shadow: none; }
+.btn.ghost:hover:not(:disabled) { background: rgba(232,196,106,.14); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+.muted { color: var(--mist); }
+.stage { animation: rise .7s ease both; }
+@keyframes rise { from { opacity: .0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* ---------- stage 1: intent ---------- */
+.intro { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(20px, 4vw, 48px); align-items: center; }
+.hero { position: relative; min-width: 0; text-align: center; padding-block: 8px; }
+.hero h1 {
+  font-family: var(--f-title); font-size: clamp(46px, 8vw, 86px); line-height: 1.15;
+  background: linear-gradient(180deg, var(--gold-hi) 10%, var(--gold) 50%, var(--gold-deep) 95%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 18px rgba(232,196,106,.28));
+}
+.hero .latin { font-family: var(--f-deco); color: var(--gold); letter-spacing: .32em; font-size: clamp(12px, 1.6vw, 15px); margin-top: 4px; }
+.hero p { max-width: 46ch; margin: 14px auto 0; color: var(--mist); }
+.altar { position: relative; height: clamp(250px, 34vw, 330px); margin-top: 18px; }
+.altar .circle { position: absolute; left: 50%; top: 50%; width: min(330px, 86%); aspect-ratio: 1; transform: translate(-50%, -50%); }
+.altar .peek { position: absolute; left: 50%; top: 52%; width: clamp(92px, 12vw, 122px); aspect-ratio: 200/340; transform-origin: 50% 115%; }
+.altar .peek svg { width: 100%; height: 100%; display: block; border-radius: 9px; box-shadow: 0 12px 30px rgba(0,0,0,.6), 0 0 26px rgba(232,196,106,.22); }
+.altar .peek:nth-child(2) { transform: translate(-50%, -50%) rotate(-16deg) translateX(-14%); }
+.altar .peek:nth-child(3) { transform: translate(-50%, -50%) rotate(0deg) translateY(-8%); z-index: 2; }
+.altar .peek:nth-child(4) { transform: translate(-50%, -50%) rotate(16deg) translateX(14%); }
+.spin { animation: spin 120s linear infinite; }
+.spin-rev { animation: spin 160s linear infinite reverse; }
+@keyframes spin { to { rotate: 360deg; } }
+form.intent { display: grid; gap: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label, .legend { font-size: 14px; color: var(--gold-hi); font-weight: 500; }
+.field .hint { font-size: 12.5px; color: var(--mist); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input[type=text], input[type=date], textarea {
+  font: inherit; font-size: 15px; color: var(--ivory); width: 100%;
+  background: rgba(7, 8, 20, .55); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px;
+}
+textarea { resize: vertical; min-height: 64px; }
+input::placeholder, textarea::placeholder { color: rgba(174,168,204,.6); }
+input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(232,196,106,.15); }
+.spreads { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.spread-opt { position: relative; }
+.spread-opt input { position: absolute; opacity: 0; inset: 0; pointer-events: none; }
+.spread-opt label {
+  display: grid; grid-template-columns: 42px 1fr; gap: 10px; align-items: center; cursor: pointer; height: 100%;
+  border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; background: rgba(7,8,20,.35);
+  transition: border-color .2s, background .2s;
+}
+.spread-opt label svg { width: 42px; height: 42px; }
+.spread-opt label b { display: block; font-size: 14px; line-height: 1.35; color: var(--ivory); }
+.spread-opt label span { font-size: 12px; color: var(--mist); line-height: 1.35; display: block; }
+.spread-opt input:checked + label { border-color: var(--gold); background: rgba(232,196,106,.1); box-shadow: inset 0 0 0 1px rgba(232,196,106,.35); }
+.spread-opt input:focus-visible + label { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+.toggle { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--mist); cursor: pointer; }
+.toggle input { accent-color: var(--gold); width: 18px; height: 18px; }
+.history { margin-top: 26px; }
+.history summary { cursor: pointer; color: var(--gold-hi); font-size: 15px; }
+.history ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.history li button {
+  width: 100%; text-align: left; font: inherit; font-size: 14px; color: var(--ivory); cursor: pointer;
+  background: rgba(7,8,20,.4); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.history li button:hover { border-color: var(--line-strong); }
+.history li .meta { color: var(--mist); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+/* ---------- stage 2: shuffle ---------- */
+.stage-head { text-align: center; display: grid; gap: 6px; justify-items: center; margin-bottom: 8px; }
+.stage-head h2 { font-size: clamp(26px, 4vw, 38px); color: var(--gold-hi); }
+.stage-head p { margin: 0; color: var(--mist); max-width: 60ch; }
+.table { position: relative; height: clamp(280px, 44vh, 400px); margin-block: 6px; }
+.table .circle { position: absolute; left: 50%; top: 50%; width: min(420px, 92%); aspect-ratio: 1; transform: translate(-50%, -50%); opacity: .75; pointer-events: none; }
+.proxy {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--pcw, 110px); aspect-ratio: 200/340;
+  margin-left: calc(var(--pcw, 110px) / -2); margin-top: calc(var(--pcw, 110px) * -0.85);
+  transition: transform .32s cubic-bezier(.3,.7,.25,1);
+  will-change: transform;
+}
+.proxy svg { width: 100%; height: 100%; display: block; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,.55); }
+.pile-btn {
+  position: absolute; top: calc(50% + var(--pcw, 110px) * 0.95); transform: translateX(-50%);
+  font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 99px; cursor: pointer;
+  background: rgba(7,8,20,.7); color: var(--gold-hi); border: 1px solid var(--line-strong); white-space: nowrap;
+  animation: rise .4s ease both;
+}
+.pile-btn:hover { background: rgba(232,196,106,.18); }
+.meter { max-width: 620px; margin: 4px auto 18px; display: grid; gap: 8px; }
+.meter-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; flex-wrap: wrap; }
+.meter-row b { font-family: var(--f-latin); color: var(--gold-hi); font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; border: 1px solid rgba(232,196,106,.15); }
+.bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-hi)); transition: width .6s ease; }
+.meter .note { font-size: 13px; color: var(--mist); text-align: center; }
+.center-row { justify-content: center; }
+/* ---------- stage 3: pick ---------- */
+.fan { position: relative; width: 100%; margin-top: 10px; }
+.fan .card { transition: left .7s cubic-bezier(.2,.8,.2,1), top .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1), opacity .3s; }
+.fan .card:hover .card-inner, .fan .card:focus-visible .card-inner { translate: 0 -18px; }
+.fan .card:hover .face, .fan .card:focus-visible .face { box-shadow: 0 0 18px rgba(232,196,106,.7); }
+.fan .card.taken { opacity: 0; pointer-events: none; }
+.slots { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
+.slot { width: 58px; display: grid; gap: 4px; justify-items: center; text-align: center; }
+.slot .hole { width: 58px; aspect-ratio: 200/340; border: 1px dashed var(--line-strong); border-radius: 6px; position: relative; background: rgba(232,196,106,.04); }
+.slot .hole svg { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 6px; }
+.slot .hole .n { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-latin); color: var(--gold-deep); font-size: 18px; }
+.slot span { font-size: 11px; color: var(--mist); line-height: 1.3; }
+.fly { position: fixed; z-index: 55; pointer-events: none; aspect-ratio: 200/340; }
+.fly svg { width: 100%; height: 100%; display: block; border-radius: 6px; box-shadow: 0 0 24px rgba(232,196,106,.6); }
+/* ---------- cards ---------- */
+.card {
+  position: absolute; width: var(--cw, 80px); aspect-ratio: 200/340; padding: 0; border: 0; background: none;
+  cursor: pointer; perspective: 1000px; color: inherit; font: inherit;
+}
+.card-inner {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  transition: transform 1s cubic-bezier(.2,.75,.2,1), translate .25s ease;
+}
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 7%/4.1%; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,.55); transition: box-shadow .4s; }
+.face svg { width: 100%; height: 100%; display: block; }
+.front { transform: rotateY(180deg); }
+.card.rev .front svg { transform: rotate(180deg); }
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.card.flipped .front { box-shadow: 0 0 26px rgba(232,196,106,.45), 0 6px 16px rgba(0,0,0,.55); }
+/* ---------- stage 4: board ---------- */
+.board-wrap { position: relative; margin: 6px auto 0; }
+.board { position: relative; width: 100%; }
+.board .circle { position: absolute; left: 50%; top: 50%; width: 92%; max-width: 560px; aspect-ratio: 1; transform: translate(-50%, -50%); opacity: .4; pointer-events: none; }
+.board .card { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)); }
+.board .card .badge {
+  position: absolute; z-index: 3; top: -9px; left: -9px; width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--f-latin); font-size: 11px; font-weight: 700;
+  background: var(--panel-solid); color: var(--gold); border: 1px solid var(--line-strong);
+}
+.board .cap {
+  position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 6px; white-space: nowrap;
+  font-size: clamp(11px, 1.6vw, 14px); color: var(--gold-hi); text-align: center; line-height: 1.3; pointer-events: none;
+}
+.board .cap small { display: block; color: var(--mist); font-size: .85em; }
+.legend-list { columns: 2 240px; column-gap: 24px; margin: 18px auto 0; padding: 0; list-style: none; max-width: 760px; font-size: 14px; }
+.legend-list li { break-inside: avoid; display: flex; gap: 8px; padding-block: 3px; color: var(--mist); }
+.legend-list li b { font-family: var(--f-latin); color: var(--gold); min-width: 20px; }
+.legend-list li em { font-style: normal; color: var(--ivory); }
+/* ---------- reading ---------- */
+.reading { display: grid; gap: 18px; margin-top: 34px; }
+.reading-head { text-align: center; display: grid; gap: 6px; justify-items: center; padding-block: 8px; }
+.reading-head h2 { font-size: clamp(24px, 3.6vw, 36px); color: var(--gold-hi); max-width: 30ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { font-size: 12.5px; padding: 2px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--mist); font-variant-numeric: tabular-nums; }
+.chip b { color: var(--gold-hi); font-weight: 500; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 18px; }
+.verdict { display: grid; gap: 16px; align-content: start; }
+.ring-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.ring { width: 128px; height: 128px; flex: none; }
+.ring-txt b { display: block; font-size: 22px; color: var(--gold-hi); line-height: 1.3; }
+.ring-txt span { color: var(--mist); font-size: 14px; }
+.dom { display: grid; gap: 10px; }
+.dom-row { display: grid; grid-template-columns: 74px 1fr 62px; gap: 10px; align-items: center; font-size: 14px; }
+.dom-row .stars { color: var(--gold); letter-spacing: 1px; font-size: 12px; text-align: right; font-family: var(--f-sym); }
+.dom-row .val { font-family: var(--f-latin); font-variant-numeric: tabular-nums; color: var(--gold-hi); }
+.dom-row .bar i.good { background: linear-gradient(90deg, #4f9d77, var(--good)); }
+.dom-row .bar i.mid { background: linear-gradient(90deg, var(--gold-deep), var(--warn)); }
+.dom-row .bar i.low { background: linear-gradient(90deg, #9b4a5a, var(--bad)); }
+.dom-notes { display: grid; gap: 8px; font-size: 14.5px; }
+.dom-notes p { margin: 0; }
+.dom-notes b { color: var(--gold-hi); }
+.narrative p { margin: 0 0 12px; max-width: 68ch; }
+.narrative p:last-child { margin-bottom: 0; }
+.narrative b { color: var(--gold-hi); font-weight: 600; }
+.narrative .advice { border-top: 1px solid var(--line); padding-top: 12px; color: var(--gold-hi); }
+.pos-list { display: grid; gap: 14px; }
+.pos-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; align-items: start; padding-block: 12px; border-top: 1px solid rgba(232,196,106,.12); }
+.pos-row:first-child { border-top: 0; padding-top: 0; }
+.pos-row .mini { width: 92px; aspect-ratio: 200/340; cursor: pointer; border: 0; padding: 0; background: none; border-radius: 6px; }
+.pos-row .mini svg { width: 100%; height: 100%; display: block; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.pos-row .mini.rev svg { transform: rotate(180deg); }
+.pos-row .where { font-size: 12.5px; color: var(--gold); font-family: var(--f-latin); letter-spacing: .12em; }
+.pos-row .where span { font-family: var(--f-body); letter-spacing: 0; color: var(--mist); }
+.pos-row h4 { margin: 2px 0 4px; font-size: 18px; color: var(--ivory); }
+.pos-row h4 .en { font-family: var(--f-latin); font-size: 14px; color: var(--gold); font-weight: 600; margin-left: 6px; }
+.tag { display: inline-block; font-size: 12px; padding: 0 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; border: 1px solid; }
+.tag.up { color: var(--good); border-color: rgba(143,227,176,.4); }
+.tag.rv { color: var(--bad); border-color: rgba(240,138,155,.4); }
+.kw { font-size: 13.5px; color: var(--gold-hi); margin-bottom: 4px; }
+.pos-row p { margin: 0; font-size: 15px; }
+.pos-row .ctx { color: var(--mist); font-size: 13.5px; margin-top: 4px; }
+.elements { display: grid; gap: 10px; }
+.el-row { display: grid; grid-template-columns: 64px 1fr 40px; gap: 10px; align-items: center; font-size: 14px; }
+.el-row .n { text-align: right; font-family: var(--f-latin); font-variant-numeric: tabular-nums; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
+.fact { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; text-align: center; }
+.fact b { display: block; font-family: var(--f-latin); font-size: 22px; color: var(--gold-hi); font-variant-numeric: tabular-nums; line-height: 1.3; }
+.fact span { font-size: 12px; color: var(--mist); }
+.bullets { margin: 14px 0 0; padding-left: 1.1em; display: grid; gap: 6px; font-size: 14.5px; }
+.numer { display: grid; gap: 12px; }
+.num-item { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 12px; align-items: start; }
+.num-item .big {
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--f-latin); font-size: 22px; font-weight: 700; color: var(--gold-hi);
+  border: 1px solid var(--line-strong); background: radial-gradient(circle, rgba(232,196,106,.18), transparent 70%);
+}
+.num-item b { color: var(--gold-hi); }
+.num-item p { margin: 0; font-size: 14.5px; }
+.num-item .lbl { font-size: 12.5px; color: var(--mist); }
+.lucky { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.lucky .item { text-align: center; padding: 10px; border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.lucky .item span { font-size: 12.5px; color: var(--mist); display: block; }
+.lucky .item b { display: block; font-size: 20px; color: var(--gold-hi); line-height: 1.4; }
+.lucky .item b.num { font-family: var(--f-latin); font-size: 26px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; border: 1px solid rgba(255,255,255,.3); }
+.foot-note { text-align: center; font-size: 12.5px; color: var(--mist); margin-top: 8px; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--panel-solid); border: 1px solid var(--line-strong); color: var(--gold-hi);
+  padding: 8px 18px; border-radius: 99px; z-index: 80; font-size: 14px;
+}
+/* ---------- modal ---------- */
+.modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(4,5,14,.78); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 16px; animation: rise .3s ease both; }
+.modal-box {
+  width: min(820px, 100%); max-height: 92vh; overflow: auto; display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 22px;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 20px; padding: clamp(16px, 3vw, 28px); position: relative;
+}
+.modal-box .bigcard svg { width: 100%; height: auto; display: block; border-radius: 12px; box-shadow: 0 0 40px rgba(232,196,106,.35); }
+.modal-box .bigcard.rev svg { transform: rotate(180deg); }
+.modal-box h3 { font-size: 26px; color: var(--gold-hi); }
+.modal-box .en { font-family: var(--f-latin); color: var(--gold); letter-spacing: .1em; }
+.modal-box p { margin: 8px 0; }
+.modal-box dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14px; margin: 12px 0 0; }
+.modal-box dt { color: var(--mist); }
+.modal-box dd { margin: 0; }
+.close-x { position: absolute; top: 10px; right: 12px; }
+@media (max-width: 900px) {
+  .intro { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .lucky { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 560px) {
+  .two { grid-template-columns: 1fr; }
+  .steps li { padding: 2px 7px; font-size: 11.5px; }
+  .modal-box { grid-template-columns: 1fr; }
+  .modal-box .bigcard { width: min(220px, 70%); margin: 0 auto; }
+  .pos-row { grid-template-columns: 70px minmax(0,1fr); gap: 12px; }
+  .pos-row .mini { width: 70px; }
+  .facts { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .dom-row { grid-template-columns: 64px 1fr 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin, .spin-rev { animation: none; }
+  .stage, .modal { animation: none; }
+}
+</style>
+
+<div class="nebula"></div>
+<canvas id="sky"></canvas>
+<canvas id="fx"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs-host"></svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0-11L2.4-2.4 11 0 2.4 2.4 0 11-2.4 2.4-11 0-2.4-2.4Z" fill="url(#gGold)"/></svg>
+      ASTRAL ORACLE
+    </div>
+    <ol class="steps" id="steps">
+      <li data-s="ask"><b>I</b>ตั้งจิต</li>
+      <li data-s="shuffle"><b>II</b>สับไพ่</li>
+      <li data-s="pick"><b>III</b>เลือกไพ่</li>
+      <li data-s="reveal"><b>IV</b>เปิดไพ่</li>
+      <li data-s="reading"><b>V</b>คำทำนาย</li>
+    </ol>
+    <button class="icon-btn" id="sound-btn" type="button" aria-pressed="true">เสียง: เปิด</button>
+  </header>
+
+  <!-- STAGE 1 -->
+  <section class="stage" id="stage-ask">
+    <div class="intro">
+      <div class="hero">
+        <h1>หอดาราทาโรต์</h1>
+        <div class="latin">ARCANA · MAIOR · MINOR</div>
+        <p>สำรับเต็ม 78 ใบ มีไพ่กลับหัว สับแบบ riffle จริงตามคณิตศาสตร์ของการสับไพ่ แล้วอ่านดวงทั้งรายตำแหน่ง ธาตุ เลขศาสตร์ และคะแนนดวงแต่ละด้าน</p>
+        <div class="altar" id="altar"></div>
+      </div>
+      <div class="panel">
+        <form class="intent" id="intent" novalidate>
+          <div>
+            <div class="eyebrow">Step I</div>
+            <h3 style="font-size:24px;margin-top:2px">ตั้งจิตก่อนสับไพ่</h3>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="q-name">ชื่อของคุณ</label>
+              <input type="text" id="q-name" placeholder="เช่น อรุณี" autocomplete="given-name">
+            </div>
+            <div class="field">
+              <label for="q-dob">วันเกิด</label>
+              <input type="date" id="q-dob" min="1900-01-01" max="2026-12-31">
+            </div>
+          </div>
+          <div class="field">
+            <label for="q-text">คำถามที่อยากถามไพ่</label>
+            <textarea id="q-text" placeholder="เช่น งานใหม่ที่กำลังตัดสินใจ จะพาชีวิตไปในทางที่ดีไหม"></textarea>
+            <span class="hint">ใส่ชื่อและวันเกิดเพื่อให้คำนวณเลขศาสตร์ ไพ่ประจำตัว และไพ่ประจำปีได้ ถ้าเว้นว่างจะอ่านเฉพาะไพ่</span>
+          </div>
+          <div class="field">
+            <span class="legend" id="spread-legend">รูปแบบการวางไพ่</span>
+            <div class="spreads" id="spreads" role="radiogroup" aria-labelledby="spread-legend"></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="q-rev" checked> ใช้ไพ่กลับหัว (ระหว่างสับ ไพ่บางกองจะถูกหมุน 180°)</label>
+          <div class="btn-row"><button class="btn" type="submit">เริ่มพิธีสับไพ่</button></div>
+        </form>
+      </div>
+    </div>
+    <details class="history panel" id="history" hidden>
+      <summary>คำทำนายที่ผ่านมา (เก็บไว้ในเครื่องนี้เท่านั้น)</summary>
+      <ul id="history-list"></ul>
+    </details>
+  </section>
+
+  <!-- STAGE 2 -->
+  <section class="stage" id="stage-shuffle" hidden>
+    <div class="stage-head">
+      <div class="eyebrow">Step II · Riffle Shuffle</div>
+      <h2>สับไพ่ด้วยมือของคุณ</h2>
+      <p>สำรับเริ่มจากลำดับในกล่อง ทุกครั้งที่กด ไพ่จะถูกแบ่งสองกองแล้วสลับแทรกกันแบบ riffle ไพ่ 78 ใบต้องสับราว 10 ครั้งจึงจะสุ่มจริง</p>
+    </div>
+    <div class="table" id="table"></div>
+    <div class="meter">
+      <div class="meter-row"><span>สับแล้ว <b id="riffle-count">0</b> ครั้ง</span><span>ความสุ่มของลำดับไพ่ <b id="rand-pct">0%</b></span></div>
+      <div class="bar"><i id="rand-bar"></i></div>
+      <div class="note" id="rand-note">ไพ่ยังเรียงตามลำดับในกล่อง</div>
+    </div>
+    <div class="btn-row center-row" id="shuffle-controls">
+      <button class="btn ghost" type="button" id="btn-riffle">สับ 1 ครั้ง</button>
+      <button class="btn ghost" type="button" id="btn-riffle-many">สับจนสุ่มเต็มที่</button>
+      <button class="btn" type="button" id="btn-cut" disabled>ตัดไพ่</button>
+    </div>
+  </section>
+
+  <!-- STAGE 3 -->
+  <section class="stage" id="stage-pick" hidden>
+    <div class="stage-head">
+      <div class="eyebrow">Step III · Choose</div>
+      <h2>เลือกไพ่ด้วยสัญชาตญาณ</h2>
+      <p id="pick-hint">แตะไพ่ที่ดึงดูดใจ</p>
+    </div>
+    <div class="fan" id="fan"></div>
+    <div class="slots" id="slots"></div>
+  </section>
+
+  <!-- STAGE 4 + 5 -->
+  <section class="stage" id="stage-reveal" hidden>
+    <div class="stage-head">
+      <div class="eyebrow" id="reveal-eyebrow">Step IV · Reveal</div>
+      <h2 id="reveal-title">เปิดไพ่ทีละใบ</h2>
+      <p id="reveal-hint">แตะไพ่เพื่อเปิด เปิดตามลำดับตัวเลขจะได้อารมณ์ที่สุด</p>
+    </div>
+    <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
+    <ol class="legend-list" id="legend" hidden></ol>
+    <div class="btn-row center-row" style="margin-top:18px" id="reveal-controls">
+      <button class="btn ghost" type="button" id="btn-reveal-all">เปิดทั้งหมด</button>
+    </div>
+    <div class="reading" id="reading" hidden></div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+const ROMAN = ["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+const EL = {
+  fire:  { th: "ไฟ",  color: "#ff9a62", lucky: ["แดงเลือดนก", "#c8323c", "ทองคำ", "#e8c46a"], dom: "พลังไฟนำ เรื่องนี้ขับเคลื่อนด้วยความปรารถนา ความกล้า และการลงมือทำ", miss: "ไม่มีไฟเลย แรงจูงใจอาจหายไป ลองหาแรงบันดาลใจใหม่ก่อนลงมือ" },
+  water: { th: "น้ำ", color: "#6fb2ff", lucky: ["น้ำเงินคราม", "#2c4fa8", "เงินยวง", "#c9d2e4"], dom: "พลังน้ำนำ อารมณ์ ความรู้สึก และความสัมพันธ์คือหัวใจของเรื่อง", miss: "ไม่มีน้ำเลย อย่าลืมฟังความรู้สึกของตัวเองและคนรอบข้าง" },
+  air:   { th: "ลม",  color: "#dfe9ff", lucky: ["เหลืองอ่อน", "#f2df7a", "ขาวมุก", "#f4f1ea"], dom: "พลังลมนำ ความคิด การสื่อสาร และการตัดสินใจจะเป็นตัวชี้ผล", miss: "ไม่มีลมเลย ใช้เหตุผลและวางแผนให้มากขึ้นก่อนตัดสินใจ" },
+  earth: { th: "ดิน", color: "#8ed689", lucky: ["เขียวมรกต", "#2f8a5b", "น้ำตาลทอง", "#9b6b32"], dom: "พลังดินนำ เรื่องเงิน งาน ร่างกาย และสิ่งที่จับต้องได้คือแก่นของเรื่อง", miss: "ไม่มีดินเลย ทำความคิดให้เป็นรูปธรรม ลงมือทีละขั้น" }
+};
+const DOMAINS = [
+  { k: "love", th: "ความรัก" }, { k: "career", th: "การงาน" }, { k: "money", th: "การเงิน" },
+  { k: "health", th: "สุขภาพ" }, { k: "luck", th: "โชคลาภ" }
+];
+const DOMAIN_TXT = {
+  love: ["ความรักเบ่งบาน เหมาะกับการเปิดใจ สารภาพ หรือก้าวสู่ขั้นใหม่ของความสัมพันธ์", "ความรักอบอุ่นและมีทิศทางดี ใส่ใจเรื่องเล็กๆ จะยิ่งแน่นแฟ้น", "ความรักทรงตัว ไม่หวือหวา การพูดคุยตรงไปตรงมาจะช่วยหล่อเลี้ยง", "มีความไม่เข้าใจหรือระยะห่าง อย่าตัดสินจากอารมณ์ชั่ววูบ", "ความรักอยู่ในช่วงทดสอบหนัก ดูแลหัวใจตัวเองก่อนดูแลความสัมพันธ์"],
+  career: ["งานรุ่งโรจน์ เหมาะกับการเสนอโปรเจกต์ ขอเลื่อนตำแหน่ง หรือเริ่มกิจการ", "ความก้าวหน้าชัดเจน ผลงานเริ่มเป็นที่มองเห็น", "งานเดินตามแผน เน้นความสม่ำเสมอมากกว่าการเสี่ยง", "มีแรงต้านหรือความล่าช้า ทบทวนแผนและคนที่ร่วมงานให้ดี", "งานติดขัดหนัก อย่าเพิ่งตัดสินใจเรื่องใหญ่ เก็บแรงไว้รอจังหวะ"],
+  money: ["การเงินไหลเข้าดีมาก มีโอกาสได้รายได้พิเศษหรือผลตอบแทนจากการลงทุน", "การเงินมั่นคงและมีแนวโน้มเพิ่ม วางแผนออมจะเห็นผลเร็ว", "รายรับรายจ่ายพอดีกัน ระวังค่าใช้จ่ายจุกจิก", "เงินเข้าช้าหรือมีรายจ่ายไม่คาดคิด ชะลอการซื้อของชิ้นใหญ่", "ช่วงตึงตัวทางการเงิน เลี่ยงการลงทุนเสี่ยงและการค้ำประกันให้ใคร"],
+  health: ["พลังกายใจเต็มเปี่ยม เหมาะกับการเริ่มออกกำลังกายหรือเปลี่ยนนิสัยใหม่", "สุขภาพดี รักษาจังหวะการนอนและการกินไว้", "ร่างกายปกติแต่ใจอาจเหนื่อยล้า หาเวลาพักให้ตัวเอง", "มีสัญญาณความเครียดสะสม อย่าฝืนร่างกาย", "พลังงานต่ำ ควรพักผ่อนจริงจัง ถ้ามีอาการผิดปกติควรพบแพทย์"],
+  luck: ["ดวงดาวเรียงตัวเข้าข้าง โชคและจังหวะดีอยู่กับคุณ", "มีโชคหนุนเป็นระยะ คนรอบตัวช่วยเปิดทาง", "โชคกลางๆ ความสำเร็จมาจากฝีมือมากกว่าดวง", "โชคไม่ค่อยเข้าข้าง ตรวจสอบทุกอย่างให้รอบคอบ", "ช่วงดวงตก ทำใจให้นิ่ง และเลี่ยงการเสี่ยงโชค"]
+};
+/* Major Arcana: num, en, th, glyph (Golden Dawn / modern planetary attribution), element, valence,
+   affinity [love, career, money, health], upright kw, reversed kw, upright, reversed, advice, reversed valence override */
+const MAJOR = [
+ [0,"The Fool","ผู้ออกเดินทาง","♅","air",1.5,[1,1,.7,1],"การเริ่มต้นใหม่ · อิสระ · กล้าเสี่ยง","ประมาท · ลังเล · กระโจนโดยไม่คิด","ประตูบานใหม่กำลังเปิด คุณพร้อมก้าวสู่สิ่งที่ไม่เคยลองด้วยใจบริสุทธิ์ ความไม่รู้ในตอนนี้คือพลัง ไม่ใช่จุดอ่อน","ความตื่นเต้นอาจทำให้มองข้ามรายละเอียด หรือความกลัวทำให้คุณยืนอยู่ปากหน้าผานานเกินไป ตรวจสอบให้ดีก่อนกระโดด","กล้าเริ่ม แต่พกแผนสำรองไปด้วย"],
+ [1,"The Magician","นักมายากล","☿","air",2.5,[.8,1.4,1.2,.9],"พลังสร้างสรรค์ · ทักษะ · ลงมือทำ","หลอกลวง · ศักยภาพที่ไม่ถูกใช้ · บงการ","คุณมีเครื่องมือครบทุกอย่างบนโต๊ะแล้ว ความตั้งใจที่ชัดเจนจะเปลี่ยนความคิดให้กลายเป็นจริง นี่คือเวลาลงมือ","ระวังคำพูดสวยหรูที่ไม่มีของจริงรองรับ ทั้งจากคนอื่นและจากตัวเอง พรสวรรค์ของคุณยังไม่ได้ถูกใช้เต็มที่","เลือกเป้าหมายเดียว แล้วทุ่มทักษะทั้งหมดลงไป"],
+ [2,"The High Priestess","นักบวชหญิง","☽","water",1,[1.1,.8,.6,1],"ญาณหยั่งรู้ · ความลับ · จิตใต้สำนึก","ไม่ฟังเสียงภายใน · ความลับถูกเปิด · สับสน","คำตอบไม่ได้อยู่ข้างนอก มันอยู่ในความเงียบของใจคุณ ยังมีบางสิ่งที่ไม่ถูกเปิดเผย จงรอและสังเกต","คุณกำลังเพิกเฉยต่อสัญชาตญาณ หรือมีความลับที่กำลังจะหลุดออกมา อย่าตัดสินใจจากข้อมูลผิวเผิน","นั่งนิ่งๆ แล้วถามใจตัวเองก่อนถามคนอื่น"],
+ [3,"The Empress","จักรพรรดินี","♀","earth",2.5,[1.4,.9,1.2,1.2],"ความอุดมสมบูรณ์ · ความรัก · การเติบโต","พึ่งพาเกินไป · ลืมดูแลตัวเอง · ความคิดสร้างสรรค์ติดขัด","ทุกสิ่งที่คุณหว่านไว้กำลังงอกงาม ความรัก ความสุขสบาย และความอุดมสมบูรณ์โอบล้อมคุณ","คุณให้คนอื่นมากจนลืมเติมให้ตัวเอง หรือความคิดสร้างสรรค์กำลังติดขัด กลับมาดูแลรากของตัวเองก่อน","ดูแลตัวเองและสิ่งที่รักอย่างอ่อนโยน แล้วมันจะเติบโตเอง"],
+ [4,"The Emperor","จักรพรรดิ","♈","fire",1.5,[.7,1.4,1.2,.9],"อำนาจ · โครงสร้าง · ความมั่นคง","เผด็จการ · ดื้อรั้น · ขาดวินัย","ความมั่นคงมาจากระเบียบและการตัดสินใจที่เด็ดขาด คุณหรือผู้มีอำนาจกำลังวางรากฐานที่แข็งแรง","การควบคุมมากเกินไปทำให้คนรอบข้างอึดอัด หรือคุณขาดโครงสร้างจนทุกอย่างกระจัดกระจาย","วางกฎให้ชัด แล้วถือมันอย่างยุติธรรม"],
+ [5,"The Hierophant","พระสังฆราช","♉","earth",1,[1,1.1,1,.9],"ประเพณี · ครูบาอาจารย์ · ความเชื่อ","แหกกฎ · ตั้งคำถามกับระบบ · คำแนะนำผิดทาง","เส้นทางที่ผ่านการพิสูจน์แล้วคือคำตอบ การเรียนจากผู้รู้หรือทำตามธรรมเนียมจะพาคุณไปถูกทาง","กฎเดิมอาจไม่เหมาะกับคุณอีกต่อไป หรือคุณกำลังฟังคำแนะนำจากคนที่ไม่เข้าใจคุณจริง","หาครูที่ดี หรือกล้าเขียนกฎของตัวเองเมื่อกฎเดิมไม่รับใช้คุณ"],
+ [6,"The Lovers","คู่รัก","♊","air",2.5,[1.6,.8,.7,.9],"ความรัก · การเลือก · ความกลมกลืน","ไม่ลงรอย · เลือกผิด · ค่านิยมขัดกัน","หัวใจสองดวงหรือคุณค่าสองอย่างมาบรรจบกัน นี่คือการเลือกที่มาจากใจจริง และความสัมพันธ์ที่ลึกซึ้ง","ความไม่ลงรอย หรือการเลือกที่ขัดกับคุณค่าของตัวเอง อาจทำให้ความสัมพันธ์หรือการตัดสินใจสั่นคลอน","เลือกสิ่งที่ตรงกับคุณค่าของคุณ ไม่ใช่สิ่งที่ง่ายที่สุด"],
+ [7,"The Chariot","รถศึก","♋","water",2,[.8,1.4,1,1],"ชัยชนะ · ความมุ่งมั่น · ควบคุมทิศทาง","หลงทิศ · ขาดแรงขับ · ถูกฉุดสองทาง","ด้วยความตั้งใจที่แน่วแน่ คุณจะบังคับแรงที่ขัดกันให้วิ่งไปทางเดียว ชัยชนะอยู่ไม่ไกล","คุณกำลังถูกดึงไปหลายทิศ หรือเร่งเร็วจนเสียการควบคุม หยุดตั้งหลักก่อน","กำหนดเส้นชัยให้ชัด แล้วจับบังเหียนให้มั่น"],
+ [8,"Strength","พลัง","♌","fire",2,[1.1,1,.8,1.4],"ความกล้าหาญ · ความอ่อนโยนที่เข้มแข็ง · อดทน","ขาดความมั่นใจ · อารมณ์ครอบงำ · อ่อนล้า","พลังแท้คือความอ่อนโยนที่ไม่หวั่นไหว คุณสยบสถานการณ์ได้ด้วยความใจเย็นและความเมตตา","ความกลัวหรืออารมณ์กำลังกุมบังเหียน คุณเข้มแข็งกว่าที่คิด แต่ต้องพักให้ใจฟื้นก่อน","ใช้ความอดทนแทนกำลัง"],
+ [9,"The Hermit","ฤาษี","♍","earth",.5,[.6,.9,.7,1.1],"แสวงหาภายใน · สันโดษ · ปัญญา","โดดเดี่ยวเกินไป · หลบหนี · ปิดกั้น","ถอยออกมาจากเสียงรบกวนเพื่อฟังตัวเอง ตะเกียงแห่งปัญญาจะส่องทางเมื่อคุณเดินช้าลง","การแยกตัวนานเกินไปเริ่มกลายเป็นการหนีปัญหา ถึงเวลากลับมาเชื่อมกับผู้คน","อยู่กับตัวเองอย่างตั้งใจ ไม่ใช่เพื่อหนี"],
+ [10,"Wheel of Fortune","กงล้อแห่งโชคชะตา","♃","fire",2,[1,1.1,1.3,.9],"โชคชะตา · จุดเปลี่ยน · วัฏจักร","จังหวะไม่เข้าข้าง · ต้านการเปลี่ยนแปลง · วนลูปเดิม","กงล้อหมุนเข้าข้างคุณ โอกาสและการเปลี่ยนแปลงครั้งสำคัญกำลังมา จังหวะคือทุกสิ่ง","จังหวะยังไม่เข้าข้าง หรือคุณกำลังวนอยู่ในรูปแบบเดิม ยอมรับว่ากงล้อจะหมุนต่อ แล้วเตรียมตัวรอรอบหน้า","คว้าจังหวะเมื่อมันมา และอย่ายึดติดเมื่อมันผ่าน",-1],
+ [11,"Justice","ความยุติธรรม","♎","air",1,[1,1.1,1.1,.9],"ความยุติธรรม · ความจริง · เหตุและผล","อคติ · เลี่ยงความรับผิดชอบ · ไม่ซื่อตรง","ผลลัพธ์จะตรงกับสิ่งที่ทำมา การตัดสินใจอย่างซื่อตรงและมีเหตุผลจะได้ผลที่เป็นธรรม","มีบางอย่างไม่ยุติธรรม หรือคุณกำลังเลี่ยงความจริง เรื่องเอกสารและกฎหมายให้ระวังเป็นพิเศษ","ซื่อตรงกับตัวเองก่อน แล้วเรื่องอื่นจะชัดตาม"],
+ [12,"The Hanged Man","คนแขวน","♆","water",-.3,[1,.9,.8,1],"การรอคอย · มุมมองใหม่ · เสียสละ","ติดค้าง · เสียสละไร้ค่า · ไม่ยอมปล่อย","การหยุดนิ่งชั่วคราวไม่ใช่ความพ่ายแพ้ ลองกลับหัวมองโลก แล้วคุณจะเห็นคำตอบที่มองไม่เห็นมาก่อน","คุณกำลังรอสิ่งที่ไม่มาแน่ หรือเสียสละโดยไม่ได้อะไรกลับ ถึงเวลาตัดสินใจ","ปล่อยการควบคุม แล้วมองจากอีกมุม"],
+ [13,"Death","ความตาย","♏","water",-.5,[1.1,1,.9,1.2],"การสิ้นสุด · การเปลี่ยนผ่าน · เกิดใหม่","ต้านการเปลี่ยนแปลง · ยื้อสิ่งที่จบแล้ว · หยุดนิ่ง","บางสิ่งต้องจบเพื่อให้สิ่งใหม่เกิด นี่ไม่ใช่ความตายจริง แต่คือการปิดฉากบทเก่าอย่างสมบูรณ์","คุณกำลังยื้อสิ่งที่หมดเวลาไปแล้ว ยิ่งต้าน ยิ่งเจ็บนาน","ปล่อยบทเก่าให้จบอย่างสง่างาม"],
+ [14,"Temperance","การรู้จักประมาณ","♐","fire",1.5,[1,1,1,1.4],"ความสมดุล · ความอดทน · การผสานกลมกลืน","สุดโต่ง · ไม่สมดุล · ใจร้อน","ความพอดีคือเวทมนตร์ ผสมสิ่งที่ต่างกันอย่างค่อยเป็นค่อยไป แล้วจะได้ผลลัพธ์ที่ลงตัว","ชีวิตเอียงไปทางใดทางหนึ่งมากเกินไป ทั้งงาน การกิน และอารมณ์ ถึงเวลาปรับสมดุล","ค่อยๆ เป็นค่อยๆ ไป"],
+ [15,"The Devil","ปีศาจ","♑","earth",-2,[1.2,.9,1.2,1.2],"พันธนาการ · ความหลงใหล · วัตถุนิยม","หลุดพ้น · ตาสว่าง · ปลดโซ่","คุณถูกผูกไว้ด้วยนิสัย ความหลงใหล หรือความสัมพันธ์ที่เป็นพิษ โซ่นั้นหลวมกว่าที่คิด คุณถอดมันได้เอง","คุณเริ่มมองเห็นโซ่ที่ผูกตัวเอง และกำลังปลดมันออก นี่คือช่วงเวลาแห่งการหลุดพ้น","ถามตัวเองว่ากำลังยอมเป็นทาสของอะไร"],
+ [16,"The Tower","หอคอย","♂","fire",-3,[1.1,1.2,1.2,1.1],"ล่มสลายฉับพลัน · ความจริงปรากฏ · ปลดปล่อย","รอดจากหายนะ · กลัวการเปลี่ยน · พังช้าๆ","โครงสร้างที่ตั้งบนรากผิดกำลังพังลงอย่างฉับพลัน เจ็บ แต่มันเปิดทางให้ความจริงและการสร้างใหม่","คุณอาจรอดจากแรงกระแทกครั้งใหญ่ หรือกำลังยื้อสิ่งที่ร้าวไว้ การเปลี่ยนจะเกิดอยู่ดี เลือกให้มันเกิดแบบที่ควบคุมได้","อย่าสร้างต่อบนรากที่ร้าว"],
+ [17,"The Star","ดวงดาว","♒","air",2.5,[1.2,1,.9,1.3],"ความหวัง · การเยียวยา · แรงบันดาลใจ","หมดหวัง · ขาดศรัทธา · เหนื่อยล้า","หลังพายุผ่าน ดวงดาวส่องแสง ความหวังกลับมา การเยียวยาเกิดขึ้นอย่างเงียบงาม","คุณอาจรู้สึกหมดศรัทธา แต่ดาวยังอยู่ แค่เมฆบัง กลับมาเติมพลังให้ตัวเอง","เชื่อว่าสิ่งดีกำลังมา และเปิดใจรับมัน",-.8],
+ [18,"The Moon","ดวงจันทร์","♓","water",-1.5,[1.2,.9,.9,1.1],"ภาพลวงตา · ความกลัว · ความไม่แน่นอน","ความจริงปรากฏ · ความกลัวคลาย · หมอกจาง","ไม่ใช่ทุกอย่างที่เห็นคือความจริง ความกลัวและจินตนาการทำให้ทางดูมืดกว่าที่เป็น เดินช้าๆ และเชื่อสัญชาตญาณ","หมอกเริ่มจาง ความลับหรือความเข้าใจผิดกำลังคลี่คลาย","แยกให้ออกว่าอะไรคือข้อเท็จจริง อะไรคือความกลัว"],
+ [19,"The Sun","ดวงอาทิตย์","☉","fire",3,[1.2,1.2,1.1,1.3],"ความสำเร็จ · ความสุข · ความชัดเจน","ความสุขที่ล่าช้า · มองโลกดีเกินไป · หมดไฟชั่วคราว","ไพ่ที่สว่างที่สุดในสำรับ ความสำเร็จ ความสุข และความจริงใจส่องประกาย ทุกอย่างชัดเจนและเติบโต","แสงยังอยู่ แค่ถูกเมฆบดบังบ้าง ความสำเร็จอาจมาช้ากว่าที่หวัง แต่ยังมาแน่","ยิ้มรับและแบ่งปันแสงของคุณ",.8],
+ [20,"Judgement","การพิพากษา","♇","fire",1.5,[1,1.2,1,1.1],"การตื่นรู้ · เสียงเรียก · การให้อภัย","ตัดสินตัวเองรุนแรง · ลังเล · ไม่ฟังเสียงเรียก","เสียงแตรเรียกให้คุณตื่น นี่คือเวลาทบทวนอดีต ให้อภัย และก้าวสู่บทบาทใหม่ที่ใหญ่กว่า","คุณกำลังตัดสินตัวเองหนักเกินไป หรือปิดหูต่อเสียงเรียกในใจ","ให้อภัยตัวเอง แล้วตอบรับโอกาสครั้งที่สอง"],
+ [21,"The World","โลก","♄","earth",3,[1.1,1.3,1.2,1.1],"ความสมบูรณ์ · ความสำเร็จ · การเดินทาง","ยังไม่จบ · ขาดอีกนิด · ทางลัด","วงจรหนึ่งสมบูรณ์ เป้าหมายสำเร็จ คุณยืนอยู่บนจุดสูงสุดของบทนี้ พร้อมเริ่มการเดินทางรอบใหม่","เกือบถึงแล้ว แต่ยังมีชิ้นส่วนสุดท้ายที่ต้องเก็บ อย่ารีบข้ามขั้น","ปิดงานให้ครบ แล้วฉลองอย่างเต็มที่",-.5]
+];
+const SUITS = [
+  { key: "wands", en: "Wands", th: "ไม้เท้า", el: "fire", aff: { love: .6, career: 1.2, money: .7, health: .9 }, adv: "ลงมือด้วยความกล้าและรักษาไฟในใจไว้" },
+  { key: "cups", en: "Cups", th: "ถ้วย", el: "water", aff: { love: 1.5, career: .4, money: .4, health: .7 }, adv: "ฟังเสียงหัวใจและดูแลความสัมพันธ์" },
+  { key: "swords", en: "Swords", th: "ดาบ", el: "air", aff: { love: .7, career: 1, money: .5, health: 1 }, adv: "คิดให้ชัด พูดตรงไปตรงมา และตัดสิ่งที่ไม่จำเป็นทิ้ง" },
+  { key: "pentacles", en: "Pentacles", th: "เหรียญ", el: "earth", aff: { love: .4, career: 1.1, money: 1.5, health: 1 }, adv: "ทำทีละขั้นอย่างมั่นคง และดูแลทรัพยากรให้ดี" }
+];
+const RANK_EN = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+const COURT_TH = ["มหาดเล็ก","อัศวิน","ราชินี","ราชา"];
+const RANK_MEANING = ["จุดเริ่มต้นใหม่หลายเรื่องพร้อมกัน","การตัดสินใจและความสัมพันธ์แบบคู่","การเติบโตและการร่วมมือ","ความมั่นคงและการหยุดพัก","ความขัดแย้งและการเปลี่ยนแปลงที่ไม่สบายใจ","การปรับสมดุลและการเยียวยา","การทดสอบและการประเมิน","การเคลื่อนไหวและความชำนาญ","ใกล้บรรลุผล","การจบวงจรและเริ่มรอบใหม่","ข่าวสารและการเรียนรู้","การเคลื่อนไหวรวดเร็ว","พลังแห่งการโอบอุ้ม","อำนาจและการควบคุม"];
+/* Minor: [upright kw, reversed kw, upright, reversed, valence] Ace..King */
+const MINOR = {
+ wands: [
+  ["แรงบันดาลใจ · จุดเริ่มโครงการ · ไฟในใจ","ล่าช้า · ไฟมอด · ขาดทิศทาง","ประกายไฟแห่งไอเดียใหม่ลุกขึ้น โอกาสเริ่มสิ่งที่ตื่นเต้นอยู่ตรงหน้า","ไฟยังมีแต่ยังจุดไม่ติด แผนอาจล่าช้าหรือขาดแรงจูงใจ",2.5],
+  ["วางแผน · มองการณ์ไกล · ตัดสินใจ","กลัวสิ่งที่ไม่รู้ · แผนไม่ชัด","คุณยืนมองโลกกว้างพร้อมแผนในมือ ถึงเวลาตัดสินใจว่าจะไปทางไหน","ความกลัวทำให้คุณอยู่แต่ในพื้นที่ปลอดภัย แผนยังไม่ชัดพอจะก้าว",1.2],
+  ["ขยายตัว · รอผล · มองไกล","อุปสรรคการเดินทาง · ผลล่าช้า","เรือที่ส่งออกไปเริ่มกลับมา ผลของความพยายามเริ่มเห็น และโอกาสไกลบ้านเปิดกว้าง","ผลลัพธ์ช้ากว่าที่คิด หรือแผนขยายงานสะดุด ทบทวนการเตรียมตัว",1.8],
+  ["ฉลอง · บ้านที่มั่นคง · ความสำเร็จขั้นแรก","ขาดความกลมเกลียว · การฉลองเลื่อน","ถึงเวลาเฉลิมฉลอง บ้าน ครอบครัว และความสำเร็จก้าวแรกให้ความรู้สึกมั่นคง","บรรยากาศในบ้านหรือในทีมอาจไม่ลงรอย แต่รากฐานยังดีอยู่",2.2],
+  ["การแข่งขัน · ความขัดแย้ง · ความเห็นต่าง","เลี่ยงความขัดแย้ง · หาข้อยุติ","ทุกคนต่างดึงไปคนละทาง การแข่งขันหรือการถกเถียงทำให้วุ่นวาย แต่ก็ลับให้คุณคมขึ้น","ความขัดแย้งกำลังคลี่คลาย หรือคุณกำลังกดมันไว้ไม่พูด",-1.5],
+  ["ชัยชนะ · การยอมรับ · ความภาคภูมิ","หยิ่งผยอง · ไม่ได้รับการยอมรับ","ชัยชนะและการยอมรับจากผู้คน คุณได้รับเกียรติจากความพยายาม","ความสำเร็จอาจไม่ถูกมองเห็น หรือความมั่นใจกลายเป็นความหยิ่ง",2.3],
+  ["ยืนหยัด · ปกป้องจุดยืน · ท้าทาย","ท้อถอย · ถูกกดดันหนัก","คุณอยู่บนที่สูงและต้องปกป้องตำแหน่ง ยืนหยัดในสิ่งที่เชื่อ คุณยังได้เปรียบ","แรงกดดันรอบด้านทำให้เหนื่อย เลือกสนามที่คุ้มค่าจะสู้",.6],
+  ["ความเร็ว · ข่าวสาร · เคลื่อนไหว","ล่าช้า · รีบร้อน · สื่อสารผิด","ทุกอย่างเคลื่อนเร็ว ข่าวดี การเดินทาง หรือความคืบหน้าพุ่งมาหาคุณ","จังหวะสะดุด ข่าวล่าช้า หรือรีบเกินจนพลาด",1.8],
+  ["อดทน · ยืดหยุ่น · ด่านสุดท้าย","หมดแรง · ระแวง · อยากยอมแพ้","คุณบาดเจ็บแต่ยังยืนอยู่ นี่คือด่านสุดท้าย อย่าเพิ่งวางอาวุธ","คุณเหนื่อยและระแวงจนแบกเกินตัว ขอความช่วยเหลือบ้าง",.3],
+  ["ภาระหนัก · รับผิดชอบเกินตัว","ปล่อยวางภาระ · แบ่งงาน","คุณแบกทุกอย่างไว้คนเดียว ความสำเร็จมาพร้อมภาระที่หนักเกินไป","ถึงเวลาวางบางอย่างลง หรือแบ่งความรับผิดชอบให้คนอื่น",-1.5],
+  ["ข่าวดี · ความกระตือรือร้น · การค้นพบ","ไอเดียไม่ไปต่อ · ข่าวร้ายเล็กๆ","ข่าวที่น่าตื่นเต้นหรือความสนใจใหม่ปลุกไฟในตัวคุณ ลองสำรวจดู","ไอเดียมากแต่ไม่ลงมือ หรือข่าวที่รอยังไม่มา",1.5],
+  ["ลุยไปข้างหน้า · ผจญภัย · หลงใหล","หุนหันพลันแล่น · ใจร้อน","พลังพุ่งเต็มที่ พร้อมผจญภัยและลุยเป้าหมายด้วยความหลงใหล","ความใจร้อนอาจพาให้ตัดสินใจพลาด ชะลอสักนิด",1.3],
+  ["มั่นใจ · มีเสน่ห์ · อบอุ่น","อิจฉา · ขาดความมั่นใจ","คุณเปล่งประกายด้วยความมั่นใจและเสน่ห์ คนรอบตัวถูกดึงดูดด้วยพลังของคุณ","ความมั่นใจลดลง หรือความอิจฉากำลังกัดกิน กลับมาเชื่อในคุณค่าของตัวเอง",2],
+  ["ผู้นำ · วิสัยทัศน์ · กล้าตัดสินใจ","เผด็จการ · คาดหวังเกินจริง","ผู้นำที่มีวิสัยทัศน์ คุณพร้อมพาทั้งตัวเองและคนอื่นไปสู่เป้าหมายใหญ่","การนำที่ใช้อำนาจมากไปหรือตั้งเป้าเกินจริง ทำให้คนรอบข้างถอยห่าง",2]
+ ],
+ cups: [
+  ["ความรักใหม่ · อารมณ์เปี่ยมล้น · ความเมตตา","อารมณ์อัดอั้น · รักที่ว่างเปล่า","ถ้วยแห่งหัวใจล้นปรี่ ความรักใหม่ ความรู้สึกดีๆ และการเยียวยาทางใจกำลังไหลมา","คุณเก็บความรู้สึกไว้ข้างใน หรือให้ความรักคนอื่นจนตัวเองว่างเปล่า",2.6],
+  ["รักซึ่งกันและกัน · คู่ชีวิต · หุ้นส่วน","ความสัมพันธ์ไม่สมดุล · แยกทาง","สองหัวใจที่เท่าเทียมพบกัน ความรัก มิตรภาพ หรือหุ้นส่วนที่ลงตัว","ความสัมพันธ์เสียสมดุล ฝ่ายหนึ่งให้มากกว่า หรือการสื่อสารขาดหาย",2.6],
+  ["มิตรภาพ · เฉลิมฉลอง · สังคม","นินทา · สนุกเกินพอดี","เพื่อนฝูงและการเฉลิมฉลอง ความสุขที่ได้แบ่งปันกับคนที่รัก","สังสรรค์มากเกินไป หรือมีมือที่สามและการนินทาในวงเพื่อน",2],
+  ["เบื่อหน่าย · มองข้ามโอกาส · ทบทวนใจ","ตื่นตัว · รับโอกาสใหม่","คุณจมอยู่กับความไม่พอใจจนมองไม่เห็นถ้วยที่ยื่นมาตรงหน้า","คุณเริ่มเงยหน้าและเห็นโอกาสที่เคยมองข้าม",-.6],
+  ["ความสูญเสีย · เสียใจ · มองแต่สิ่งที่หายไป","ยอมรับ · ก้าวต่อ","ถ้วยสามใบล้มลง ความเสียใจเป็นของจริง แต่ยังมีอีกสองใบตั้งอยู่ข้างหลังคุณ","คุณเริ่มยอมรับความสูญเสีย และหันกลับมามองสิ่งที่ยังเหลือ",-2],
+  ["ความทรงจำ · ความไร้เดียงสา · คนเก่า","ติดอยู่กับอดีต · โตขึ้น","ความหวานจากอดีต คนเก่าหรือความทรงจำวัยเยาว์กลับมาให้ความอบอุ่น","การยึดติดกับวันเก่าทำให้ไม่ก้าวไปข้างหน้า",1.3],
+  ["ตัวเลือกมากมาย · ฝันลมๆ แล้งๆ · ภาพลวง","เห็นชัดขึ้น · ตัดสินใจได้","ตัวเลือกมากมายลอยอยู่ตรงหน้า บางอันเป็นแค่ภาพลวง ระวังการฝันกลางวัน","หมอกจางลง คุณเริ่มรู้ว่าอะไรคือสิ่งที่ต้องการจริงๆ",-.5],
+  ["เดินจากไป · แสวงหาความหมาย","กลัวการจากไป · วนเวียน","คุณกำลังเดินจากสิ่งที่ไม่เติมเต็มใจ แม้ภายนอกจะดูดี เพื่อหาสิ่งที่ลึกกว่า","คุณอยากไปแต่ไม่กล้า หรือหนีปัญหาแทนที่จะแก้",-.4],
+  ["สมปรารถนา · ความพึงพอใจ · ไพ่แห่งคำอธิษฐาน","ความโลภ · พอใจแค่ผิวเผิน","ไพ่แห่งคำอธิษฐาน สิ่งที่หวังมีโอกาสเป็นจริง ความสุขและความพึงพอใจอยู่ใกล้","ได้สิ่งที่ขอแล้วแต่ยังไม่อิ่มใจ ถามตัวเองว่าต้องการอะไรจริงๆ",2.8],
+  ["ครอบครัวอบอุ่น · ความสุขยั่งยืน","ครอบครัวไม่ลงรอย · ภาพฝันไม่ตรงความจริง","สายรุ้งแห่งความสุข ครอบครัวและความสัมพันธ์ที่กลมเกลียวอย่างยั่งยืน","ความคาดหวังว่าครอบครัวต้องสมบูรณ์แบบทำให้เกิดแรงตึง",3],
+  ["ข่าวรัก · ความรู้สึกใหม่ · จินตนาการ","อ่อนไหวเกินไป · ไม่จริงใจ","ข้อความหวานๆ หรือความรู้สึกใหม่ที่ไม่คาดฝัน เปิดใจรับความอ่อนโยน","อารมณ์ขึ้นลงง่าย หรือคำพูดหวานแต่ไม่จริงใจ",1.6],
+  ["ความโรแมนติก · ข้อเสนอ · ทำตามหัวใจ","หวั่นไหวง่าย · หลงภาพฝัน","อัศวินแห่งความรักนำข้อเสนอหรือคำชวนมาให้ ทำตามหัวใจด้วยความจริงใจ","คำสัญญาสวยหรูที่ไม่มีการกระทำรองรับ ระวังหลงภาพฝัน",1.7],
+  ["เห็นอกเห็นใจ · ญาณหยั่งรู้ · ความอบอุ่น","อ่อนไหวเกิน · พึ่งพาทางอารมณ์","หัวใจที่ลึกซึ้งและเข้าใจผู้อื่น สัญชาตญาณของคุณแม่นยำในตอนนี้","คุณซึมซับอารมณ์คนอื่นจนเหนื่อย ตั้งขอบเขตให้ใจบ้าง",2],
+  ["สุขุม · คุมอารมณ์ได้ · ผู้ให้คำปรึกษา","เก็บกด · บงการทางอารมณ์","ความสงบท่ามกลางทะเลอารมณ์ คุณรับมือเรื่องหัวใจได้อย่างผู้ใหญ่","การเก็บกดอารมณ์หรือใช้อารมณ์ควบคุมคนอื่นทำให้ความสัมพันธ์เย็นชา",1.8]
+ ],
+ swords: [
+  ["ความชัดเจน · ความจริง · ความคิดใหม่","สับสน · ใช้คำพูดทำร้าย","ดาบแห่งความจริงฟันผ่านความสับสน ความคิดที่แหลมคมและคำตอบที่ชัดเจนมาถึง","ความคิดยุ่งเหยิง หรือคำพูดกลายเป็นอาวุธทำร้าย",1.8],
+  ["ทางตัน · ลังเล · ปิดตาไม่รับรู้","ข้อมูลล้น · ต้องตัดสินใจ","คุณปิดตาไม่ยอมเลือกเพราะทั้งสองทางดูยาก แต่การไม่เลือกก็คือการเลือก","ผ้าปิดตาเริ่มหลุด ความจริงบังคับให้ต้องตัดสินใจเสียที",-.6],
+  ["อกหัก · ความเจ็บปวด · ความเศร้า","การเยียวยา · ปล่อยความเจ็บ","หัวใจถูกดาบสามเล่มแทง ความเจ็บปวดทางใจที่ต้องยอมรับและร้องไห้ออกมา","แผลเริ่มสมาน คุณกำลังปล่อยความเจ็บปวดออกไปทีละน้อย",-2.6],
+  ["พักผ่อน · ฟื้นฟู · สงบนิ่ง","หมดไฟ · กระสับกระส่าย","ถึงเวลาวางดาบลงและพัก การถอยเพื่อฟื้นฟูคือกลยุทธ์ ไม่ใช่ความอ่อนแอ","คุณฝืนเกินไปจนร่างกายและจิตใจประท้วง หยุดก่อนจะพัง",.6],
+  ["ชนะแบบเสียน้ำใจ · ความขัดแย้ง · ศักดิ์ศรี","คืนดี · ปล่อยความแค้น","ชนะการโต้เถียงแต่เสียความสัมพันธ์ ถามตัวเองว่าคุ้มไหม","ความขัดแย้งจบลง ถึงเวลาคืนดีและวางทิฐิ",-2],
+  ["เปลี่ยนผ่าน · ออกจากปัญหา · เดินทาง","ติดค้าง · ยังไม่พร้อมไป","เรือพาคุณออกจากน้ำเชี่ยวสู่น้ำนิ่ง ช่วงเลวร้ายกำลังจะผ่านไป","คุณพยายามไปต่อ แต่สัมภาระเก่ายังถ่วงเรือ",.8],
+  ["เล่ห์เหลี่ยม · หลบเลี่ยง · กลยุทธ์","ความลับถูกเปิด · สำนึกผิด","มีบางคนหรือตัวคุณเองกำลังทำอะไรลับหลัง ระวังการหลอกลวงหรือทางลัดที่ไม่ซื่อ","ความลับกำลังถูกเปิดเผย หรือคุณตัดสินใจทำสิ่งที่ถูกต้อง",-1.6],
+  ["ติดกับดัก · คิดมาก · จำกัดตัวเอง","ปลดปล่อย · มุมมองใหม่","คุณรู้สึกติดอยู่ แต่ผ้าปิดตาและเชือกนั้นหลวม กรงนี้สร้างด้วยความคิดของคุณเอง","คุณเริ่มเห็นทางออก และกำลังปลดตัวเองจากความเชื่อที่จำกัด",-1.8],
+  ["วิตกกังวล · ฝันร้าย · นอนไม่หลับ","ความกังวลคลาย · ขอความช่วยเหลือ","ความกังวลรบกวนในยามค่ำคืน สิ่งที่กลัวมักน่ากลัวในหัวมากกว่าความจริง","ความกังวลเริ่มจางเมื่อพูดออกมาหรือขอความช่วยเหลือ",-2.6],
+  ["จุดจบที่เจ็บปวด · ถึงที่สุด · ล่มสลาย","ฟื้นตัว · รอดจากหายนะ","จุดต่ำสุดมาถึงแล้ว เรื่องนี้จบสิ้นเด็ดขาด และนั่นแปลว่ามีแต่จะดีขึ้น","คุณผ่านจุดที่แย่ที่สุดมาแล้ว กำลังลุกขึ้นทีละน้อย",-3],
+  ["ช่างสังเกต · อยากรู้ · ข่าวสาร","ซุบซิบ · พูดไม่คิด","ความอยากรู้และการสังเกตอย่างเฉียบแหลมจะพาคุณไปพบข้อมูลสำคัญ","คำพูดที่ไม่ไตร่ตรองหรือข่าวลืออาจสร้างปัญหา",.4],
+  ["พุ่งชน · ตรงไปตรงมา · ฉับไว","ก้าวร้าว · ขาดการวางแผน","ลุยตรงไปข้างหน้าด้วยความคิดที่เฉียบคม เร็วและเด็ดขาด","ความเร็วกลายเป็นความบุ่มบ่าม คำพูดแรงอาจทำร้ายคนอื่น",.3],
+  ["เฉียบคม · เป็นตัวของตัวเอง · ซื่อตรง","เย็นชา · ขมขื่น","มองโลกตามจริงด้วยปัญญาและความซื่อตรง ขอบเขตที่ชัดเจนปกป้องคุณ","ความเจ็บในอดีตทำให้ใจแข็งและพูดจาเชือดเฉือน",.9],
+  ["ตรรกะ · ความยุติธรรม · อำนาจทางปัญญา","ใช้อำนาจผิด · เย็นชาไร้หัวใจ","ตัดสินด้วยเหตุผลและหลักการ คุณคือคนที่ผู้อื่นพึ่งพาทางความคิด","ตรรกะที่ไม่มีหัวใจ หรือการใช้ความรู้เพื่อบงการ",1]
+ ],
+ pentacles: [
+  ["โอกาสทางการเงิน · ความมั่งคั่งใหม่ · รากฐาน","พลาดโอกาส · วางแผนการเงินไม่ดี","เมล็ดพันธุ์แห่งความมั่งคั่ง โอกาสงานใหม่ เงินก้อนใหม่ หรือรากฐานที่มั่นคง","โอกาสหลุดมือเพราะยังไม่พร้อม ตรวจสอบแผนการเงินให้ดี",2.6],
+  ["สร้างสมดุล · ยืดหยุ่น · หลายภาระ","จัดการไม่ไหว · การเงินติดขัด","คุณเลี้ยงลูกบอลหลายลูกได้อย่างคล่องแคล่ว ความยืดหยุ่นคือกุญแจ","รับงานหรือภาระมากเกินจนเริ่มหลุดมือ จัดลำดับความสำคัญใหม่",.6],
+  ["ทีมเวิร์ก · ฝีมือ · ได้รับการยอมรับ","ทีมไม่ลงรอย · งานไม่ได้มาตรฐาน","ฝีมือของคุณได้รับการยอมรับ การร่วมมือกับคนเก่งสร้างผลงานคุณภาพ","การทำงานเป็นทีมสะดุด หรือรีบจนงานไม่ประณีต",2],
+  ["เก็บออม · ความมั่นคง · ยึดถือ","ตระหนี่ · กลัวสูญเสีย","คุณกำเงินและความมั่นคงไว้แน่น การออมดี แต่อย่ากำจนไม่มีอะไรไหลเข้ามา","ความกลัวการสูญเสียทำให้ปิดใจ หรือการใช้จ่ายเริ่มไม่ระวัง",.6],
+  ["ความขัดสน · ความยากลำบาก · รู้สึกถูกทิ้ง","ฟื้นตัวทางการเงิน · ได้รับความช่วยเหลือ","ช่วงขาดแคลนทั้งเงินและใจ แต่ประตูแห่งความช่วยเหลืออยู่ใกล้กว่าที่คิด","ช่วงลำบากกำลังผ่านไป ความช่วยเหลือเริ่มมาถึง",-2.6],
+  ["การให้และรับ · ความเอื้อเฟื้อ · ช่วยเหลือ","หนี้สิน · ให้แบบมีเงื่อนไข","การให้และรับที่สมดุล คุณอาจได้รับความช่วยเหลือ หรือเป็นผู้ให้เอง","ระวังการให้ที่มีเงื่อนไขแอบแฝง หรือภาระหนี้สิน",1.8],
+  ["ลงทุนระยะยาว · รอผล · ประเมิน","ผลตอบแทนต่ำ · ใจร้อน","ต้นไม้ที่ปลูกกำลังโต อดทนรอผลและประเมินว่าควรลงทุนต่อไหม","ทุ่มเทมากแต่ผลน้อย ทบทวนว่ากำลังลงแรงถูกที่หรือเปล่า",.8],
+  ["ฝึกฝน · ความชำนาญ · ขยัน","งานซ้ำซาก · ขาดแรงจูงใจ","ทำซ้ำอย่างตั้งใจจนเป็นเลิศ การพัฒนาทักษะจะคืนผลอย่างงาม","งานกลายเป็นกิจวัตรน่าเบื่อ หรือทำแบบขอไปที",1.8],
+  ["พึ่งตัวเองได้ · ความหรูหรา · ความสำเร็จส่วนตัว","พึ่งคนอื่นทางการเงิน · ใช้จ่ายเกินตัว","คุณเก็บเกี่ยวผลของความพากเพียร ความมั่งคั่งและอิสระที่สร้างด้วยตัวเอง","ความหรูหราที่ไม่ยั่งยืน หรือยังต้องพึ่งพาคนอื่นมากเกินไป",2.5],
+  ["มรดก · ความมั่งคั่งยั่งยืน · ครอบครัว","ปัญหาเงินในครอบครัว · มรดกขัดแย้ง","ความมั่งคั่งที่ส่งต่อได้ ครอบครัว ทรัพย์สิน และความมั่นคงระยะยาว","เรื่องเงินในครอบครัวหรือมรดกอาจทำให้เกิดความขัดแย้ง",2.8],
+  ["เริ่มเรียนรู้ · โอกาสใหม่ · ตั้งใจ","ขาดความต่อเนื่อง · ผัดวันประกันพรุ่ง","ข่าวดีเรื่องการเรียน งาน หรือเงิน ความตั้งใจจริงจะพาโอกาสเล็กๆ ให้เติบโต","เริ่มแล้วไม่ต่อ หรือผัดวันจนโอกาสหลุดมือ",1.5],
+  ["ขยันอดทน · มั่นคง · รับผิดชอบ","เฉื่อยชา · ดื้อ · เบื่อ","ช้าแต่ชัวร์ ความรับผิดชอบและความสม่ำเสมอจะพาคุณถึงเป้าหมายแน่นอน","ความเฉื่อยหรือการยึดติดวิธีเดิมทำให้ไม่ขยับ",1.3],
+  ["อุดมสมบูรณ์ · ดูแลผู้อื่น · ติดดิน","ทำงานจนลืมบ้าน · ไม่มั่นคง","ความอบอุ่นที่จับต้องได้ คุณดูแลบ้าน ครอบครัว และการเงินได้อย่างดีเยี่ยม","งานกับชีวิตส่วนตัวเสียสมดุล หรือกังวลเรื่องความมั่นคงเกินเหตุ",2.2],
+  ["มั่งคั่ง · นักธุรกิจ · ความสำเร็จทางวัตถุ","โลภ · ยึดติดวัตถุ","เจ้าแห่งความมั่งคั่ง ความสำเร็จทางธุรกิจและการเงินที่มั่นคงอยู่ในมือ","การยึดติดเงินและสถานะจนลืมคุณค่าอื่น หรือการตัดสินใจทางเงินที่เสี่ยง",2.4]
+ ]
+};
+const DECK = [];
+MAJOR.forEach(m => DECK.push({
+  id: m[0], major: true, num: m[0], en: m[1], th: m[2], glyph: m[3], el: m[4], v: m[5],
+  aff: { love: m[6][0], career: m[6][1], money: m[6][2], health: m[6][3] },
+  kwU: m[7], kwR: m[8], up: m[9], rv: m[10], adv: m[11],
+  vr: m[12] !== undefined ? m[12] : (m[5] > 0 ? -m[5] * .6 : -m[5] * .55)
+}));
+SUITS.forEach((s, si) => MINOR[s.key].forEach((m, r) => {
+  const rank = r + 1;
+  const th = rank === 1 ? "เอซ " + s.th : rank <= 10 ? rank + " " + s.th : COURT_TH[rank - 11] + "แห่ง" + s.th;
+  DECK.push({
+    id: 22 + si * 14 + r, major: false, rank, suit: s.key, suitIdx: si, en: RANK_EN[r] + " of " + s.en, th, el: s.el,
+    v: m[4], vr: m[4] > 0 ? -m[4] * .6 : -m[4] * .55, aff: s.aff,
+    kwU: m[0], kwR: m[1], up: m[2], rv: m[3], adv: s.adv
+  });
+}));
+/* Spreads: positions in % of board (x, y), weight, label, meaning. aspect = width / height. cw = card width % of board width */
+const SPREADS = {
+  daily: { name: "ไพ่ประจำวัน", sub: "1 ใบ · พลังของวัน", aspect: 1.5, cw: 22, max: 520, key: 0, out: 0, adv: 0, cap: true,
+    pos: [{ x: 50, y: 46, w: 1.2, k: "พลังของวันนี้", d: "บรรยากาศหลักและบทเรียนของวัน" }] },
+  ppf: { name: "อดีต ปัจจุบัน อนาคต", sub: "3 ใบ · เส้นเวลา", aspect: 1.9, cw: 19, max: 760, key: 1, out: 2, adv: 2, cap: true,
+    pos: [{ x: 20, y: 44, w: .7, k: "อดีต", d: "รากของเรื่อง สิ่งที่ส่งผลมาถึงตอนนี้" }, { x: 50, y: 44, w: 1, k: "ปัจจุบัน", d: "สถานการณ์และพลังที่อยู่ตรงหน้า" }, { x: 80, y: 44, w: 1.3, k: "อนาคต", d: "แนวโน้มถ้าเดินทางนี้ต่อไป" }] },
+  love: { name: "เส้นทางหัวใจ", sub: "5 ใบ · ความรัก", aspect: 1.25, cw: 15, max: 720, key: 2, out: 4, adv: 3, cap: true, focus: "love",
+    pos: [{ x: 18, y: 23, w: .9, k: "ตัวคุณ", d: "ใจและบทบาทของคุณในความรักนี้" }, { x: 82, y: 23, w: .9, k: "อีกฝ่าย", d: "ใจของอีกฝ่าย หรือคนที่กำลังจะเข้ามา" }, { x: 50, y: 23, w: 1.1, k: "สายสัมพันธ์", d: "พลังที่เชื่อมคุณทั้งสองไว้" }, { x: 32, y: 72, w: .9, k: "อุปสรรค", d: "สิ่งที่ต้องข้ามผ่านไปด้วยกัน" }, { x: 68, y: 72, w: 1.4, k: "แนวโน้ม", d: "ทิศทางของความสัมพันธ์ในอีกไม่กี่เดือน" }] },
+  career: { name: "งานและการเงิน", sub: "5 ใบ · อาชีพ เงินทอง", aspect: 1.25, cw: 15, max: 720, key: 0, out: 4, adv: 2, cap: true, focus: "career",
+    pos: [{ x: 18, y: 23, w: 1, k: "สถานการณ์งาน", d: "ภาพรวมของงานตอนนี้" }, { x: 50, y: 23, w: 1, k: "การเงิน", d: "กระแสเงินและทรัพยากรที่มี" }, { x: 82, y: 23, w: .8, k: "จุดแข็ง", d: "สิ่งที่คุณมีและควรใช้" }, { x: 32, y: 72, w: .9, k: "สิ่งที่ขวาง", d: "ความท้าทายที่ต้องจัดการ" }, { x: 68, y: 72, w: 1.4, k: "ผลลัพธ์", d: "สิ่งที่จะเกิดขึ้นใน 1–3 เดือน" }] },
+  celtic: { name: "กางเขนเซลติก", sub: "10 ใบ · อ่านเจาะลึก", aspect: 1, cw: 12.5, max: 620, key: 0, out: 9, adv: 6, cap: false, challenge: 1,
+    pos: [
+      { x: 31, y: 50, w: 1.2, k: "สถานการณ์", d: "หัวใจของคำถาม สิ่งที่เกิดขึ้นตอนนี้" },
+      { x: 31, y: 50, w: 1, k: "สิ่งที่ขวาง", d: "แรงที่ตัดผ่าน ความท้าทายหลัก", rot: 90 },
+      { x: 31, y: 77, w: .7, k: "รากฐาน", d: "ต้นเหตุลึกๆ ที่อยู่ใต้เรื่องนี้" },
+      { x: 14, y: 50, w: .6, k: "อดีตที่ผ่านไป", d: "สิ่งที่เพิ่งผ่านพ้นและกำลังจางไป" },
+      { x: 31, y: 23, w: .9, k: "เป้าหมาย", d: "สิ่งที่คุณมุ่งหวัง หรือผลที่ดีที่สุดที่เป็นไปได้" },
+      { x: 48, y: 50, w: 1.1, k: "อนาคตใกล้", d: "สิ่งที่จะเกิดในอีกไม่นาน" },
+      { x: 80, y: 88, w: .9, k: "ตัวคุณ", d: "ท่าทีและมุมมองของคุณต่อเรื่องนี้" },
+      { x: 80, y: 63, w: .7, k: "สิ่งแวดล้อม", d: "คนรอบตัวและอิทธิพลภายนอก" },
+      { x: 80, y: 38, w: .8, k: "ความหวังและความกลัว", d: "สิ่งที่คุณหวังและกลัวไปพร้อมกัน" },
+      { x: 80, y: 13, w: 1.5, k: "ผลลัพธ์", d: "ปลายทางของเรื่องถ้าทุกอย่างดำเนินต่อไปแบบนี้" }
+    ] }
+};
+const LIFE_PATH = {
+  1: ["ผู้บุกเบิก", "เกิดมาเพื่อนำและเริ่มต้นสิ่งใหม่ อิสระและความกล้าคือพลังหลัก"],
+  2: ["ผู้ประสาน", "พลังแห่งความร่วมมือ ความอ่อนโยน และการมองเห็นใจคน"],
+  3: ["ผู้สร้างสรรค์", "การสื่อสาร ศิลปะ และความสนุกสดใสคือของขวัญของคุณ"],
+  4: ["ผู้สร้างรากฐาน", "ความมั่นคง วินัย และการลงมือทำที่จับต้องได้"],
+  5: ["นักผจญภัย", "อิสระ การเปลี่ยนแปลง และประสบการณ์ใหม่หล่อเลี้ยงชีวิตคุณ"],
+  6: ["ผู้ดูแล", "ความรับผิดชอบ ครอบครัว และความรักที่มอบให้ผู้อื่น"],
+  7: ["ผู้แสวงหาความจริง", "ปัญญา การวิเคราะห์ และโลกภายในที่ลึกซึ้ง"],
+  8: ["ผู้ครองอำนาจ", "ความสำเร็จทางวัตถุ การบริหาร และพลังที่จะสร้างความมั่งคั่ง"],
+  9: ["ผู้ให้", "ความเมตตา อุดมคติ และการปิดวงจรเพื่อส่วนรวม"],
+  11: ["ผู้นำทางจิตวิญญาณ (เลขมาสเตอร์)", "ญาณหยั่งรู้สูง เป็นแรงบันดาลใจให้ผู้อื่น แต่ต้องดูแลความอ่อนไหวของตัวเอง"],
+  22: ["สถาปนิกผู้ยิ่งใหญ่ (เลขมาสเตอร์)", "เปลี่ยนความฝันใหญ่ให้เป็นสิ่งก่อสร้างจริงในโลก"],
+  33: ["ครูแห่งความเมตตา (เลขมาสเตอร์)", "พลังแห่งการเยียวยาและการสอนด้วยความรัก"]
+};
+const THAI_DAYS = [
+  { th: "อาทิตย์", color: "แดง", hex: "#d23a3a", planet: "ดวงอาทิตย์", card: 19 },
+  { th: "จันทร์", color: "เหลือง", hex: "#f2cf4a", planet: "ดวงจันทร์", card: 2 },
+  { th: "อังคาร", color: "ชมพู", hex: "#f08fb4", planet: "ดาวอังคาร", card: 16 },
+  { th: "พุธ", color: "เขียว", hex: "#3fae63", planet: "ดาวพุธ", card: 1 },
+  { th: "พฤหัสบดี", color: "ส้ม", hex: "#f08a3a", planet: "ดาวพฤหัสบดี", card: 10 },
+  { th: "ศุกร์", color: "ฟ้า", hex: "#5aa8e6", planet: "ดาวศุกร์", card: 3 },
+  { th: "เสาร์", color: "ม่วง", hex: "#8a5ad0", planet: "ดาวเสาร์", card: 21 }
+];
+/* Thai letter values (เลขศาสตร์ไทย) and Pythagorean values for Latin letters */
+const THAI_NUM = { 1: "กดถทภฤาำุ่", 2: "ขชงบปเแู้ิ", 3: "ฆตฑฒ๋", 4: "คธญรษะโัี", 5: "ฉณฌนมหฮฎึ", 6: "จลวอใ็", 7: "ซศส๊ื", 8: "ยพฟผฝ", 9: "ฏฐไ์" };
+const LETTER_VAL = {};
+Object.entries(THAI_NUM).forEach(([n, s]) => [...s].forEach(ch => LETTER_VAL[ch] = +n));
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((ch, i) => LETTER_VAL[ch] = (i % 9) + 1);
+
+/* ================= UTIL ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SPEED = REDUCED ? 0.3 : 1;
+const wait = ms => new Promise(r => setTimeout(r, ms * SPEED));
+const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const digitSum = n => String(n).split("").reduce((a, b) => a + (+b || 0), 0);
+const reduceNum = (n, master = true) => { while (n > 9 && !(master && (n === 11 || n === 22 || n === 33))) n = digitSum(n); return n; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+function store(key, val) { try { if (val === undefined) return JSON.parse(localStorage.getItem(key)); localStorage.setItem(key, JSON.stringify(val)); } catch (e) { return null; } }
+
+/* ================= SVG ART ================= */
+const DEFS = `
+<defs>
+  <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c8"/><stop offset=".45" stop-color="#e8c46a"/><stop offset="1" stop-color="#a8792e"/></linearGradient>
+  <linearGradient id="gGoldH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a8792e"/><stop offset=".5" stop-color="#fff0c2"/><stop offset="1" stop-color="#a8792e"/></linearGradient>
+  <radialGradient id="gFace" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#232a66"/><stop offset=".6" stop-color="#131840"/><stop offset="1" stop-color="#080a22"/></radialGradient>
+  <radialGradient id="gHalo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e8c46a" stop-opacity=".38"/><stop offset="1" stop-color="#e8c46a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gBack" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1650"/><stop offset=".5" stop-color="#0d1033"/><stop offset="1" stop-color="#1a1650"/></linearGradient>
+  <pattern id="pLattice" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <path d="M0 0H20M0 0V20" stroke="#e8c46a" stroke-opacity=".16" stroke-width="1"/>
+    <circle cx="10" cy="10" r="1" fill="#e8c46a" fill-opacity=".35"/>
+  </pattern>
+  <symbol id="sym-wands" viewBox="-20 -20 40 40">
+    <path d="M-4 18 L4 -17" stroke="url(#gGold)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M-1.6 7 q-7 -1 -9 -6 q6 0 9 4Z M1.4 -4 q7 -1 9 -6 q-6 0 -9 4Z M-0.2 1 q-6 -3 -6 -9 q5 2 6 7Z" fill="#8ed689"/>
+    <circle cx="4" cy="-17" r="2.6" fill="#fff0c2"/>
+  </symbol>
+  <symbol id="sym-cups" viewBox="-20 -20 40 40">
+    <path d="M-13 -16 H13 Q13 2 0 4 Q-13 2 -13 -16Z" fill="url(#gGold)"/>
+    <path d="M-10 -12 H10" stroke="#6fb2ff" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="-2" y="3" width="4" height="9" fill="url(#gGold)"/>
+    <path d="M-9 17 Q0 10 9 17Z" fill="url(#gGold)"/>
+  </symbol>
+  <symbol id="sym-swords" viewBox="-20 -20 40 40">
+    <path d="M0 -19 L3.2 -13 L3.2 7 L-3.2 7 L-3.2 -13Z" fill="#e6ecff"/>
+    <path d="M0 -17 V6" stroke="#9fb0d8" stroke-width="1"/>
+    <rect x="-10" y="7" width="20" height="3.4" rx="1.7" fill="url(#gGold)"/>
+    <rect x="-1.8" y="10" width="3.6" height="7" fill="url(#gGold)"/>
+    <circle cy="18.3" r="2.3" fill="url(#gGold)"/>
+  </symbol>
+  <symbol id="sym-pentacles" viewBox="-20 -20 40 40">
+    <circle r="16" fill="url(#gGold)"/>
+    <circle r="13.6" fill="#1a1f52"/>
+    <path d="M0 -12 L7.05 9.7 L-11.4 -3.7 H11.4 L-7.05 9.7Z" fill="none" stroke="url(#gGold)" stroke-width="1.8" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="cardBack" viewBox="0 0 200 340">
+    <rect x="0" y="0" width="200" height="340" rx="14" fill="url(#gBack)"/>
+    <rect x="0" y="0" width="200" height="340" rx="14" fill="url(#pLattice)"/>
+    <rect x="8" y="8" width="184" height="324" rx="9" fill="none" stroke="url(#gGoldH)" stroke-width="2"/>
+    <rect x="14" y="14" width="172" height="312" rx="6" fill="none" stroke="#e8c46a" stroke-opacity=".45" stroke-width="1"/>
+    <circle cx="100" cy="170" r="58" fill="#0b0d2a" stroke="url(#gGoldH)" stroke-width="1.6"/>
+    <circle cx="100" cy="170" r="50" fill="none" stroke="#e8c46a" stroke-opacity=".5" stroke-dasharray="2 4"/>
+    <g fill="url(#gGold)">
+      <path d="M100 124 L106 162 L146 170 L106 178 L100 216 L94 178 L54 170 L94 162Z"/>
+      <path d="M100 140 L103 167 L130 170 L103 173 L100 200 L97 173 L70 170 L97 167Z" transform="rotate(45 100 170)" opacity=".7"/>
+    </g>
+    <circle cx="100" cy="170" r="9" fill="#0b0d2a" stroke="#fff0c2" stroke-width="1.5"/>
+    <path d="M86 52 a16 16 0 1 0 28 0 a13 13 0 1 1 -28 0Z" fill="url(#gGold)"/>
+    <path d="M86 288 a16 16 0 1 1 28 0 a13 13 0 1 0 -28 0Z" fill="url(#gGold)"/>
+    <g fill="#fff0c2"><circle cx="40" cy="40" r="1.6"/><circle cx="160" cy="40" r="1.6"/><circle cx="40" cy="300" r="1.6"/><circle cx="160" cy="300" r="1.6"/><circle cx="56" cy="100" r="1"/><circle cx="144" cy="240" r="1"/><circle cx="144" cy="100" r="1"/><circle cx="56" cy="240" r="1"/></g>
+    <path d="M24 170 H40 M160 170 H176" stroke="#e8c46a" stroke-opacity=".6"/>
+  </symbol>
+</defs>`;
+const backSVG = () => `<svg viewBox="0 0 200 340" aria-hidden="true"><use href="#cardBack"/></svg>`;
+function elementSign(el, cx, cy, s, color) {
+  const h = s * 0.866;
+  const up = el === "fire" || el === "air";
+  const tri = up ? `M${cx} ${cy - h * .66}L${cx + s / 2} ${cy + h * .34}L${cx - s / 2} ${cy + h * .34}Z` : `M${cx} ${cy + h * .66}L${cx + s / 2} ${cy - h * .34}L${cx - s / 2} ${cy - h * .34}Z`;
+  const bar = el === "air" ? `<path d="M${cx - s * .36} ${cy}H${cx + s * .36}"/>` : el === "earth" ? `<path d="M${cx - s * .36} ${cy}H${cx + s * .36}"/>` : "";
+  return `<g fill="none" stroke="${color}" stroke-opacity=".45" stroke-width="1.6" stroke-linejoin="round"><path d="${tri}"/>${bar}</g>`;
+}
+const PIPS = {
+  2: [[100, 120], [100, 222]], 3: [[100, 102], [100, 171], [100, 240]],
+  4: [[68, 122], [132, 122], [68, 220], [132, 220]], 5: [[68, 112], [132, 112], [100, 171], [68, 230], [132, 230]],
+  6: [[68, 108], [132, 108], [68, 171], [132, 171], [68, 234], [132, 234]],
+  7: [[68, 104], [132, 104], [100, 138], [68, 171], [132, 171], [68, 238], [132, 238]],
+  8: [[68, 102], [132, 102], [100, 136], [68, 171], [132, 171], [100, 206], [68, 240], [132, 240]],
+  9: [[68, 98], [132, 98], [68, 145], [132, 145], [100, 171], [68, 197], [132, 197], [68, 244], [132, 244]],
+  10: [[68, 98], [132, 98], [100, 122], [68, 145], [132, 145], [68, 197], [132, 197], [100, 220], [68, 244], [132, 244]]
+};
+function courtEmblem(rank) {
+  const g = `fill="url(#gGold)"`;
+  if (rank === 14) return `<path ${g} d="M70 118 L74 92 L86 106 L100 86 L114 106 L126 92 L130 118Z"/><rect ${g} x="70" y="120" width="60" height="7" rx="2"/><circle cx="100" cy="84" r="4" fill="#fff0c2"/>`;
+  if (rank === 13) return `<path ${g} d="M76 120 Q78 100 84 96 Q90 108 100 92 Q110 108 116 96 Q122 100 124 120Z"/><circle cx="84" cy="94" r="3" fill="#fff0c2"/><circle cx="100" cy="89" r="3.6" fill="#fff0c2"/><circle cx="116" cy="94" r="3" fill="#fff0c2"/>`;
+  if (rank === 12) return `<path ${g} d="M80 92 H120 V112 Q120 128 100 134 Q80 128 80 112Z"/><path d="M100 96 V128 M86 108 H114" stroke="#131840" stroke-width="3"/>`;
+  return `<path ${g} d="M100 86 L105 104 L122 108 L105 112 L100 130 L95 112 L78 108 L95 104Z"/>`;
+}
+function cardFront(c) {
+  const elc = EL[c.el].color;
+  let art = "", top = "";
+  if (c.major) {
+    top = ROMAN[c.num];
+    let rays = "";
+    for (let i = 0; i < 32; i++) {
+      const a = i / 32 * Math.PI * 2, r1 = 64, r2 = i % 2 ? 76 : 90;
+      rays += `M${(100 + Math.cos(a) * r1).toFixed(1)} ${(168 + Math.sin(a) * r1).toFixed(1)}L${(100 + Math.cos(a) * r2).toFixed(1)} ${(168 + Math.sin(a) * r2).toFixed(1)}`;
+    }
+    art = `<circle cx="100" cy="168" r="92" fill="url(#gHalo)"/>
+      <path d="${rays}" stroke="url(#gGold)" stroke-width="1.4" stroke-linecap="round" opacity=".85"/>
+      <circle cx="100" cy="168" r="60" fill="#0b0d2a" stroke="url(#gGoldH)" stroke-width="2"/>
+      <circle cx="100" cy="168" r="53" fill="none" stroke="#e8c46a" stroke-opacity=".35" stroke-dasharray="1 5"/>
+      ${elementSign(c.el, 100, 168, 92, elc)}
+      <text x="100" y="170" text-anchor="middle" dominant-baseline="central" font-size="62" fill="url(#gGold)" font-family="'Noto Sans Symbols','Segoe UI Symbol','DejaVu Sans',serif">${c.glyph}&#xFE0E;</text>`;
+  } else {
+    const sym = "#sym-" + c.suit;
+    if (c.rank === 1) {
+      top = "ACE";
+      let rays = "";
+      for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; rays += `M${(100 + Math.cos(a) * 50).toFixed(1)} ${(170 + Math.sin(a) * 50).toFixed(1)}L${(100 + Math.cos(a) * (i % 2 ? 64 : 78)).toFixed(1)} ${(170 + Math.sin(a) * (i % 2 ? 64 : 78)).toFixed(1)}`; }
+      art = `<circle cx="100" cy="170" r="86" fill="url(#gHalo)"/><path d="${rays}" stroke="url(#gGold)" stroke-width="1.3" stroke-linecap="round"/>
+        <use href="${sym}" x="54" y="124" width="92" height="92"/>`;
+    } else if (c.rank <= 10) {
+      top = ROMAN[c.rank];
+      const s = c.rank <= 6 ? 38 : 32;
+      art = `<rect x="44" y="82" width="112" height="178" rx="8" fill="url(#gHalo)" opacity=".5"/>` + PIPS[c.rank].map(([x, y]) => `<use href="${sym}" x="${x - s / 2}" y="${y - s / 2}" width="${s}" height="${s}"/>`).join("");
+    } else {
+      top = RANK_EN[c.rank - 1].toUpperCase();
+      art = `<circle cx="100" cy="176" r="80" fill="url(#gHalo)"/>
+        <circle cx="100" cy="190" r="50" fill="#0b0d2a" stroke="url(#gGoldH)" stroke-width="1.6"/>
+        ${courtEmblem(c.rank)}
+        <use href="${sym}" x="66" y="156" width="68" height="68"/>`;
+    }
+    art += elementSign(c.el, 100, 292, 14, elc).replace('stroke-opacity=".45"', 'stroke-opacity=".8"');
+  }
+  const en = c.en.toUpperCase();
+  const enSize = en.length > 17 ? 11 : en.length > 13 ? 12.5 : 14;
+  return `<svg viewBox="0 0 200 340" role="img" aria-label="${esc(c.en)}">
+    <rect x="0" y="0" width="200" height="340" rx="14" fill="url(#gFace)"/>
+    <rect x="8" y="8" width="184" height="324" rx="9" fill="none" stroke="url(#gGoldH)" stroke-width="2"/>
+    <rect x="14" y="14" width="172" height="312" rx="6" fill="none" stroke="#e8c46a" stroke-opacity=".4"/>
+    <g fill="#e8c46a"><path d="M14 30 L18 14 L30 14Z M186 30 L182 14 L170 14Z M14 310 L18 326 L30 326Z M186 310 L182 326 L170 326Z"/></g>
+    <g fill="#fff0c2" opacity=".8"><circle cx="34" cy="70" r="1.2"/><circle cx="168" cy="84" r="1"/><circle cx="40" cy="262" r="1"/><circle cx="162" cy="252" r="1.3"/><circle cx="150" cy="66" r=".8"/></g>
+    <path d="M60 50 H140" stroke="#e8c46a" stroke-opacity=".5"/>
+    <text x="100" y="40" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="url(#gGold)" letter-spacing="2">${top}</text>
+    ${art}
+    <path d="M44 278 H156" stroke="#e8c46a" stroke-opacity=".5"/>
+    <text x="100" y="${c.major ? 300 : 306}" text-anchor="middle" font-family="Cinzel, serif" font-weight="600" font-size="${enSize}" fill="#f4ecd8" letter-spacing="1">${esc(en)}</text>
+    ${c.major ? `<text x="100" y="318" text-anchor="middle" font-family="'Noto Serif Thai', serif" font-size="12" fill="#e8c46a">${esc(c.th)}</text>` : ""}
+  </svg>`;
+}
+function magicCircle(cls) {
+  const zod = "♈♉♊♋♌♍♎♏♐♑♒♓";
+  let glyphs = "", ticks = "";
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 - Math.PI / 2 + Math.PI / 12;
+    glyphs += `<text x="${(200 + Math.cos(a) * 158).toFixed(1)}" y="${(200 + Math.sin(a) * 158).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="17" fill="#e8c46a" fill-opacity=".8" font-family="'Noto Sans Symbols','Segoe UI Symbol',serif">${zod[i]}&#xFE0E;</text>`;
+    const b = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    ticks += `M${(200 + Math.cos(b) * 144).toFixed(1)} ${(200 + Math.sin(b) * 144).toFixed(1)}L${(200 + Math.cos(b) * 172).toFixed(1)} ${(200 + Math.sin(b) * 172).toFixed(1)}`;
+  }
+  const hex = [0, 1, 2, 3, 4, 5].map(i => { const a = i / 6 * Math.PI * 2 - Math.PI / 2; return `${(200 + Math.cos(a) * 118).toFixed(1)},${(200 + Math.sin(a) * 118).toFixed(1)}`; });
+  return `<svg class="circle ${cls || ""}" viewBox="0 0 400 400" aria-hidden="true">
+    <defs><path id="ringPath${cls || ""}" d="M200 200 m-128 0 a128 128 0 1 1 256 0 a128 128 0 1 1 -256 0"/></defs>
+    <g class="spin" style="transform-origin:200px 200px">
+      <circle cx="200" cy="200" r="176" fill="none" stroke="#e8c46a" stroke-opacity=".55"/>
+      <circle cx="200" cy="200" r="140" fill="none" stroke="#e8c46a" stroke-opacity=".4"/>
+      <path d="${ticks}" stroke="#e8c46a" stroke-opacity=".45"/>
+      ${glyphs}
+    </g>
+    <g class="spin-rev" style="transform-origin:200px 200px">
+      <text font-family="Cinzel, serif" font-size="10.5" letter-spacing="4.2" fill="#e8c46a" fill-opacity=".55"><textPath href="#ringPath${cls || ""}">IGNIS · AQUA · AER · TERRA · ARCANA MAIORA · ARCANA MINORA · ROTA FORTUNAE ·</textPath></text>
+      <polygon points="${hex[0]} ${hex[2]} ${hex[4]}" fill="none" stroke="#e8c46a" stroke-opacity=".35"/>
+      <polygon points="${hex[1]} ${hex[3]} ${hex[5]}" fill="none" stroke="#e8c46a" stroke-opacity=".35"/>
+      <circle cx="200" cy="200" r="118" fill="none" stroke="#e8c46a" stroke-opacity=".25" stroke-dasharray="2 6"/>
+    </g>
+    <circle cx="200" cy="200" r="70" fill="url(#gHalo)"/>
+  </svg>`;
+}
+function spreadIcon(sp) {
+  const W = 42, H = 42;
+  const bw = sp.aspect >= 1 ? W : H * sp.aspect, bh = bw / sp.aspect;
+  const ox = (W - bw) / 2, oy = (H - bh) / 2;
+  const cw = bw * sp.cw / 100, ch = cw * 1.7;
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">` + sp.pos.map(p => {
+    const x = ox + bw * p.x / 100, y = oy + bh * p.y / 100;
+    return `<rect x="${(x - cw / 2).toFixed(1)}" y="${(y - ch / 2).toFixed(1)}" width="${cw.toFixed(1)}" height="${ch.toFixed(1)}" rx="1" fill="rgba(232,196,106,.18)" stroke="#e8c46a" stroke-width=".8" ${p.rot ? `transform="rotate(${p.rot} ${x.toFixed(1)} ${y.toFixed(1)})"` : ""}/>`;
+  }).join("") + `</svg>`;
+}
+
+/* ================= SOUND ================= */
+const Sound = {
+  ctx: null, on: true, noise: null,
+  ensure() {
+    if (!this.on) return null;
+    try {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const len = this.ctx.sampleRate * 0.05, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+        this.noise = buf;
+      }
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      return this.ctx;
+    } catch (e) { this.on = false; return null; }
+  },
+  tick() {
+    const c = this.ensure(); if (!c) return;
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.noise; f.type = "bandpass"; f.frequency.value = 2200 + Math.random() * 1800; f.Q.value = 1.2;
+    g.gain.value = 0.16; s.connect(f).connect(g).connect(c.destination); s.start();
+  },
+  chime(base = 660) {
+    const c = this.ensure(); if (!c) return;
+    const t = c.currentTime;
+    [1, 1.5, 2, 2.997, 4.02].forEach((m, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "sine"; o.frequency.value = base * m;
+      g.gain.setValueAtTime(0, t + i * .03); g.gain.linearRampToValueAtTime(.07 / (i + 1), t + i * .03 + .02);
+      g.gain.exponentialRampToValueAtTime(.0001, t + 2.4);
+      o.connect(g).connect(c.destination); o.start(t + i * .03); o.stop(t + 2.6);
+    });
+  },
+  swell() {
+    const c = this.ensure(); if (!c) return;
+    const t = c.currentTime;
+    [110, 165, 220, 330].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = i % 2 ? "triangle" : "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + 1); g.gain.exponentialRampToValueAtTime(.0001, t + 4);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + 4.2);
+    });
+  }
+};
+
+/* ================= CANVAS: SKY + FX ================= */
+const Sky = (() => {
+  const cv = $("#sky"), ctx = cv.getContext("2d");
+  let stars = [], W = 0, H = 0, dpr = 1, shoot = null, last = 0;
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.round(W * H / 4200);
+    stars = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.3 + .2, p: Math.random() * 6.28, s: Math.random() * 1.5 + .3, gold: Math.random() < .18 }));
+    if (REDUCED) draw(0);
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      const a = .35 + .65 * (0.5 + 0.5 * Math.sin(s.p + t * .001 * s.s));
+      ctx.fillStyle = s.gold ? `rgba(255,226,150,${a})` : `rgba(220,226,255,${a * .85})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+    }
+    if (shoot) {
+      shoot.x += shoot.vx; shoot.y += shoot.vy; shoot.life -= 1;
+      const g = ctx.createLinearGradient(shoot.x, shoot.y, shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14);
+      g.addColorStop(0, "rgba(255,240,200,.9)"); g.addColorStop(1, "rgba(255,240,200,0)");
+      ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(shoot.x, shoot.y); ctx.lineTo(shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14); ctx.stroke();
+      if (shoot.life <= 0) shoot = null;
+    } else if (Math.random() < .0025) {
+      shoot = { x: Math.random() * W * .7 + W * .2, y: Math.random() * H * .3, vx: -(6 + Math.random() * 4), vy: 2.5 + Math.random() * 2, life: 50 };
+    }
+  }
+  function loop(t) { if (t - last > 33) { draw(t); last = t; } requestAnimationFrame(loop); }
+  addEventListener("resize", resize); resize();
+  if (!REDUCED) requestAnimationFrame(loop);
+})();
+const FX = (() => {
+  const cv = $("#fx"), ctx = cv.getContext("2d");
+  let parts = [], running = false, W, H;
+  function resize() { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
+  addEventListener("resize", resize); resize();
+  function burst(x, y, n = 60, spread = 6, colors = ["#fff0c2", "#e8c46a", "#ffd98a"]) {
+    if (REDUCED) n = Math.round(n / 4);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = Math.random() * spread + 1;
+      parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, decay: .012 + Math.random() * .02, r: Math.random() * 2.4 + .6, c: colors[i % colors.length], star: Math.random() < .25 });
+    }
+    if (!running) { running = true; requestAnimationFrame(step); }
+  }
+  function step() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    parts = parts.filter(p => p.life > 0);
+    for (const p of parts) {
+      p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy = p.vy * .97 + .05; p.life -= p.decay;
+      ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
+      if (p.star) { const r = p.r * 3; ctx.beginPath(); ctx.moveTo(p.x, p.y - r); ctx.lineTo(p.x + r * .25, p.y); ctx.lineTo(p.x, p.y + r); ctx.lineTo(p.x - r * .25, p.y); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(p.x - r, p.y); ctx.lineTo(p.x, p.y + r * .25); ctx.lineTo(p.x + r, p.y); ctx.lineTo(p.x, p.y - r * .25); ctx.closePath(); ctx.fill(); }
+      else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    if (parts.length) requestAnimationFrame(step); else { running = false; ctx.clearRect(0, 0, W, H); }
+  }
+  return { burst };
+})();
+const burstAt = (el, n, spread) => { const r = el.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, n, spread); };
+
+/* ================= SHUFFLE MATH ================= */
+/* Gilbert–Shannon–Reeds riffle: binomial cut, then cards drop from each packet in proportion to its size. */
+function riffle(deck, allowRev) {
+  let cut = 0; for (let i = 0; i < deck.length; i++) if (rnd() < .5) cut++;
+  let L = deck.slice(0, cut), R = deck.slice(cut);
+  let rotated = false;
+  if (allowRev && rnd() < .5) { L = L.reverse().map(c => ({ id: c.id, rev: !c.rev })); rotated = true; }
+  const out = []; let i = 0, j = 0;
+  while (i < L.length || j < R.length) {
+    const l = L.length - i, r = R.length - j;
+    if (rnd() < l / (l + r)) out.push(L[i++]); else out.push(R[j++]);
+  }
+  return { deck: out, rotated, cut };
+}
+/* Total-variation distance from uniform after k GSR riffles of n cards (Bayer & Diaconis, 1992). */
+const TV_CACHE = {};
+function tvDistance(n, k) {
+  if (k === 0) return 1;
+  if (k > 16) return 0;
+  if (TV_CACHE[k] !== undefined) return TV_CACHE[k];
+  const a = Math.pow(2, k), N = a + n + 2, lf = new Float64Array(N);
+  for (let i = 1; i < N; i++) lf[i] = lf[i - 1] + Math.log(i);
+  let A = [1];
+  for (let m = 2; m <= n; m++) { const B = new Array(m).fill(0); for (let j = 0; j < m; j++) B[j] = (j < m - 1 ? (j + 1) * A[j] : 0) + (j > 0 ? (m - j) * A[j - 1] : 0); A = B; }
+  let s = 0;
+  for (let r = 1; r <= n; r++) {
+    const w = Math.exp(Math.log(A[r - 1]) - lf[n]);
+    const p = a - r >= 0 ? Math.exp(lf[a + n - r] - lf[a - r] - n * Math.log(a)) : 0;
+    s += w * Math.abs(p - 1);
+  }
+  return TV_CACHE[k] = s / 2;
+}
+function deckCode(deck) {
+  let h = 2166136261;
+  for (const c of deck) { h ^= c.id * 2 + (c.rev ? 1 : 0); h = Math.imul(h, 16777619) >>> 0; }
+  return h.toString(16).toUpperCase().padStart(8, "0");
+}
+
+/* ================= STATE ================= */
+const S = { stage: "ask", deck: [], riffles: 0, spreadKey: "ppf", allowRev: true, q: {}, picks: [], flipped: [], busy: false, code: "", proxies: [], reading: null };
+const freshDeck = () => DECK.map(c => ({ id: c.id, rev: false }));
+
+function goStage(name) {
+  S.stage = name;
+  ["ask", "shuffle", "pick", "reveal"].forEach(s => $("#stage-" + s).hidden = !(s === name || (name === "reading" && s === "reveal")));
+  const order = ["ask", "shuffle", "pick", "reveal", "reading"], idx = order.indexOf(name);
+  $$("#steps li").forEach((li, i) => { li.classList.toggle("on", i === idx); li.classList.toggle("done", i < idx); });
+  if (name !== "reading") scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+}
+
+/* ================= STAGE 1 ================= */
+function initAsk() {
+  const box = $("#spreads");
+  box.innerHTML = Object.entries(SPREADS).map(([k, sp]) => `
+    <div class="spread-opt"><input type="radio" name="spread" id="sp-${k}" value="${k}" ${k === S.spreadKey ? "checked" : ""}>
+    <label for="sp-${k}">${spreadIcon(sp)}<div><b>${sp.name}</b><span>${sp.sub}</span></div></label></div>`).join("");
+  const peeks = [17, 19, 18].map(id => `<div class="peek">${cardFront(DECK[id])}</div>`).join("");
+  $("#altar").innerHTML = magicCircle("a") + peeks;
+  $("#intent").addEventListener("submit", e => {
+    e.preventDefault();
+    Sound.ensure();
+    S.q = { name: $("#q-name").value.trim(), dob: $("#q-dob").value, text: $("#q-text").value.trim() };
+    S.spreadKey = ($("input[name=spread]:checked") || {}).value || "ppf";
+    S.allowRev = $("#q-rev").checked;
+    startShuffle();
+  });
+  renderHistory();
+}
+
+/* ================= STAGE 2: SHUFFLE ================= */
+const P = 26;
+function proxyBase(i) { return `translate(${(-i * .18).toFixed(2)}px, ${(-i * .55).toFixed(2)}px)`; }
+function startShuffle() {
+  S.deck = freshDeck(); S.riffles = 0; S.picks = []; S.flipped = []; S.reading = null;
+  const t = $("#table");
+  t.innerHTML = magicCircle("t");
+  const pcw = clamp(t.clientWidth * .2, 78, 118);
+  t.style.setProperty("--pcw", pcw + "px");
+  S.proxies = [];
+  for (let i = 0; i < P; i++) {
+    const d = document.createElement("div"); d.className = "proxy"; d.innerHTML = backSVG();
+    d.style.zIndex = i; d.style.transform = proxyBase(i); t.appendChild(d); S.proxies.push(d);
+  }
+  $("#shuffle-controls").hidden = false;
+  goStage("shuffle");
+  updateMeter();
+}
+function updateMeter() {
+  const tv = tvDistance(78, S.riffles), pct = Math.round((1 - tv) * 100);
+  $("#riffle-count").textContent = S.riffles;
+  $("#rand-pct").textContent = pct + "%";
+  $("#rand-bar").style.width = pct + "%";
+  let note;
+  if (S.riffles === 0) note = "ไพ่ยังเรียงตามลำดับในกล่อง";
+  else if (tv > .9) note = "ยังเหลือร่องรอยลำดับเดิมเกือบทั้งหมด ไพ่ 78 ใบต้องสับมากกว่าไพ่ป๊อก 52 ใบ";
+  else if (tv > .5) note = "เริ่มสุ่มแล้ว แต่ยังมีลำดับเดิมหลงเหลืออยู่มาก";
+  else if (tv > .1) note = "ใกล้สุ่มเต็มที่แล้ว สับอีก 1–2 ครั้งจะดีมาก";
+  else note = "สุ่มเต็มที่แล้ว ระยะห่างจากการสุ่มสมบูรณ์เหลือ " + (tv * 100).toFixed(1) + "% พร้อมตัดไพ่";
+  $("#rand-note").textContent = note;
+  $("#btn-cut").disabled = S.riffles < 1 || S.busy;
+  $("#btn-riffle").disabled = $("#btn-riffle-many").disabled = S.busy;
+  $("#btn-riffle-many").textContent = tv > .1 ? "สับจนสุ่มเต็มที่" : "สับเพิ่มอีก 3 ครั้ง";
+}
+async function riffleAnim(rotated, fast) {
+  const t = $("#table"), pcw = parseFloat(t.style.getPropertyValue("--pcw")), off = pcw * .82;
+  const k = fast ? .55 : 1;
+  const ps = S.proxies, half = Math.floor(ps.length / 2) + Math.round((rnd() - .5) * 4);
+  const L = ps.slice(0, half), R = ps.slice(half);
+  L.forEach((el, i) => el.style.transform = `translate(${-off}px, ${8 - i * .5}px) rotate(${rotated ? -180 : -7}deg)`);
+  R.forEach((el, i) => el.style.transform = `translate(${off}px, ${8 - i * .5}px) rotate(7deg)`);
+  await wait(340 * k);
+  L.forEach((el, i) => el.style.transform = `translate(${-off * .62}px, ${-6 - i * .5}px) rotate(${rotated ? -168 : -14}deg)`);
+  R.forEach((el, i) => el.style.transform = `translate(${off * .62}px, ${-6 - i * .5}px) rotate(14deg)`);
+  await wait(200 * k);
+  const order = []; let i = 0, j = 0;
+  while (i < L.length || j < R.length) { const l = L.length - i, r = R.length - j; if (Math.random() < l / (l + r)) order.push(L[i++]); else order.push(R[j++]); }
+  for (let n = 0; n < order.length; n++) {
+    const el = order[n]; el.style.zIndex = n;
+    const fromL = L.includes(el);
+    el.style.transform = proxyBase(n) + (fromL && rotated ? " rotate(-360deg)" : "");
+    if (n % 2 === 0) Sound.tick();
+    await wait(15 * k);
+  }
+  await wait(300 * k);
+  order.forEach((el, n) => { el.style.transition = "none"; el.style.transform = proxyBase(n); });
+  void t.offsetWidth;
+  order.forEach(el => el.style.transition = "");
+  S.proxies = order;
+  const r = t.getBoundingClientRect();
+  FX.burst(r.left + r.width / 2, r.top + r.height / 2, fast ? 14 : 28, 4);
+}
+async function doRiffles(count) {
+  if (S.busy) return;
+  S.busy = true; updateMeter();
+  for (let n = 0; n < count; n++) {
+    const res = riffle(S.deck, S.allowRev);
+    S.deck = res.deck;
+    await riffleAnim(res.rotated, count > 1);
+    S.riffles++; S.busy = n < count - 1; updateMeter();
+  }
+  S.busy = false; updateMeter();
+}
+async function cutDeck() {
+  if (S.busy) return;
+  S.busy = true; updateMeter();
+  $("#shuffle-controls").hidden = true;
+  $("#rand-note").textContent = "แบ่งสำรับเป็นสามกอง แล้วเลือกกองที่ใจบอก กองนั้นจะขึ้นมาอยู่บนสุด";
+  const t = $("#table"), pcw = parseFloat(t.style.getPropertyValue("--pcw"));
+  const gap = Math.min(pcw * 1.3, t.clientWidth / 3.2);
+  const ps = S.proxies, n1 = 8 + Math.floor(rnd() * 3), n2 = 8 + Math.floor(rnd() * 3);
+  const groups = [ps.slice(ps.length - n1), ps.slice(ps.length - n1 - n2, ps.length - n1), ps.slice(0, ps.length - n1 - n2)];
+  const xs = [-gap, 0, gap];
+  for (let g = 0; g < 3; g++) {
+    groups[g].forEach((el, i) => { el.style.zIndex = 100 * g + i; el.style.transform = `translate(${xs[g] - i * .18}px, ${-i * .55}px)`; });
+    Sound.tick(); await wait(260);
+  }
+  /* real deck cut: top/middle/bottom packets proportional to the visual piles */
+  const N = S.deck.length;
+  const c1 = Math.round(N * n1 / P) + Math.floor((rnd() - .5) * 6), c2 = Math.round(N * n2 / P) + Math.floor((rnd() - .5) * 6);
+  const piles = [S.deck.slice(0, c1), S.deck.slice(c1, c1 + c2), S.deck.slice(c1 + c2)];
+  const labels = ["กองซ้าย", "กองกลาง", "กองขวา"];
+  const btns = xs.map((x, g) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "pile-btn"; b.textContent = labels[g];
+    b.style.left = `calc(50% + ${x}px)`; b.style.animationDelay = g * .08 + "s"; t.appendChild(b);
+    b.addEventListener("click", () => chooseP(g)); return b;
+  });
+  S.busy = false;
+  async function chooseP(g) {
+    if (S.busy) return; S.busy = true;
+    btns.forEach(b => b.remove());
+    groups[g].forEach((el, i) => el.style.transform = `translate(${xs[g]}px, ${-40 - i * .55}px)`);
+    const r = groups[g][0].getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, 40, 5);
+    Sound.chime(523);
+    await wait(420);
+    const rest = [0, 1, 2].filter(x => x !== g);
+    const ordered = [...rest.flatMap(x => groups[x]), ...groups[g]];
+    ordered.forEach((el, i) => { el.style.zIndex = i; el.style.transform = proxyBase(i); });
+    S.proxies = ordered;
+    S.deck = [...piles[g], ...rest.flatMap(x => piles[x])];
+    S.code = deckCode(S.deck);
+    await wait(650);
+    S.busy = false;
+    startPick();
+  }
+}
+
+/* ================= STAGE 3: PICK ================= */
+function startPick() {
+  const sp = SPREADS[S.spreadKey];
+  S.picks = [];
+  $("#slots").innerHTML = sp.pos.map((p, i) => `<div class="slot"><div class="hole" id="hole-${i}"><div class="n">${i + 1}</div></div><span>${esc(p.k)}</span></div>`).join("");
+  $("#pick-hint").textContent = `แตะไพ่ที่ดึงดูดใจ ${sp.pos.length} ใบ ใบแรกที่เลือกจะไปอยู่ตำแหน่งที่ 1 ตามลำดับ`;
+  goStage("pick");
+  const fan = $("#fan");
+  fan.innerHTML = "";
+  S.deck.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card"; b.dataset.i = i;
+    b.setAttribute("aria-label", "ไพ่คว่ำใบที่ " + (i + 1));
+    b.innerHTML = `<div class="card-inner"><div class="face back">${backSVG()}</div></div>`;
+    b.addEventListener("click", () => pickCard(i, b));
+    fan.appendChild(b);
+  });
+  layoutFan(true);
+}
+function layoutFan(entrance) {
+  const fan = $("#fan"); if (!fan.children.length) return;
+  const W = fan.clientWidth, n = S.deck.length;
+  const cw = clamp(W / 13, 40, 86), ch = cw * 1.7;
+  const theta = (W < 520 ? 70 : 96) * Math.PI / 180;
+  const R = ((W - cw) / 2 - 6) / Math.sin(theta / 2);
+  const dy = R * (1 - Math.cos(theta / 2));
+  fan.style.height = (ch + dy + 34) + "px";
+  fan.style.setProperty("--cw", cw + "px");
+  [...fan.children].forEach((el, i) => {
+    const a = -theta / 2 + theta * i / (n - 1);
+    const x = W / 2 + R * Math.sin(a) - cw / 2, y = 24 + R * (1 - Math.cos(a));
+    if (entrance) {
+      el.style.transition = "none";
+      el.style.left = (W / 2 - cw / 2) + "px"; el.style.top = (24 + dy / 2) + "px"; el.style.transform = "rotate(0deg)"; el.style.opacity = "0";
+    }
+    const apply = () => { el.style.left = x + "px"; el.style.top = y + "px"; el.style.transform = `rotate(${a}rad)`; el.style.opacity = ""; };
+    if (entrance) {
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transition = ""; el.style.transitionDelay = (i * 9 * SPEED) + "ms"; apply(); setTimeout(() => el.style.transitionDelay = "", 1500); }));
+    } else apply();
+  });
+}
+function pickCard(i, el) {
+  const sp = SPREADS[S.spreadKey];
+  if (S.picks.length >= sp.pos.length || el.classList.contains("taken")) return;
+  const slot = S.picks.length;
+  S.picks.push(i);
+  Sound.chime(440 + slot * 40);
+  const from = el.getBoundingClientRect(), hole = $("#hole-" + slot), to = hole.getBoundingClientRect();
+  const fly = document.createElement("div");
+  fly.className = "fly"; fly.innerHTML = backSVG();
+  Object.assign(fly.style, { left: from.left + "px", top: from.top + "px", width: el.offsetWidth + "px" });
+  document.body.appendChild(fly);
+  el.classList.add("taken");
+  FX.burst(from.left + from.width / 2, from.top + from.height / 2, 24, 3);
+  const dx = to.left - from.left, dy = to.top - from.top, sc = to.width / el.offsetWidth;
+  const anim = fly.animate([
+    { transform: "translate(0,0) scale(1) rotate(0deg)" },
+    { transform: `translate(${dx * .5}px, ${dy * .5 - 80}px) scale(${(1 + sc) / 2 + .15}) rotate(-8deg)`, offset: .5 },
+    { transform: `translate(${dx}px, ${dy}px) scale(${sc}) rotate(0deg)` }
+  ], { duration: 700 * SPEED, easing: "cubic-bezier(.3,.7,.3,1)", fill: "forwards" });
+  anim.onfinish = () => {
+    fly.remove(); hole.innerHTML = backSVG();
+    burstAt(hole, 18, 2.5);
+    if (S.picks.length === sp.pos.length) setTimeout(startReveal, 650 * SPEED);
+  };
+}
+
+/* ================= STAGE 4: REVEAL ================= */
+function startReveal() {
+  const sp = SPREADS[S.spreadKey];
+  S.flipped = sp.pos.map(() => false);
+  $("#reading").hidden = true; $("#reading").innerHTML = "";
+  $("#reveal-controls").hidden = false;
+  $("#reveal-title").textContent = "เปิดไพ่ทีละใบ";
+  $("#reveal-hint").textContent = "แตะไพ่เพื่อเปิด เปิดตามลำดับตัวเลขจะได้อารมณ์ที่สุด";
+  goStage("reveal");
+  buildBoard(sp, false);
+}
+function buildBoard(sp, open) {
+  const wrap = $("#board-wrap"), board = $("#board");
+  wrap.style.maxWidth = sp.max + "px";
+  board.style.aspectRatio = sp.aspect;
+  board.style.marginBottom = sp.cap ? "2.6em" : "0";
+  board.innerHTML = magicCircle("b");
+  const setCw = () => board.style.setProperty("--cw", (board.clientWidth * sp.cw / 100) + "px");
+  setCw();
+  if (!buildBoard.ro) { buildBoard.ro = new ResizeObserver(() => { const s = SPREADS[S.spreadKey]; board.style.setProperty("--cw", (board.clientWidth * s.cw / 100) + "px"); }); buildBoard.ro.observe(board); }
+  sp.pos.forEach((p, i) => {
+    const c = S.deck[S.picks[i]], card = DECK[c.id];
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card" + (c.rev ? " rev" : "") + (open ? " flipped" : "");
+    b.style.left = p.x + "%"; b.style.top = p.y + "%";
+    b.style.setProperty("--rot", (p.rot || 0) + "deg");
+    if (p.rot) b.style.zIndex = 5;
+    b.setAttribute("aria-label", `ตำแหน่ง ${i + 1} ${p.k}`);
+    b.innerHTML = `<span class="badge">${i + 1}</span><div class="card-inner"><div class="face back">${backSVG()}</div><div class="face front">${cardFront(card)}</div></div>` +
+      (sp.cap ? `<span class="cap">${esc(p.k)}<small class="cap-name"></small></span>` : "");
+    /* the crossing card lies on top of the card beneath it, so the first tap opens the covered card */
+    b.addEventListener("click", () => p.rot && !S.flipped[i - 1] ? flip(i - 1) : S.flipped[i] ? openModal(i) : flip(i));
+    board.appendChild(b);
+    if (open) setCap(b, i);
+  });
+  const lg = $("#legend");
+  lg.hidden = sp.cap;
+  lg.innerHTML = sp.cap ? "" : sp.pos.map((p, i) => `<li id="lg-${i}"><b>${i + 1}</b><span><em>${esc(p.k)}</em> <span class="lg-name"></span></span></li>`).join("");
+  if (open && !sp.cap) sp.pos.forEach((p, i) => setCap(null, i));
+}
+function setCap(btn, i) {
+  const c = S.deck[S.picks[i]], card = DECK[c.id];
+  const label = card.th + (c.rev ? " (กลับหัว)" : "");
+  if (btn) { const s = btn.querySelector(".cap-name"); if (s) s.textContent = label; }
+  const lg = $("#lg-" + i); if (lg) lg.querySelector(".lg-name").textContent = "· " + label;
+}
+function flip(i, quiet) {
+  if (S.flipped[i]) return;
+  S.flipped[i] = true;
+  const btn = $$("#board .card")[i];
+  btn.classList.add("flipped");
+  setCap(btn, i);
+  const card = DECK[S.deck[S.picks[i]].id];
+  if (!quiet) Sound.chime(card.major ? 523 : 659);
+  setTimeout(() => burstAt(btn, card.major ? 90 : 50, card.major ? 7 : 5), 380 * SPEED);
+  if (S.flipped.every(Boolean)) {
+    $("#reveal-controls").hidden = true;
+    setTimeout(() => { Sound.swell(); finishReading(); }, 1100 * SPEED);
+  }
+}
+async function revealAll() {
+  const sp = SPREADS[S.spreadKey];
+  for (let i = 0; i < sp.pos.length; i++) { if (!S.flipped[i]) { flip(i, i > 0); await wait(sp.pos.length > 5 ? 220 : 380); } }
+}
+
+/* ================= CALCULATIONS ================= */
+function numerology(q) {
+  if (!q.dob) return null;
+  const [y, m, d] = q.dob.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  const lp = reduceNum(reduceNum(d) + reduceNum(m) + reduceNum(y));
+  const chain = sum => { let n = sum; while (n > 22) n = digitSum(n); const out = []; if (n === 22) { out.push(0); n = 4; } out.push(n); while (n > 9) { n = digitSum(n); out.push(n); } return [...new Set(out)]; };
+  const year = new Date().getFullYear();
+  const birth = chain(m + d + y), yearCards = chain(m + d + year);
+  const wd = new Date(y, m - 1, d).getDay();
+  let nameNum = null;
+  if (q.name) {
+    const total = [...q.name.toUpperCase()].reduce((a, ch) => a + (LETTER_VAL[ch] || 0), 0);
+    if (total > 0) nameNum = { total, n: reduceNum(total) };
+  }
+  return { lp, birth, yearCards, year, day: THAI_DAYS[wd], nameNum, d, m, y };
+}
+function computeReading() {
+  const sp = SPREADS[S.spreadKey];
+  const cards = sp.pos.map((p, i) => { const c = S.deck[S.picks[i]]; return { card: DECK[c.id], rev: c.rev, pos: p, i }; });
+  const sums = { love: 0, career: 0, money: 0, health: 0, luck: 0 }; let wsum = 0;
+  const el = { fire: 0, water: 0, air: 0, earth: 0 };
+  let majors = 0, revs = 0, courts = 0;
+  const ranks = {}, suits = {};
+  cards.forEach(({ card, rev, pos }) => {
+    const val = rev ? card.vr : card.v, mult = card.major ? 1.3 : 1, w = pos.w;
+    ["love", "career", "money", "health"].forEach(d => sums[d] += val * card.aff[d] * mult * w);
+    sums.luck += val * mult * w * (card.id === 10 ? 1.8 : 1);
+    wsum += w;
+    el[card.el] += card.major ? 1.5 : 1;
+    if (card.major) majors++; else { ranks[card.rank] = (ranks[card.rank] || 0) + 1; suits[card.suit] = (suits[card.suit] || 0) + 1; if (card.rank > 10) courts++; }
+    if (rev) revs++;
+  });
+  const scores = {};
+  Object.keys(sums).forEach(d => scores[d] = Math.round(50 + 48 * Math.tanh(sums[d] / (wsum * 1.5))));
+  const overall = Math.round(DOMAINS.reduce((a, d) => a + scores[d.k], 0) / DOMAINS.length);
+  const num = numerology(S.q);
+  return { sp, cards, scores, overall, el, majors, revs, courts, ranks, suits, num, n: cards.length, date: new Date(), code: S.code, riffles: S.riffles, q: S.q, spreadKey: S.spreadKey };
+}
+const band = s => s >= 80 ? 0 : s >= 65 ? 1 : s >= 50 ? 2 : s >= 35 ? 3 : 4;
+const stars = s => { const n = clamp(Math.round(s / 20), 1, 5); return "★".repeat(n) + "☆".repeat(5 - n); };
+const cardLabel = (c, rev) => `${c.th}${c.major ? ` (${c.en})` : ""}${rev ? " กลับหัว" : ""}`;
+function luckyNumbers(R) {
+  const keyCard = R.cards[R.sp.key].card, outCard = R.cards[R.sp.out].card;
+  const kn = keyCard.major ? keyCard.num : keyCard.rank, on = outCard.major ? outCard.num : outCard.rank;
+  const base = R.num ? R.num.lp : (parseInt(R.code.slice(0, 2), 16) % 9) + 1;
+  const a = base % 10, b = kn % 10, c = on % 10;
+  const two = [`${a}${c}`, `${c}${b}`];
+  if (two[0] === two[1]) two[1] = `${(c + 5) % 10}${b}`;
+  return { two, three: `${a}${b}${c}` };
+}
+function domainOrder(sp) { const f = sp.focus; return f ? [...DOMAINS].sort((x, y) => (y.k === f) - (x.k === f) || (f === "career" && y.k === "money") - (f === "career" && x.k === "money")) : DOMAINS; }
+function narrative(R) {
+  const out = [];
+  const who = R.q.name ? esc(R.q.name) : "คุณ";
+  const ov = R.overall;
+  const tone = ov >= 75 ? "ไพ่ทั้งชุดส่องแสงเข้าข้าง ภาพรวมของคำถามนี้สว่างและมีแรงผลักดันสูง"
+    : ov >= 60 ? "ภาพรวมเอนไปทางบวก มีทางไปต่อที่ชัดเจน แม้จะมีบางจุดต้องระวัง"
+    : ov >= 45 ? "ไพ่ชุดนี้ผสมทั้งแสงและเงา ผลลัพธ์ขึ้นกับการเลือกของคุณมากกว่าโชคชะตา"
+    : ov >= 30 ? "ไพ่เตือนว่าช่วงนี้มีแรงต้านมาก ต้องใช้ความอดทนและการวางแผน"
+    : "ไพ่ชุดนี้เป็นพายุ แต่พายุมีไว้ล้างของเก่าเพื่อเปิดทางให้สิ่งใหม่";
+  out.push(`${R.q.text ? `${who}ถามว่า “${esc(R.q.text)}” ` : ""}${tone}`);
+  const K = R.cards[R.sp.key], O = R.cards[R.sp.out];
+  out.push(`หัวใจของการเปิดไพ่ครั้งนี้คือ <b>${esc(cardLabel(K.card, K.rev))}</b> ในตำแหน่ง “${esc(K.pos.k)}” ${esc(K.rev ? K.card.rv : K.card.up)}`);
+  if (R.sp.challenge !== undefined) { const C = R.cards[R.sp.challenge]; out.push(`แรงที่ตัดผ่านเรื่องนี้คือ <b>${esc(cardLabel(C.card, C.rev))}</b> สิ่งที่ต้องข้ามให้ได้คือ ${esc((C.rev ? C.card.kwR : C.card.kwU).split(" · ")[0])}`); }
+  if (O !== K) out.push(`ปลายทางที่ไพ่ชี้ไปคือ <b>${esc(cardLabel(O.card, O.rev))}</b> ในตำแหน่ง “${esc(O.pos.k)}” พลังหลักคือ ${esc(O.rev ? O.card.kwR : O.card.kwU)}`);
+  const extra = [];
+  if (R.n >= 3) {
+    if (R.majors / R.n >= .5) extra.push(`ไพ่ชุดใหญ่ปรากฏถึง ${R.majors} จาก ${R.n} ใบ เรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิต มีแรงที่ใหญ่กว่าตัวคุณกำลังทำงานอยู่`);
+    else if (R.majors === 0) extra.push(`ไม่มีไพ่ชุดใหญ่เลย เรื่องนี้อยู่ในระดับชีวิตประจำวัน และอยู่ในมือคุณเกือบทั้งหมด`);
+    else extra.push(`มีไพ่ชุดใหญ่ ${R.majors} ใบผสมกับไพ่ชุดเล็ก ทั้งโชคชะตาและการกระทำของคุณมีส่วนพอๆ กัน`);
+    if (R.revs / R.n >= .5) extra.push(`ไพ่กลับหัว ${R.revs} ใบ พลังส่วนใหญ่ยังติดขัดหรือทำงานอยู่ข้างใน ให้เวลาตัวเองคลายปมก่อนเร่ง`);
+    else if (R.revs === 0) extra.push(`ไม่มีไพ่กลับหัวเลย พลังไหลตรงไม่มีอะไรกั้น`);
+  }
+  if (extra.length) out.push(extra.join(" "));
+  const els = Object.entries(R.el).sort((a, b) => b[1] - a[1]);
+  let elTxt = EL[els[0][0]].dom;
+  if (R.n >= 5) { const miss = els.filter(e => e[1] === 0).map(e => EL[e[0]].miss); if (miss.length) elTxt += " ส่วน" + miss.join(" และ"); }
+  if (R.n >= 2) out.push(elTxt);
+  if (R.num) {
+    const N = R.num, hits = [];
+    R.cards.forEach(({ card }) => {
+      if (card.major && N.birth.includes(card.num)) hits.push(`ไพ่ประจำตัวของคุณ <b>${esc(card.th)}</b> ปรากฏในการเปิดไพ่ครั้งนี้ เรื่องนี้เกี่ยวกับตัวตนแท้ของคุณโดยตรง`);
+      if (card.major && N.yearCards.includes(card.num) && !N.birth.includes(card.num)) hits.push(`ไพ่ประจำปี ${N.year} ของคุณ <b>${esc(card.th)}</b> ปรากฏ คำตอบนี้คือบทเรียนหลักของปีนี้`);
+      if (card.id === N.day.card) hits.push(`<b>${esc(card.th)}</b> คือไพ่ของ${N.day.planet} ดาวประจำวันเกิดของคุณ ดาวของคุณกำลังส่งเสียงผ่านไพ่ใบนี้`);
+    });
+    if (hits.length) out.push([...new Set(hits)].join(" "));
+  }
+  const A = R.cards[R.sp.adv];
+  const adv = A.card.major ? A.card.adv : A.card.adv + (A.rev ? ` แต่ระวังเรื่อง${A.card.kwR.split(" · ")[0]}` : "");
+  return { paras: out, advice: `คำแนะนำจาก${esc(A.card.th)}: ${esc(adv)}` };
+}
+function finishReading() {
+  const R = computeReading();
+  S.reading = R;
+  saveHistory(R);
+  renderReading(R);
+}
+
+/* ================= RENDER READING ================= */
+function renderReading(R) {
+  const el = $("#reading");
+  const N = narrative(R);
+  const ord = domainOrder(R.sp);
+  const ringC = 2 * Math.PI * 52, ov = R.overall;
+  const ovLabel = ov >= 75 ? "ดวงรุ่ง" : ov >= 60 ? "ดวงดี" : ov >= 45 ? "ดวงกลางๆ" : ov >= 30 ? "ดวงมีแรงต้าน" : "ช่วงพายุ";
+  const lucky = luckyNumbers(R);
+  const elTotal = Object.values(R.el).reduce((a, b) => a + b, 0) || 1;
+  const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
+  const lc = EL[domEl].lucky;
+  const dateStr = R.date.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
+  const patterns = [];
+  Object.entries(R.ranks).forEach(([r, n]) => { if (n >= 2) patterns.push(`${r == 1 ? "เอซ" : r > 10 ? COURT_TH[r - 11] : "เลข " + r} ซ้ำ ${n} ใบ: ${RANK_MEANING[r - 1]}`); });
+  if (R.courts >= 2) patterns.push(`ไพ่ราชสำนัก ${R.courts} ใบ: ผู้คนรอบตัวมีบทบาทสูงในเรื่องนี้`);
+  const suitTop = Object.entries(R.suits).sort((a, b) => b[1] - a[1])[0];
+  if (suitTop && suitTop[1] >= 3) { const s = SUITS.find(x => x.key === suitTop[0]); patterns.push(`ชุด${s.th}เด่นที่สุด (${suitTop[1]} ใบ): ${EL[s.el].dom.replace(/^พลัง\S+นำ /, "")}`); }
+  const num = R.num;
+  const numHTML = num ? `
+    <div class="num-item"><div class="big">${num.lp}</div><div><b>เลขเส้นทางชีวิต · ${LIFE_PATH[num.lp][0]}</b><p>${LIFE_PATH[num.lp][1]}</p><div class="lbl">${num.d}/${num.m}/${num.y} → ลดรูปวัน เดือน ปี แล้วรวมกัน</div></div></div>
+    <div class="num-item"><div class="big">${ROMAN[num.birth[0]]}</div><div><b>ไพ่ประจำตัว · ${num.birth.map(n => esc(DECK[n].th)).join(" และ ")}</b><p>${esc(DECK[num.birth[0]].kwU)}</p><div class="lbl">เดือน + วัน + ปีเกิด = ${num.m + num.d + num.y} แล้วรวมหลักจนไม่เกิน 22</div></div></div>
+    <div class="num-item"><div class="big">${ROMAN[num.yearCards[0]]}</div><div><b>ไพ่ประจำปี ${num.year} · ${esc(DECK[num.yearCards[0]].th)}</b><p>ธีมของปีนี้: ${esc(DECK[num.yearCards[0]].kwU)}</p><div class="lbl">เดือน + วันเกิด + ปีปัจจุบัน = ${num.m + num.d + num.year}</div></div></div>
+    <div class="num-item"><div class="big"><span class="swatch" style="background:${num.day.hex};margin:0;width:22px;height:22px"></span></div><div><b>เกิดวัน${num.day.th} · ดาว${num.day.planet.replace("ดาว", "")}</b><p>สีประจำวันเกิดคือสี${num.day.color} ไพ่ประจำดาวคือ ${esc(DECK[num.day.card].th)}</p></div></div>
+    ${num.nameNum ? `<div class="num-item"><div class="big">${num.nameNum.n}</div><div><b>เลขศาสตร์ชื่อ “${esc(R.q.name)}”</b><p>ผลรวมตัวอักษร ${num.nameNum.total} → ${num.nameNum.n} · ${LIFE_PATH[num.nameNum.n] ? LIFE_PATH[num.nameNum.n][0] : ""}</p><div class="lbl">ไทยใช้ค่าตัวอักษรตามตำราเลขศาสตร์ อังกฤษใช้ระบบพีทาโกรัส</div></div></div>` : ""}`
+    : `<p class="muted">ไม่ได้กรอกวันเกิด จึงยังไม่ได้คำนวณเลขเส้นทางชีวิต ไพ่ประจำตัว และไพ่ประจำปี เริ่มเปิดไพ่ใหม่แล้วกรอกวันเกิดเพื่อดูส่วนนี้</p>`;
+
+  el.innerHTML = `
+    <div class="reading-head">
+      <div class="eyebrow">Step V · The Reading</div>
+      <h2>${R.q.text ? "“" + esc(R.q.text) + "”" : "คำทำนายสำหรับ" + (R.q.name ? esc(R.q.name) : "คุณ")}</h2>
+      <div class="chips">
+        ${R.q.name ? `<span class="chip">ผู้ถาม <b>${esc(R.q.name)}</b></span>` : ""}
+        <span class="chip">${esc(R.sp.name)}</span>
+        <span class="chip">${dateStr}</span>
+        <span class="chip">สับ <b>${R.riffles}</b> ครั้ง</span>
+        <span class="chip">รหัสพิธี <b>${R.code}</b></span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel verdict">
+        <h3><small>Fate Score</small>คะแนนดวงชะตา</h3>
+        <div class="ring-row">
+          <svg class="ring" viewBox="0 0 128 128" aria-hidden="true">
+            <circle cx="64" cy="64" r="52" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/>
+            <circle cx="64" cy="64" r="52" fill="none" stroke="url(#gGoldH)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(ringC * ov / 100).toFixed(1)} ${ringC.toFixed(1)}" transform="rotate(-90 64 64)"/>
+            <text x="64" y="62" text-anchor="middle" font-family="Cinzel, serif" font-size="34" font-weight="700" fill="#fff0c2">${ov}</text>
+            <text x="64" y="84" text-anchor="middle" font-family="Cinzel, serif" font-size="10" letter-spacing="2" fill="#aea8cc">/ 100</text>
+          </svg>
+          <div class="ring-txt"><b>${ovLabel}</b><span>ค่าเฉลี่ยห้าด้าน คำนวณจากพลังของไพ่แต่ละใบ ทิศตั้งตรงหรือกลับหัว น้ำหนักตำแหน่ง และไพ่ชุดใหญ่มีน้ำหนักมากกว่า</span></div>
+        </div>
+        <div class="dom">${ord.map(d => { const s = R.scores[d.k]; return `<div class="dom-row"><span>${d.th}</span><div class="bar"><i class="${s >= 60 ? "good" : s >= 45 ? "mid" : "low"}" style="width:${s}%"></i></div><span class="stars"><span class="val">${s}</span></span></div>`; }).join("")}</div>
+        <div class="dom-notes">${ord.map(d => `<p><b>${d.th} <span class="stars" style="color:var(--gold);font-family:var(--f-sym)">${stars(R.scores[d.k])}</span></b><br>${DOMAIN_TXT[d.k][band(R.scores[d.k])]}</p>`).join("")}</div>
+      </div>
+      <div class="panel narrative">
+        <h3><small>The Oracle Speaks</small>บทอ่านจากหอดารา</h3>
+        ${N.paras.map(p => `<p>${p}</p>`).join("")}
+        <p class="advice">${N.advice}</p>
+      </div>
+    </div>
+    <div class="panel">
+      <h3><small>Card by Card</small>ไพ่แต่ละตำแหน่ง</h3>
+      <div class="pos-list">${R.cards.map(({ card, rev, pos, i }) => `
+        <div class="pos-row">
+          <button type="button" class="mini${rev ? " rev" : ""}" data-modal="${i}" aria-label="ดู ${esc(card.en)} แบบเต็ม">${cardFront(card)}</button>
+          <div>
+            <div class="where">POSITION ${i + 1} · <span>${esc(pos.k)}: ${esc(pos.d)}</span></div>
+            <h4>${esc(card.th)}<span class="en">${esc(card.en)}</span><span class="tag ${rev ? "rv" : "up"}">${rev ? "กลับหัว" : "ตั้งตรง"}</span></h4>
+            <div class="kw">${esc(rev ? card.kwR : card.kwU)}</div>
+            <p>${esc(rev ? card.rv : card.up)}</p>
+            <div class="ctx">ธาตุ${EL[card.el].th} · ${card.major ? "ไพ่ชุดใหญ่ ลำดับ " + ROMAN[card.num] : "ชุด" + SUITS[card.suitIdx].th + " · " + RANK_MEANING[card.rank - 1]}</div>
+          </div>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3><small>Elemental Balance</small>สมดุลธาตุและองค์ประกอบ</h3>
+        <div class="elements">${["fire", "water", "air", "earth"].map(k => `<div class="el-row"><span>ธาตุ${EL[k].th}</span><div class="bar"><i style="width:${(R.el[k] / elTotal * 100).toFixed(0)}%;background:${EL[k].color}"></i></div><span class="n">${Math.round(R.el[k] / elTotal * 100)}%</span></div>`).join("")}</div>
+        <div class="facts">
+          <div class="fact"><b>${R.majors}/${R.n}</b><span>ไพ่ชุดใหญ่</span></div>
+          <div class="fact"><b>${R.revs}/${R.n}</b><span>ไพ่กลับหัว</span></div>
+          <div class="fact"><b>${R.courts}</b><span>ไพ่ราชสำนัก</span></div>
+        </div>
+        <ul class="bullets">
+          <li>${EL[domEl].dom}</li>
+          ${patterns.map(p => `<li>${esc(p)}</li>`).join("")}
+          <li class="muted">ไพ่ชุดใหญ่นับน้ำหนักธาตุ 1.5 เท่าของไพ่ชุดเล็ก</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3><small>Numerology</small>เลขศาสตร์และไพ่ประจำตัว</h3>
+        <div class="numer">${numHTML}</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3><small>Talismans</small>สิ่งนำโชคจากการเปิดไพ่ครั้งนี้</h3>
+      <div class="lucky">
+        <div class="item"><span>เลขนำโชค 2 ตัว</span><b class="num">${lucky.two.join(" · ")}</b></div>
+        <div class="item"><span>เลขนำโชค 3 ตัว</span><b class="num">${lucky.three}</b></div>
+        <div class="item"><span>สีเสริมดวง (ธาตุ${EL[domEl].th})</span><b><span class="swatch" style="background:${lc[1]}"></span>${lc[0]}</b><span><span class="swatch" style="background:${lc[3]}"></span>${lc[2]}</span></div>
+        <div class="item"><span>${num ? "สีประจำวันเกิด" : "ธาตุนำ"}</span><b>${num ? `<span class="swatch" style="background:${num.day.hex}"></span>${num.day.color}` : "ธาตุ" + EL[domEl].th}</b><span>${num ? "วัน" + num.day.th : ""}</span></div>
+      </div>
+    </div>
+    <div class="btn-row center-row">
+      <button class="btn" type="button" id="btn-again">เปิดไพ่ใหม่</button>
+      <button class="btn ghost" type="button" id="btn-copy">คัดลอกคำทำนาย</button>
+    </div>
+    <p class="foot-note">ไพ่ทาโรต์เป็นเครื่องมือสะท้อนความคิดและเพื่อความบันเทิง การตัดสินใจสำคัญเรื่องสุขภาพ เงิน และกฎหมาย ควรปรึกษาผู้เชี่ยวชาญ</p>`;
+  el.hidden = false;
+  $("#reveal-eyebrow").textContent = "Step IV · Revealed";
+  $("#reveal-title").textContent = "ไพ่ทั้งหมดเปิดแล้ว";
+  $("#reveal-hint").textContent = "แตะไพ่ใบไหนก็ได้เพื่อดูความหมายเต็ม เลื่อนลงเพื่ออ่านคำทำนาย";
+  goStage("reading");
+  $$("[data-modal]", el).forEach(b => b.addEventListener("click", () => openModal(+b.dataset.modal)));
+  $("#btn-again").addEventListener("click", () => { goStage("ask"); renderHistory(); });
+  $("#btn-copy").addEventListener("click", () => copyReading(R, N));
+  setTimeout(() => el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }), 300);
+}
+function copyReading(R, N) {
+  const strip = s => s.replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  const lines = [
+    "หอดาราทาโรต์ · " + R.sp.name + " · " + R.date.toLocaleDateString("th-TH"),
+    R.q.text ? "คำถาม: " + R.q.text : "",
+    "",
+    ...R.cards.map(({ card, rev, pos, i }) => `${i + 1}. ${pos.k}: ${card.th} (${card.en})${rev ? " กลับหัว" : ""} · ${rev ? card.kwR : card.kwU}`),
+    "",
+    "คะแนนรวม " + R.overall + "/100 · " + DOMAINS.map(d => d.th + " " + R.scores[d.k]).join(" · "),
+    "",
+    ...N.paras.map(strip), strip(N.advice),
+    "", "รหัสพิธี " + R.code
+  ].filter((l, i, a) => l !== "" || a[i - 1] !== "");
+  const text = lines.join("\n");
+  const done = () => toast("คัดลอกคำทำนายแล้ว");
+  try {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text));
+  } catch (e) { fallbackCopy(text); }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) { }
+  ta.remove(); toast(ok ? "คัดลอกคำทำนายแล้ว" : "คัดลอกไม่ได้ในหน้าต่างนี้ ลองเลือกข้อความเอง");
+}
+
+/* ================= MODAL ================= */
+function openModal(i) {
+  const R = S.reading;
+  const sp = SPREADS[S.spreadKey];
+  const c = S.deck[S.picks[i]], card = DECK[c.id], rev = c.rev, pos = sp.pos[i];
+  $("#modal-box").innerHTML = `
+    <button class="icon-btn close-x" type="button" id="modal-close">ปิด</button>
+    <div class="bigcard${rev ? " rev" : ""}">${cardFront(card)}</div>
+    <div>
+      <div class="eyebrow">Position ${i + 1} · ${esc(pos.k)}</div>
+      <h3 id="modal-title">${esc(card.th)}</h3>
+      <div class="en">${esc(card.en)}${card.major ? " · " + ROMAN[card.num] : ""}</div>
+      <p class="muted" style="font-size:14px">${esc(pos.d)}</p>
+      <p><span class="tag ${rev ? "rv" : "up"}" style="margin-left:0">${rev ? "กลับหัว" : "ตั้งตรง"}</span></p>
+      <div class="kw">${esc(rev ? card.kwR : card.kwU)}</div>
+      <p>${esc(rev ? card.rv : card.up)}</p>
+      <dl>
+        <dt>ความหมายอีกทิศ</dt><dd>${esc(rev ? card.kwU : card.kwR)}</dd>
+        <dt>ธาตุ</dt><dd>${EL[card.el].th}</dd>
+        ${card.major ? `<dt>สัญลักษณ์</dt><dd style="font-family:var(--f-sym)">${card.glyph}&#xFE0E;</dd>` : `<dt>ชุด</dt><dd>${SUITS[card.suitIdx].th} (${SUITS[card.suitIdx].en})</dd>`}
+        <dt>คำแนะนำ</dt><dd>${esc(card.adv)}</dd>
+        ${R ? `<dt>พลังต่อดวง</dt><dd>${((rev ? card.vr : card.v) >= 0 ? "+" : "") + (rev ? card.vr : card.v).toFixed(1)} (สเกล −3 ถึง +3)</dd>` : ""}
+      </dl>
+    </div>`;
+  const m = $("#modal"); m.hidden = false;
+  $("#modal-close").focus();
+  $("#modal-close").addEventListener("click", closeModal);
+}
+function closeModal() { $("#modal").hidden = true; }
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("#modal").hidden) closeModal(); });
+
+/* ================= HISTORY ================= */
+const HKEY = "astral-tarot-history-v1";
+function saveHistory(R) {
+  const list = store(HKEY) || [];
+  list.unshift({ t: R.date.getTime(), sp: R.spreadKey, q: R.q, picks: R.cards.map(({ card, rev }) => [card.id, rev ? 1 : 0]), ov: R.overall, code: R.code, r: R.riffles });
+  store(HKEY, list.slice(0, 12));
+}
+function renderHistory() {
+  const list = store(HKEY) || [];
+  const box = $("#history");
+  box.hidden = !list.length;
+  $("#history-list").innerHTML = list.map((h, i) => `<li><button type="button" data-h="${i}">
+    <span>${esc(h.q.text || SPREADS[h.sp].name)}</span>
+    <span class="meta">${new Date(h.t).toLocaleDateString("th-TH", { day: "numeric", month: "short" })} · ${esc(SPREADS[h.sp].name)} · ${h.ov}/100</span></button></li>`).join("");
+  $$("#history-list button").forEach(b => b.addEventListener("click", () => reopen(list[+b.dataset.h])));
+}
+function reopen(h) {
+  S.spreadKey = h.sp; S.q = h.q; S.code = h.code; S.riffles = h.r;
+  S.deck = h.picks.map(([id, rev]) => ({ id, rev: !!rev }));
+  S.picks = S.deck.map((_, i) => i);
+  S.flipped = S.deck.map(() => true);
+  goStage("reveal");
+  $("#reveal-controls").hidden = true;
+  buildBoard(SPREADS[h.sp], true);
+  const R = computeReading(); R.date = new Date(h.t);
+  S.reading = R;
+  renderReading(R);
+}
+
+/* ================= WIRING ================= */
+$("#defs-host").innerHTML = DEFS;
+initAsk();
+$("#btn-riffle").addEventListener("click", () => doRiffles(1));
+$("#btn-riffle-many").addEventListener("click", () => { let k = 0; while (tvDistance(78, S.riffles + k) > .1 && k < 12) k++; doRiffles(Math.max(k, 3)); });
+$("#btn-cut").addEventListener("click", cutDeck);
+$("#btn-reveal-all").addEventListener("click", revealAll);
+$("#sound-btn").addEventListener("click", e => {
+  Sound.on = !Sound.on;
+  e.currentTarget.textContent = "เสียง: " + (Sound.on ? "เปิด" : "ปิด");
+  e.currentTarget.setAttribute("aria-pressed", Sound.on);
+  store("astral-tarot-sound", Sound.on);
+});
+(() => { const s = store("astral-tarot-sound"); if (s === false) { Sound.on = false; $("#sound-btn").textContent = "เสียง: ปิด"; $("#sound-btn").setAttribute("aria-pressed", "false"); } })();
+let rT; addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(() => { if (S.stage === "pick") layoutFan(false); }, 120); });
+goStage("ask");
+</script>
