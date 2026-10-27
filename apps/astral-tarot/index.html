@@ -331,6 +331,27 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shad
 .modal-box dt { color: var(--mist); }
 .modal-box dd { margin: 0; }
 .close-x { position: absolute; top: 10px; right: 12px; }
+/* ---------- question understanding + answer ---------- */
+.qa { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; background: rgba(232,196,106,.04); }
+.qa-lead { font-size: 13.5px; color: var(--gold-hi); }
+.qa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.qa-f { display: grid; gap: 3px; font-size: 12.5px; color: var(--mist); min-width: 0; }
+.qa-f select, .qa-f input { font: inherit; font-size: 14px; color: var(--ivory); background: rgba(7,8,20,.55); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; }
+.qa-f select:focus, .qa-f input:focus { outline: none; border-color: var(--gold); }
+.qa-suggest { font-size: 13.5px; color: var(--mist); }
+.qa-suggest:empty { display: none; }
+.qa-suggest b { color: var(--gold-hi); }
+.answer { border-color: var(--line-strong); }
+.answer .ans-meta { font-size: 13.5px; color: var(--mist); margin: 4px 0 6px; }
+.answer .ans-head, .ans-inline { font-size: clamp(21px, 3vw, 28px); font-weight: 700; line-height: 1.4; margin: 0 0 10px; color: var(--gold-hi); }
+.tone-good .ans-head, .ans-inline.tone-good { color: var(--good); }
+.tone-bad .ans-head, .ans-inline.tone-bad { color: var(--bad); }
+.answer p { margin: 0 0 8px; max-width: 72ch; }
+.answer b { color: var(--gold-hi); }
+.ans-bars { margin: 4px 0 12px; max-width: 520px; }
+.ans-bars .dom-row { grid-template-columns: minmax(70px, 140px) 1fr 44px; }
+.dom-row.asked span:first-child { color: var(--gold-hi); font-weight: 700; }
+.pos-row .rel, .modal-box .rel { color: var(--gold-hi); font-size: 14px; margin-top: 4px; }
 /* ---------- plain summary + storyteller ---------- */
 .term {
   font: inherit; color: var(--gold-hi); background: none; border: 0; padding: 0; cursor: help;
@@ -464,6 +485,19 @@ body.story-open .wrap { padding-bottom: 56vh; }
             <textarea id="q-text" placeholder="เช่น งานใหม่ที่กำลังตัดสินใจ จะพาชีวิตไปในทางที่ดีไหม"></textarea>
             <span class="hint">ใส่ชื่อและวันเกิดเพื่อให้คำนวณเลขศาสตร์ ไพ่ประจำตัว และไพ่ประจำปีได้ ถ้าเว้นว่างจะอ่านเฉพาะไพ่</span>
           </div>
+          <div class="qa" id="qa">
+            <div class="qa-lead" id="qa-lead">หมอเข้าใจคำถามว่า</div>
+            <div class="qa-grid">
+              <label class="qa-f"><span>ถามเรื่องของ</span><select id="qa-subject"><option value="self">ตัวคุณเอง</option><option value="other">คนอื่น</option></select></label>
+              <label class="qa-f" id="qa-w-wrap"><span>เรียกเขาว่า</span><input type="text" id="qa-w" maxlength="24" placeholder="เช่น แฟน หัวหน้า"></label>
+              <label class="qa-f"><span>หมวด</span><select id="qa-topic"></select></label>
+              <label class="qa-f"><span>แบบคำถาม</span><select id="qa-type"></select></label>
+              <label class="qa-f" id="qa-a-wrap"><span>ทางเลือก A</span><input type="text" id="qa-a" maxlength="40"></label>
+              <label class="qa-f" id="qa-b-wrap"><span>ทางเลือก B</span><input type="text" id="qa-b" maxlength="40"></label>
+            </div>
+            <div class="qa-suggest" id="qa-suggest"></div>
+          </div>
+
           <div class="field">
             <span class="legend" id="spread-legend">รูปแบบการวางไพ่</span>
             <div class="spreads" id="spreads" role="radiogroup" aria-labelledby="spread-legend"></div>
@@ -790,13 +824,18 @@ const SUIT_PLAIN = {
   pentacles: "ชุดเหรียญเป็นธาตุดิน พูดถึงเงิน งาน ร่างกาย และสิ่งที่จับต้องได้"
 };
 const COURT_PLAIN = ["มหาดเล็กคือผู้เริ่มเรียนรู้ มักมาพร้อมข่าวสารหรือความอยากรู้", "อัศวินคือคนที่กำลังเคลื่อนไหว ไล่ตามเป้าหมายอย่างเต็มกำลัง", "ราชินีคือคนที่เข้าใจพลังของชุดนี้อย่างลึกซึ้งและใช้มันโอบอุ้มคนอื่น", "ราชาคือคนที่ควบคุมพลังของชุดนี้ได้เต็มที่และใช้มันนำผู้อื่น"];
-/* how each position reads as one sentence of the story; {kw} = the card's main keyword */
+/* how each position reads as one sentence of the story; {kw} = the card's main keyword in quotes.
+   {w} = the other person as named in the question, {o} = that person or "อีกฝ่าย", {A}/{B} = the two choices */
 const STORY = {
-  daily: ["วันนี้พลังหลักของคุณคือ{kw}"],
-  ppf: ["เรื่องนี้เริ่มต้นมาจาก{kw}", "ตอนนี้คุณกำลังอยู่ในช่วงของ{kw}", "และถ้าเดินทางนี้ต่อไป สิ่งที่รออยู่คือ{kw}"],
-  love: ["ฝั่งคุณตอนนี้มีพลังของ{kw}", "ฝั่งอีกคนมีพลังของ{kw}", "สิ่งที่เชื่อมคุณสองคนไว้คือ{kw}", "สิ่งที่ต้องข้ามไปด้วยกันคือ{kw}", "และความสัมพันธ์มีแนวโน้มไปทาง{kw}"],
-  career: ["งานของคุณตอนนี้อยู่ในช่วง{kw}", "เรื่องเงินมีพลังของ{kw}", "ของดีที่คุณมีอยู่ในมือคือ{kw}", "สิ่งที่ขวางทางอยู่คือ{kw}", "ผลที่น่าจะเกิดใน 1–3 เดือนคือ{kw}"],
-  celtic: ["หัวใจของเรื่องตอนนี้คือ{kw}", "แต่มีแรงขวางคือ{kw}", "ลึกๆ แล้วต้นเหตุมาจาก{kw}", "สิ่งที่เพิ่งผ่านไปคือ{kw}", "สิ่งที่คุณหวังไว้คือ{kw}", "อีกไม่นานจะเจอ{kw}", "ตัวคุณเองตอนนี้มีท่าทีแบบ{kw}", "คนรอบตัวส่งผลแบบ{kw}", "ในใจคุณทั้งหวังและกลัวเรื่อง{kw}", "สุดท้ายเรื่องนี้มีแนวโน้มจบที่{kw}"]
+  daily: ["พลังหลักของวันนี้คือ{kw}"],
+  yesno: [["แรงที่หนุนอยู่คือ{kw}", "สิ่งที่ควรเป็นแรงหนุนกลับออกมาเป็น{kw} จึงยังช่วยได้ไม่เต็มที่"], "ไพ่คำตอบคือ{kw}", ["แรงที่ขวางเบาบาง เพราะออกมาเป็น{kw}", "ส่วนแรงที่ขวางอยู่คือ{kw}"]],
+  ppf: ["เรื่องนี้มีรากมาจาก{kw}", "ตอนนี้สถานการณ์อยู่ในพลังของ{kw}", "ถ้าเดินต่อในทางนี้ ปลายทางจะเป็นพลังของ{kw}"],
+  mind: ["ในความคิดของ{w} คุณทำให้นึกถึง{kw}", "ลึกๆ ในใจ{w}รู้สึกถึง{kw}", "สิ่งที่{w}ยังไม่พูดออกมาคือ{kw}", "และสิ่งที่{w}น่าจะทำต่อไปคือ{kw}"],
+  love: ["ฝั่งคุณตอนนี้มีพลังของ{kw}", "ฝั่ง{o}มีพลังของ{kw}", "สิ่งที่เชื่อมคุณทั้งสองไว้คือ{kw}", ["บททดสอบไม่หนัก เพราะออกมาเป็น{kw}", "บททดสอบที่ต้องข้ามไปด้วยกันคือ{kw}"], "และความสัมพันธ์มีแนวโน้มไปทาง{kw}"],
+  career: ["งานตอนนี้อยู่ในพลังของ{kw}", "เรื่องเงินมีพลังของ{kw}", ["ของดีที่มีอยู่ในมือคือ{kw}", "จุดแข็งยังไม่ได้ใช้เต็มที่ เพราะติดอยู่กับ{kw}"], ["สิ่งที่ขวางทางเบาบาง เพราะออกมาเป็น{kw}", "สิ่งที่ขวางทางอยู่คือ{kw}"], "ผลที่น่าจะเกิดใน 1–3 เดือนคือ{kw}"],
+  choice: ["ตอนนี้ใจคุณอยู่ที่{kw}", "ถ้าเลือก{A} ช่วงแรกจะเจอ{kw}", "และปลายทางของ{A}คือ{kw}", "ถ้าเลือก{B} ช่วงแรกจะเจอ{kw}", "และปลายทางของ{B}คือ{kw}"],
+  problem: ["แก่นของปัญหาจริงๆ คือ{kw}", "ต้นเหตุมาจาก{kw}", ["สิ่งที่ช่วยคลี่คลายได้คือ{kw}", "ตัวช่วยยังไม่พร้อม เพราะติดอยู่กับ{kw} ต้องพึ่งตัวเองก่อน"], ["ก้าวแรกที่ไพ่ชี้คือ{kw}", "ก้าวแรกคือจัดการเรื่อง{kw}ให้ได้ก่อน"]],
+  celtic: ["หัวใจของเรื่องตอนนี้คือ{kw}", ["แรงขวางไม่หนัก เพราะออกมาเป็น{kw}", "แต่มีแรงขวางคือ{kw}"], "ลึกๆ แล้วต้นเหตุมาจาก{kw}", "สิ่งที่เพิ่งผ่านพ้นไปคือ{kw}", "สิ่งที่หวังไว้คือ{kw}", "อีกไม่นานจะได้เจอกับ{kw}", "ท่าทีของคุณเองตอนนี้คือ{kw}", "คนรอบตัวส่งพลังของ{kw}มาให้", "ในใจคุณทั้งหวังและกลัวเรื่อง{kw}", "สุดท้ายเรื่องนี้มีแนวโน้มจบที่{kw}"]
 };
 const GLOSS = {
   major: ["ไพ่ชุดใหญ่", "ไพ่ 22 ใบ (Major Arcana) ที่หมายถึงบทเรียนใหญ่และจุดเปลี่ยนของชีวิต ถ้าออกมาหลายใบ แปลว่าเรื่องนี้สำคัญกว่าเรื่องทั่วไป"],
@@ -830,30 +869,68 @@ SUITS.forEach((s, si) => MINOR[s.key].forEach((m, r) => {
   });
 }));
 DECK.forEach(c => { if (c.major) { c.img = MAJOR_IMG[c.num]; c.exU = MAJOR_EX[c.num][0]; c.exR = MAJOR_EX[c.num][1]; } });
-/* Spreads: positions in % of board (x, y), weight, label, meaning. aspect = width / height. cw = card width % of board width */
+/* Spreads: positions in % of board (x, y), weight, label, meaning. aspect = width / height. cw = card width % of board width.
+   ab = who the card speaks about: "s" the subject of the question, "self" the asker, "other" the other person, "both" the pair */
 const SPREADS = {
   daily: { name: "ไพ่ประจำวัน", sub: "1 ใบ · พลังของวัน", aspect: 1.5, cw: 22, max: 520, key: 0, out: 0, adv: 0, cap: true,
-    pos: [{ x: 50, y: 46, w: 1.2, k: "พลังของวันนี้", d: "บรรยากาศหลักและบทเรียนของวัน" }] },
+    pos: [{ x: 50, y: 46, w: 1.2, ab: "s", k: "พลังของวันนี้", d: "บรรยากาศหลักและบทเรียนของวัน" }] },
+  yesno: { name: "ใช่หรือไม่", sub: "3 ใบ · ตอบตรงๆ", aspect: 1.9, cw: 19, max: 760, key: 1, out: 1, adv: 2, cap: true,
+    pos: [{ x: 20, y: 44, w: 1, ab: "s", k: "แรงที่หนุน", d: "สิ่งที่ช่วยให้คำตอบเป็น “ใช่”" }, { x: 50, y: 44, w: 2, ab: "s", k: "ไพ่คำตอบ", d: "ไพ่ใบหลักที่ตอบคำถามโดยตรง" }, { x: 80, y: 44, w: 1, ab: "s", k: "แรงที่ขวาง", d: "สิ่งที่ฉุดคำตอบไปทาง “ไม่”" }] },
   ppf: { name: "อดีต ปัจจุบัน อนาคต", sub: "3 ใบ · เส้นเวลา", aspect: 1.9, cw: 19, max: 760, key: 1, out: 2, adv: 2, cap: true,
-    pos: [{ x: 20, y: 44, w: .7, k: "อดีต", d: "รากของเรื่อง สิ่งที่ส่งผลมาถึงตอนนี้" }, { x: 50, y: 44, w: 1, k: "ปัจจุบัน", d: "สถานการณ์และพลังที่อยู่ตรงหน้า" }, { x: 80, y: 44, w: 1.3, k: "อนาคต", d: "แนวโน้มถ้าเดินทางนี้ต่อไป" }] },
+    pos: [{ x: 20, y: 44, w: .7, ab: "s", k: "อดีต", d: "รากของเรื่อง สิ่งที่ส่งผลมาถึงตอนนี้" }, { x: 50, y: 44, w: 1, ab: "s", k: "ปัจจุบัน", d: "สถานการณ์และพลังที่อยู่ตรงหน้า" }, { x: 80, y: 44, w: 1.3, ab: "s", k: "อนาคต", d: "แนวโน้มถ้าเดินทางนี้ต่อไป" }] },
+  mind: { name: "ใจเขา", sub: "4 ใบ · เขาคิดยังไงกับคุณ", aspect: 1.6, cw: 16, max: 760, key: 1, out: 3, adv: 2, cap: true, focus: "love",
+    pos: [{ x: 14, y: 42, w: 1, ab: "other", k: "ความคิดของ{w}", d: "{who}คิดถึงคุณแบบไหน และมองคุณอย่างไร" }, { x: 38, y: 42, w: 1.3, ab: "other", k: "ความรู้สึกลึกๆ", d: "ความรู้สึกจริงในใจของ{who}ที่มีต่อคุณ" }, { x: 62, y: 42, w: .9, ab: "other", k: "สิ่งที่{w}ไม่พูด", d: "สิ่งที่{who}เก็บไว้ ยังไม่ยอมบอกคุณ" }, { x: 86, y: 42, w: 1.4, ab: "other", k: "สิ่งที่{w}จะทำ", d: "การกระทำที่น่าจะเกิดขึ้นจาก{who}ต่อจากนี้" }] },
   love: { name: "เส้นทางหัวใจ", sub: "5 ใบ · ความรัก", aspect: 1.25, cw: 15, max: 720, key: 2, out: 4, adv: 3, cap: true, focus: "love",
-    pos: [{ x: 18, y: 23, w: .9, k: "ตัวคุณ", d: "ใจและบทบาทของคุณในความรักนี้" }, { x: 82, y: 23, w: .9, k: "อีกฝ่าย", d: "ใจของอีกฝ่าย หรือคนที่กำลังจะเข้ามา" }, { x: 50, y: 23, w: 1.1, k: "สายสัมพันธ์", d: "พลังที่เชื่อมคุณทั้งสองไว้" }, { x: 32, y: 72, w: .9, k: "อุปสรรค", d: "สิ่งที่ต้องข้ามผ่านไปด้วยกัน" }, { x: 68, y: 72, w: 1.4, k: "แนวโน้ม", d: "ทิศทางของความสัมพันธ์ในอีกไม่กี่เดือน" }] },
+    pos: [{ x: 18, y: 23, w: .9, ab: "self", k: "ตัวคุณ", d: "ใจและบทบาทของคุณในความรักนี้" }, { x: 82, y: 23, w: .9, ab: "other", k: "{o}", d: "ใจของ{o} หรือคนที่กำลังจะเข้ามา" }, { x: 50, y: 23, w: 1.1, ab: "both", k: "สายสัมพันธ์", d: "พลังที่เชื่อมคุณทั้งสองไว้" }, { x: 32, y: 72, w: .9, ab: "both", k: "อุปสรรค", d: "สิ่งที่ต้องข้ามผ่านไปด้วยกัน" }, { x: 68, y: 72, w: 1.4, ab: "both", k: "แนวโน้ม", d: "ทิศทางของความสัมพันธ์ในอีกไม่กี่เดือน" }] },
   career: { name: "งานและการเงิน", sub: "5 ใบ · อาชีพ เงินทอง", aspect: 1.25, cw: 15, max: 720, key: 0, out: 4, adv: 2, cap: true, focus: "career",
-    pos: [{ x: 18, y: 23, w: 1, k: "สถานการณ์งาน", d: "ภาพรวมของงานตอนนี้" }, { x: 50, y: 23, w: 1, k: "การเงิน", d: "กระแสเงินและทรัพยากรที่มี" }, { x: 82, y: 23, w: .8, k: "จุดแข็ง", d: "สิ่งที่คุณมีและควรใช้" }, { x: 32, y: 72, w: .9, k: "สิ่งที่ขวาง", d: "ความท้าทายที่ต้องจัดการ" }, { x: 68, y: 72, w: 1.4, k: "ผลลัพธ์", d: "สิ่งที่จะเกิดขึ้นใน 1–3 เดือน" }] },
+    pos: [{ x: 18, y: 23, w: 1, ab: "s", k: "สถานการณ์งาน", d: "ภาพรวมของงานตอนนี้" }, { x: 50, y: 23, w: 1, ab: "s", k: "การเงิน", d: "กระแสเงินและทรัพยากรที่มี" }, { x: 82, y: 23, w: .8, ab: "s", k: "จุดแข็ง", d: "สิ่งที่มีอยู่และควรใช้" }, { x: 32, y: 72, w: .9, ab: "s", k: "สิ่งที่ขวาง", d: "ความท้าทายที่ต้องจัดการ" }, { x: 68, y: 72, w: 1.4, ab: "s", k: "ผลลัพธ์", d: "สิ่งที่จะเกิดขึ้นใน 1–3 เดือน" }] },
+  choice: { name: "สองทางเลือก", sub: "5 ใบ · เทียบ A กับ B", aspect: 1.35, cw: 14, max: 720, key: 0, out: 2, adv: 0, cap: true,
+    pos: [{ x: 50, y: 44, w: .8, ab: "self", k: "ใจคุณตอนนี้", d: "สภาพใจและสิ่งที่คุณต้องการจริงๆ" },
+      { x: 15, y: 24, w: 1, ab: "self", path: "A", k: "{A} · ช่วงแรก", d: "ถ้าเลือก{A} จะเจออะไรในช่วงแรก" }, { x: 15, y: 72, w: 1.4, ab: "self", path: "A", k: "{A} · ปลายทาง", d: "ผลลัพธ์ถ้าเลือก{A}" },
+      { x: 85, y: 24, w: 1, ab: "self", path: "B", k: "{B} · ช่วงแรก", d: "ถ้าเลือก{B} จะเจออะไรในช่วงแรก" }, { x: 85, y: 72, w: 1.4, ab: "self", path: "B", k: "{B} · ปลายทาง", d: "ผลลัพธ์ถ้าเลือก{B}" }] },
+  problem: { name: "ปัญหาและทางออก", sub: "4 ใบ · หาทางแก้", aspect: 1.6, cw: 16, max: 760, key: 0, out: 3, adv: 3, cap: true,
+    pos: [{ x: 14, y: 42, w: 1.1, ab: "s", k: "ปัญหาที่แท้จริง", d: "แก่นของปัญหา ซึ่งอาจไม่ใช่สิ่งที่เห็นภายนอก" }, { x: 38, y: 42, w: .8, ab: "s", k: "ต้นเหตุ", d: "สิ่งที่ทำให้ปัญหานี้เกิดขึ้น" }, { x: 62, y: 42, w: 1, ab: "s", k: "สิ่งที่ช่วยได้", d: "แรงหนุน คน หรือทรัพยากรที่ช่วยคลี่คลาย" }, { x: 86, y: 42, w: 1.3, ab: "self", k: "ก้าวแรก", d: "สิ่งที่คุณควรลงมือทำเป็นอย่างแรก" }] },
   celtic: { name: "กางเขนเซลติก", sub: "10 ใบ · อ่านเจาะลึก", aspect: 1, cw: 12.5, max: 620, key: 0, out: 9, adv: 6, cap: false, challenge: 1,
     pos: [
-      { x: 31, y: 50, w: 1.2, k: "สถานการณ์", d: "หัวใจของคำถาม สิ่งที่เกิดขึ้นตอนนี้" },
-      { x: 31, y: 50, w: 1, k: "สิ่งที่ขวาง", d: "แรงที่ตัดผ่าน ความท้าทายหลัก", rot: 90 },
-      { x: 31, y: 77, w: .7, k: "รากฐาน", d: "ต้นเหตุลึกๆ ที่อยู่ใต้เรื่องนี้" },
-      { x: 14, y: 50, w: .6, k: "อดีตที่ผ่านไป", d: "สิ่งที่เพิ่งผ่านพ้นและกำลังจางไป" },
-      { x: 31, y: 23, w: .9, k: "เป้าหมาย", d: "สิ่งที่คุณมุ่งหวัง หรือผลที่ดีที่สุดที่เป็นไปได้" },
-      { x: 48, y: 50, w: 1.1, k: "อนาคตใกล้", d: "สิ่งที่จะเกิดในอีกไม่นาน" },
-      { x: 80, y: 88, w: .9, k: "ตัวคุณ", d: "ท่าทีและมุมมองของคุณต่อเรื่องนี้" },
-      { x: 80, y: 63, w: .7, k: "สิ่งแวดล้อม", d: "คนรอบตัวและอิทธิพลภายนอก" },
-      { x: 80, y: 38, w: .8, k: "ความหวังและความกลัว", d: "สิ่งที่คุณหวังและกลัวไปพร้อมกัน" },
-      { x: 80, y: 13, w: 1.5, k: "ผลลัพธ์", d: "ปลายทางของเรื่องถ้าทุกอย่างดำเนินต่อไปแบบนี้" }
-    ] }
+      { x: 31, y: 50, w: 1.2, ab: "s", k: "สถานการณ์", d: "หัวใจของคำถาม สิ่งที่เกิดขึ้นตอนนี้" },
+      { x: 31, y: 50, w: 1, ab: "s", k: "สิ่งที่ขวาง", d: "แรงที่ตัดผ่าน ความท้าทายหลัก", rot: 90 },
+      { x: 31, y: 77, w: .7, ab: "s", k: "รากฐาน", d: "ต้นเหตุลึกๆ ที่อยู่ใต้เรื่องนี้" },
+      { x: 14, y: 50, w: .6, ab: "s", k: "อดีตที่ผ่านไป", d: "สิ่งที่เพิ่งผ่านพ้นและกำลังจางไป" },
+      { x: 31, y: 23, w: .9, ab: "s", k: "เป้าหมาย", d: "สิ่งที่มุ่งหวัง หรือผลที่ดีที่สุดที่เป็นไปได้" },
+      { x: 48, y: 50, w: 1.1, ab: "s", k: "อนาคตใกล้", d: "สิ่งที่จะเกิดในอีกไม่นาน" },
+      { x: 80, y: 88, w: .9, ab: "self", k: "ตัวคุณ", d: "ท่าทีและมุมมองของคุณต่อเรื่องนี้" },
+      { x: 80, y: 63, w: .7, ab: "s", k: "สิ่งแวดล้อม", d: "คนรอบตัวและอิทธิพลภายนอก" },
+      { x: 80, y: 38, w: .8, ab: "self", k: "ความหวังและความกลัว", d: "สิ่งที่คุณหวังและกลัวไปพร้อมกัน" },
+      { x: 80, y: 13, w: 1.5, ab: "s", k: "ผลลัพธ์", d: "ปลายทางของเรื่องถ้าทุกอย่างดำเนินต่อไปแบบนี้" }
+    ] },
+  year12: { name: "12 เดือนข้างหน้า", sub: "12 ใบ · ปฏิทินดวง", aspect: 1, cw: 10.5, max: 640, key: 0, out: 11, adv: 0, cap: false, months: true, pos: [] }
 };
+const TH_MONTH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+const TH_MONTH_S = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const DEFAULT_CTX = { subject: "self", w: "", topic: "general", type: "general", A: "ทางเลือก A", B: "ทางเลือก B" };
+/* turns a spread template into the concrete layout for one question: fills in names, choices and calendar months */
+function resolveSpread(key, ctx, base) {
+  ctx = { ...DEFAULT_CTX, ...(ctx || {}) };
+  const src = SPREADS[key], sp = { ...src, id: key };
+  let pos = src.pos, story = STORY[key];
+  if (src.months) {
+    const d0 = base ? new Date(base) : new Date();
+    pos = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(d0.getFullYear(), d0.getMonth() + i, 1), a = -Math.PI / 2 + i * Math.PI / 6, be = d.getFullYear() + 543;
+      return { x: 50 + 39 * Math.cos(a), y: 50 + 39 * Math.sin(a), w: 1, ab: "s", k: `${TH_MONTH_S[d.getMonth()]} ${String(be % 100).padStart(2, "0")}`, d: `ธีมหลักของเดือน${TH_MONTH[d.getMonth()]} ${be}`, month: `${TH_MONTH[d.getMonth()]} ${be}` };
+    });
+    story = pos.map(p => `เดือน${p.month} พลังหลักคือ{kw}`);
+  }
+  const other = ctx.w || "เขา", o = ctx.w || "อีกฝ่าย";
+  const short = s => s.length > 12 ? s.slice(0, 11) + "…" : s;
+  const fill = (s, label) => s.replace(/\{who\}/g, whoFull(other)).replace(/\{w\}/g, other).replace(/\{o\}/g, o)
+    .replace(/\{A\}/g, label ? short(ctx.A) : ctx.A).replace(/\{B\}/g, label ? short(ctx.B) : ctx.B);
+  sp.pos = pos.map(p => ({ ...p, k: fill(p.k), ks: fill(p.k, true), d: fill(p.d) }));
+  sp.story = story.map(s => Array.isArray(s) ? s.map(x => fill(x)) : fill(s));
+  sp.ctx = ctx;
+  return sp;
+}
+const whoFull = w => !w ? "เขา" : /^(เขา|เธอ|เค้า|คุณ)/.test(w) ? w : /^คนที่/.test(w) ? (w.includes("คุณ") ? w : w.replace(/^คนที่/, "คนที่คุณ")) : w + "ของคุณ";
 const LIFE_PATH = {
   1: ["ผู้บุกเบิก", "เกิดมาเพื่อนำและเริ่มต้นสิ่งใหม่ อิสระและความกล้าคือพลังหลัก"],
   2: ["ผู้ประสาน", "พลังแห่งความร่วมมือ ความอ่อนโยน และการมองเห็นใจคน"],
@@ -1223,23 +1300,210 @@ function goStage(name) {
   if (name !== "reading") scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
 }
 
+/* ================= QUESTION ENGINE ================= */
+/* reads a Thai question and guesses who it is about, its topic and what kind of answer it wants */
+const TOPICS = {
+  general: { th: "เรื่องทั่วไป", dom: null },
+  love: { th: "ความรัก", dom: "love" }, career: { th: "การงาน", dom: "career" }, study: { th: "การเรียน", dom: "career" },
+  money: { th: "การเงิน", dom: "money" }, health: { th: "สุขภาพ", dom: "health" }, family: { th: "ครอบครัว", dom: "love" }
+};
+const QTYPES = {
+  general: { th: "คำถามภาพรวม", spread: null }, yesno: { th: "คำถามใช่หรือไม่", spread: "yesno" },
+  timing: { th: "คำถามเรื่องเวลา", spread: "year12" }, choice: { th: "คำถามเลือกสองทาง", spread: "choice" },
+  mind: { th: "คำถามเรื่องใจเขา", spread: "mind" }, advice: { th: "คำถามขอคำแนะนำ", spread: "problem" }
+};
+/* longer words first so "ลูกค้า" wins over "ลูก" and "เพื่อนร่วมงาน" over "เพื่อน" */
+const PEOPLE = [
+  ["แฟนเก่า", "love"], ["แฟน", "love"], ["คนรัก", "love"], ["สามี", "love"], ["ภรรยา", "love"], ["เมีย", "love"], ["ผัว", "love"],
+  ["คนคุย", "love"], ["คนที่แอบชอบ", "love"], ["คนที่ชอบ", "love"], ["เนื้อคู่", "love"], ["คนที่คุยอยู่", "love"],
+  ["หัวหน้า", "career"], ["เจ้านาย", "career"], ["ลูกน้อง", "career"], ["เพื่อนร่วมงาน", "career"], ["ลูกค้า", "career"],
+  ["หุ้นส่วน", "career"], ["คู่แข่ง", "career"], ["อาจารย์", "study"], ["เพื่อนสนิท", null], ["เพื่อน", null],
+  ["คุณพ่อ", "family"], ["คุณแม่", "family"], ["พ่อ", "family"], ["แม่", "family"], ["ลูกสาว", "family"], ["ลูกชาย", "family"], ["ลูก", "family"],
+  ["พี่สาว", "family"], ["พี่ชาย", "family"], ["น้องสาว", "family"], ["น้องชาย", "family"], ["ครอบครัว", "family"], ["ญาติ", "family"],
+  ["เขา", null], ["เธอ", null], ["เค้า", null]
+];
+const SELF_RE = /ฉัน|ผม|เรา|หนู|ดิฉัน|ตัวเอง|กู|เดี๊ยน/;
+const TOPIC_RE = {
+  love: /รัก|แฟน|คนคุย|จีบ|แต่งงาน|เลิกกัน|คืนดี|ความสัมพันธ์|โสด|เนื้อคู่|หัวใจ|นอกใจ|มือที่สาม|แอบชอบ|สามี|ภรรยา|เดท|เดต|มีใจ/g,
+  career: /งาน|สมัคร|สัมภาษณ์|เลื่อนตำแหน่ง|ลาออก|บริษัท|ธุรกิจ|กิจการ|ร้าน|โปรเจกต์|โปรเจค|ลูกค้า|หัวหน้า|เจ้านาย|อาชีพ|ตำแหน่ง|ออฟฟิศ/g,
+  money: /เงิน|หนี้|ลงทุน|หุ้น|คริปโต|รายได้|กู้|ซื้อ|ขาย|หวย|ลอตเตอรี่|ล็อตเตอรี่|โชคลาภ|รวย|ทรัพย์|ดอกเบี้ย|กำไร|ขาดทุน/g,
+  health: /สุขภาพ|ป่วย|ผ่าตัด|โรค|ลดน้ำหนัก|ตั้งครรภ์|ร่างกาย|นอนไม่หลับ|หมอ|รักษาตัว|อาการ/g,
+  study: /สอบ|เรียน|มหาวิทยาลัย|มหาลัย|ทุน|เกรด|คณะ|ปริญญา|ธีสิส|วิทยานิพนธ์/g,
+  family: /ครอบครัว|พ่อ|แม่|ลูก|ญาติ|บ้านเกิด|พี่น้อง/g
+};
+const PARTICLE = /(คะ|ค่ะ|ครับ|คับ|นะ|จ๊ะ|จ้ะ|อะ|ล่ะ|เนี่ย|หน่อย)+$/;
+function analyzeQ(raw) {
+  const ctx = { ...DEFAULT_CTX };
+  const text = (raw || "").replace(/[?？!.\s]+$/g, "").trim();
+  if (!text) return ctx;
+  const t = text.replace(PARTICLE, "");
+  let hit = null, at = Infinity;
+  for (const [word, topic] of PEOPLE) {
+    const i = t.indexOf(word);
+    if (i >= 0 && !(word === "ลูก" && /ลูก(ค้า|น้อง)/.test(t))) { hit = [word, topic]; at = i; break; }
+  }
+  const selfAt = t.search(SELF_RE);
+  if (hit) { ctx.w = hit[0]; ctx.subject = selfAt >= 0 && selfAt < at ? "self" : "other"; }
+  /* topic: count keyword hits, "แต่งงาน" must not count as work */
+  const scores = {};
+  const body = hit && hit[1] === "family" ? t.split(hit[0]).join(" ") : t;
+  Object.entries(TOPIC_RE).forEach(([k, re]) => scores[k] = (body.replace(/แต่งงาน/g, k === "career" ? "" : "แต่งงาน").match(re) || []).length);
+  if (hit && hit[1]) scores[hit[1]] += .6;
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  ctx.topic = best[1] > 0 ? best[0] : "general";
+  /* type */
+  const plain = t.replace(/หรือ(เปล่า|ไม่|ป่าว)/g, "");
+  const cm = t.match(/ระหว่าง(.+?)กับ(.+)/) || plain.match(/^(.+?)หรือ(.+)$/);
+  const clean = s => s.replace(/^(ควรจะ|ควร|จะ|เลือก|ไป|ดีไหมที่จะ)\s*/, "").replace(/(ดีกว่ากัน|ดีกว่า|กันดี|ดีไหม|ดี)?$/, "").replace(PARTICLE, "").trim();
+  if (/เมื่อไหร่|เมื่อไร|ตอนไหน|อีกนาน|กี่เดือน|กี่ปี|ช่วงไหน|เดือนไหน|ปีไหน|วันไหน/.test(t)) ctx.type = "timing";
+  else if (cm && clean(cm[1]) && clean(cm[2]) && clean(cm[1]).length <= 40 && clean(cm[2]).length <= 40) { ctx.type = "choice"; ctx.A = clean(cm[1]); ctx.B = clean(cm[2]); }
+  else if (hit && /คิดยังไง|คิดอย่างไร|คิดอะไร|รู้สึกยังไง|รู้สึกอย่างไร|รู้สึกอะไร|ใจ(เขา|เธอ|เค้า)|มีใจ|ชอบ(ฉัน|เรา|ผม|หนู)|รัก(ฉัน|เรา|ผม|หนู)|คิดถึง(ฉัน|เรา|ผม|หนู)|มอง(ฉัน|เรา|ผม|หนู)/.test(t)) ctx.type = "mind";
+  else if (/(ไหม|มั้ย|มั๊ย|ไม๊|หรือเปล่า|รึเปล่า|หรือไม่|ป่าว|ปะ)$/.test(t) || /ใช่ไหม|ได้ไหม/.test(t)) ctx.type = "yesno";
+  else if (/ทำยังไง|ทำอย่างไร|ควรทำอะไร|ควรทำยังไง|แก้ยังไง|แก้อย่างไร|ยังไงดี|อย่างไรดี|วิธี|รับมือ/.test(t)) ctx.type = "advice";
+  /* "หัวหน้าจะเลื่อนตำแหน่งให้ฉันไหม" is about what happens to the asker, even though another person acts */
+  if (ctx.subject === "other" && ctx.type !== "mind" && /(ให้|กับ)(ฉัน|เรา|ผม|หนู|ดิฉัน)/.test(t)) ctx.subject = "self";
+  if (ctx.type === "mind") { ctx.subject = "other"; if (ctx.topic === "general" || ctx.topic === "family") ctx.topic = "love"; }
+  if (ctx.type === "choice") { const last = x => /สอง/.test(x) && /\s/.test(x) ? x.split(/\s+/).pop() : x; ctx.A = last(ctx.A); }
+  ctx.year = /ปีนี้|ทั้งปี|ปีหน้า|12 เดือน|สิบสองเดือน/.test(t);
+  return ctx;
+}
+function suggestSpread(ctx) {
+  if (QTYPES[ctx.type].spread) return QTYPES[ctx.type].spread;
+  if (ctx.year) return "year12";
+  if (ctx.topic === "love") return "love";
+  if (["career", "money", "study"].includes(ctx.topic)) return "career";
+  return "ppf";
+}
+/* "เรื่องการงานของแฟนของคุณ" style description of what was asked */
+function describeQ(ctx) {
+  const tp = TOPICS[ctx.topic].th;
+  if (ctx.type === "mind") return `เรื่องความรู้สึกของ${whoFull(ctx.w)}ที่มีต่อคุณ`;
+  if (ctx.subject === "other") return ["general", "family"].includes(ctx.topic) ? `เรื่องของ${whoFull(ctx.w)}` : `เรื่อง${tp}ของ${whoFull(ctx.w)}`;
+  return ctx.topic === "general" ? "เรื่องของตัวคุณเอง" : `เรื่อง${tp}ของคุณ`;
+}
+/* card texts are written to "คุณ"; when a card speaks about someone else, address that person instead */
+const YOU_RE = /คุณ(?!ค่า|ภาพ|สมบัติ|ธรรม|ประโยชน์|ลักษณะ)/g;
+const aboutOther = (pos, ctx) => pos.ab === "other" || (pos.ab === "s" && ctx.subject === "other");
+const voice = (text, pos, ctx) => aboutOther(pos, ctx) ? text.replace(YOU_RE, ctx.w || "เขา") : text;
+const kwList = str => { const p = str.split(" · ").map(x => `“${x}”`); return p.length > 1 ? p.slice(0, -1).join(" ") + " และ " + p[p.length - 1] : p[0]; };
+const cardAdvice = e => e.card.major || !(e.rev && e.val < 0) ? e.card.adv : e.card.adv + ` แต่ระวังเรื่อง “${e.card.kwR.split(" · ")[0]}”`;
+const TIME_SPEED = ["ภายในไม่กี่วันถึง 2 สัปดาห์", "ภายใน 2–6 สัปดาห์", "ภายใน 1–3 เดือน", "ภายใน 3–6 เดือน", "นานกว่า 6 เดือน หรือเมื่อเงื่อนไขพร้อม"];
+const SUIT_SPEED = { wands: 0, swords: 1, cups: 2, pentacles: 3 };
+const pathScore = (list) => { const s = list.reduce((a, e) => a + e.val * e.pos.w, 0), w = list.reduce((a, e) => a + e.pos.w, 0); return Math.round(50 + 48 * Math.tanh(s / (w * 1.5))); };
+/* the direct answer to the question, shaped by its type */
+function answerFor(R) {
+  const ctx = R.ctx, C = R.cards, td = TOPICS[ctx.topic].dom, tp = TOPICS[ctx.topic].th;
+  const name = e => `<b>${esc(e.card.th)}</b>${e.rev ? " กลับหัว" : ""} ในตำแหน่ง “${esc(e.pos.k)}”`;
+  const lines = [];
+  let head, tone, bars = "";
+  if (ctx.type === "yesno") {
+    const ws = C.map(e => ({ e, w: R.spreadKey === "yesno" ? (e.i === 1 ? 2 : 1) : e.pos.w * (e.i === R.sp.out ? 1.5 : 1) }));
+    const W = ws.reduce((a, x) => a + x.w, 0), x = ws.reduce((a, x2) => a + x2.e.val * x2.w, 0) / W;
+    const tier = x >= .9 ? ["มีแนวโน้มว่า “ใช่”", "good"] : x >= .3 ? ["“ใช่” แต่มีเงื่อนไข", "good"] : x > -.3 ? ["ยังก้ำกึ่ง ขึ้นกับสิ่งที่ทำต่อจากนี้", "mid"] : x > -.9 ? ["“ยังไม่ใช่” ในตอนนี้", "bad"] : ["มีแนวโน้มว่า “ไม่”", "bad"];
+    [head, tone] = tier;
+    const agree = C.filter(e => Math.sign(e.val) === Math.sign(x)).length / C.length;
+    const clar = Math.abs(x) > 1.4 && agree >= .66 ? "ชัดเจนมาก" : Math.abs(x) > .6 ? "ค่อนข้างชัด" : "ก้ำกึ่ง";
+    const decider = ws.sort((a, b) => Math.abs(b.e.val * b.w) - Math.abs(a.e.val * a.w))[0].e;
+    lines.push(`ความชัดเจนของคำตอบ: <b>${clar}</b> (ไพ่ ${Math.round(agree * C.length)} จาก ${C.length} ใบชี้ไปทางเดียวกัน)`);
+    lines.push(`ไพ่ที่ชี้ขาดคือ ${name(decider)} ซึ่งมีพลังของ “${esc(firstKw(decider.card, decider.rev))}”`);
+    if (x < .9) { const worst = [...C].sort((a, b) => a.val - b.val)[0]; lines.push(`คำตอบจะเอียงมาทาง “ใช่” ได้มากขึ้น ถ้าจัดการเรื่อง “${esc(firstKw(worst.card, worst.rev))}” ได้ (${esc(worst.card.th)}) คำแนะนำคือ ${esc(cardAdvice(worst))}`); }
+  } else if (ctx.type === "timing") {
+    let s = 0, w = 0;
+    C.forEach(e => { const k = e.pos.w * (e.i === R.sp.out ? 2 : 1); s += (e.card.major ? 1.5 : SUIT_SPEED[e.card.suit]) * k; w += k; });
+    const idx = clamp(Math.round(s / w + R.revs / R.n * 1.2), 0, 4);
+    head = `ช่วงเวลา: ${TIME_SPEED[idx]}`; tone = idx <= 2 ? "good" : "mid";
+    lines.push(`หลักการอ่านเวลาของไพ่: ชุดไม้เท้าเร็ว (วันถึงสัปดาห์) ชุดดาบเป็นสัปดาห์ ชุดถ้วยเป็นเดือน ชุดเหรียญช้าเป็นหลายเดือน และไพ่กลับหัวทำให้ช้าลง ชุดนี้มีไพ่กลับหัว ${R.revs} จาก ${R.n} ใบ`);
+    const O = C[R.sp.out];
+    if (O.val < 0) lines.push(`ไพ่ปลายทาง ${name(O)} มีพลังลบ จึงอาจต้องผ่านอุปสรรคก่อนถึงช่วงนั้น`);
+  } else if (ctx.type === "choice" && R.spreadKey === "choice") {
+    const a = pathScore(C.filter(e => e.pos.path === "A")), b = pathScore(C.filter(e => e.pos.path === "B"));
+    const win = a >= b ? ctx.A : ctx.B, lose = a >= b ? ctx.B : ctx.A;
+    head = Math.abs(a - b) < 8 ? "สองทางสูสีกัน" : `ไพ่เอียงไปทาง “${esc(win)}”`; tone = Math.abs(a - b) < 8 ? "mid" : "good";
+    bars = `<div class="dom ans-bars">${[[ctx.A, a], [ctx.B, b]].map(([n, s]) => `<div class="dom-row"><span>${esc(n)}</span><div class="bar"><i class="${s >= 60 ? "good" : s >= 45 ? "mid" : "low"}" style="width:${s}%"></i></div><span class="stars"><span class="val">${s}</span></span></div>`).join("")}</div>`;
+    const res = p => C.find(e => e.pos.path === p && e.pos.k.includes("ปลายทาง"));
+    const cardOnly = e => `<b>${esc(e.card.th)}</b>${e.rev ? " กลับหัว" : ""} (“${esc(firstKw(e.card, e.rev))}”)`;
+    lines.push(`ถ้าเลือก “${esc(ctx.A)}” ปลายทางคือ ${cardOnly(res("A"))} ส่วนถ้าเลือก “${esc(ctx.B)}” ปลายทางคือ ${cardOnly(res("B"))}`);
+    lines.push(Math.abs(a - b) < 8 ? `เมื่อสองทางพอๆ กัน ให้ฟังไพ่ใบแรกคือใจคุณตอนนี้ ซึ่งมีพลังของ “${esc(firstKw(C[0].card, C[0].rev))}” ทางที่ตรงกับใจนี้มากกว่าคือทางที่ควรเลือก` : `“${esc(lose)}” ไม่ได้แย่ แต่ไพ่บอกว่า “${esc(win)}” เปิดทางให้คุณมากกว่าในช่วงนี้`);
+  } else if (ctx.type === "mind") {
+    const about = C.filter(e => aboutOther(e.pos, ctx)); const src = about.length ? about : C;
+    const feel = R.spreadKey === "mind" ? [C[0], C[1]] : src;
+    const x = feel.reduce((a, e) => a + e.val * e.pos.w, 0) / feel.reduce((a, e) => a + e.pos.w, 0);
+    const tier = x >= 1.2 ? ["มีใจให้คุณชัดเจน", "good"] : x >= .4 ? ["มีใจ แต่ยังลังเลหรือมีเรื่องค้างอยู่", "good"] : x > -.4 ? ["ยังเฉยๆ หรือยังไม่แน่ใจในความรู้สึกตัวเอง", "mid"] : ["มีระยะห่างหรือความไม่สบายใจอยู่", "bad"];
+    head = `ใจของ${esc(whoFull(ctx.w))}: ${tier[0]}`; tone = tier[1];
+    if (R.spreadKey === "mind") lines.push(["คิด", "รู้สึก", "ไม่พูด", "จะทำ"].map((l, i) => `${l}: <b>“${esc(firstKw(C[i].card, C[i].rev))}”</b>`).join(" · "));
+    const act = R.spreadKey === "mind" ? C[3] : C[R.sp.out];
+    lines.push(`สิ่งที่${esc(ctx.w || "เขา")}น่าจะทำต่อไปมาจาก ${name(act)} ${esc(voice(act.rev ? act.card.rv : act.card.up, { ab: "other" }, ctx))}`);
+  } else if (ctx.type === "advice") {
+    const A = C[R.sp.adv];
+    head = `สิ่งที่ควรทำก่อน: ${esc(cardAdvice(A))}`; tone = A.val >= 0 ? "good" : "mid";
+    lines.push(`คำแนะนำนี้มาจาก ${name(A)} ซึ่งมีพลังของ “${esc(firstKw(A.card, A.rev))}” ไพ่ใบนี้บอกว่า ${esc(voice(A.rev ? A.card.rv : A.card.up, A.pos, ctx))}`);
+  } else if (td) {
+    const s = R.scores[td];
+    head = `เรื่อง${tp}${ctx.subject === "other" ? "ของ" + esc(whoFull(ctx.w)) : ""}: ${s}/100`; tone = s >= 60 ? "good" : s >= 45 ? "mid" : "bad";
+    lines.push(DOMAIN_TXT[td][band(s)]);
+  } else {
+    const ov = R.overall;
+    head = `ภาพรวม: ${ov >= 75 ? "ดวงรุ่ง" : ov >= 60 ? "ดวงดี" : ov >= 45 ? "ดวงกลางๆ" : ov >= 30 ? "ดวงมีแรงต้าน" : "ช่วงพายุ"} (${ov}/100)`; tone = ov >= 60 ? "good" : ov >= 45 ? "mid" : "bad";
+  }
+  if (ctx.type === "choice" && R.spreadKey !== "choice") lines.push(`การวางไพ่แบบนี้ไม่ได้แยกสองทางให้เทียบ ถ้าอยากเทียบ “${esc(ctx.A)}” กับ “${esc(ctx.B)}” ชัดๆ ลองเปิดใหม่ด้วยการวางแบบ “สองทางเลือก”`);
+  if (td && !["general"].includes(ctx.type) && !(ctx.type === "choice" && R.spreadKey === "choice")) lines.push(`ถ้าดูเฉพาะเรื่อง${tp} คะแนนอยู่ที่ ${R.scores[td]}/100 ${DOMAIN_TXT[td][band(R.scores[td])]}`);
+  if (R.spreadKey === "year12") {
+    const by = [...C].sort((a, b) => b.val - a.val), top = by[0], low = by[by.length - 1];
+    lines.push(`เดือนที่เด่นที่สุดคือ <b>${esc(top.pos.month)}</b> (${esc(top.card.th)} “${esc(firstKw(top.card, top.rev))}”) ส่วนเดือนที่ควรระวังคือ <b>${esc(low.pos.month)}</b> (${esc(low.card.th)} “${esc(firstKw(low.card, low.rev))}”)`);
+    if (ctx.type === "timing") head = `ช่วงที่ไพ่ส่งพลังดีที่สุด: ${esc(top.pos.month)}`;
+  }
+  return { head, tone, lines, bars };
+}
+
 /* ================= STAGE 1 ================= */
 function initAsk() {
   const box = $("#spreads");
   box.innerHTML = Object.entries(SPREADS).map(([k, sp]) => `
     <div class="spread-opt"><input type="radio" name="spread" id="sp-${k}" value="${k}" ${k === S.spreadKey ? "checked" : ""}>
-    <label for="sp-${k}">${spreadIcon(sp)}<div><b>${sp.name}</b><span>${sp.sub}</span></div></label></div>`).join("");
+    <label for="sp-${k}">${spreadIcon(resolveSpread(k))}<div><b>${sp.name}</b><span>${sp.sub}</span></div></label></div>`).join("");
   const peeks = [17, 19, 18].map(id => `<div class="peek">${cardFront(DECK[id])}</div>`).join("");
   $("#altar").innerHTML = magicCircle("a") + peeks;
+  $("#qa-topic").innerHTML = Object.entries(TOPICS).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
+  $("#qa-type").innerHTML = Object.entries(QTYPES).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
+  ["qa-subject", "qa-w", "qa-topic", "qa-type", "qa-a", "qa-b"].forEach(id => $("#" + id).addEventListener("input", () => { $("#" + id).dataset.touched = "1"; refreshQA(); }));
+  let qT;
+  $("#q-text").addEventListener("input", () => { clearTimeout(qT); qT = setTimeout(analyzeInto, 250); });
+  box.addEventListener("change", refreshQA);
+  $("#qa-suggest").addEventListener("click", e => { const b = e.target.closest("[data-use]"); if (b) { $("#sp-" + b.dataset.use).checked = true; refreshQA(); } });
   $("#intent").addEventListener("submit", e => {
     e.preventDefault();
     Sound.ensure();
-    S.q = { name: $("#q-name").value.trim(), dob: $("#q-dob").value, text: $("#q-text").value.trim() };
+    S.q = { name: $("#q-name").value.trim(), dob: $("#q-dob").value, text: $("#q-text").value.trim(), ctx: readQA() };
     S.spreadKey = ($("input[name=spread]:checked") || {}).value || "ppf";
+    S.sp = resolveSpread(S.spreadKey, S.q.ctx);
     S.allowRev = $("#q-rev").checked;
     startShuffle();
   });
+  analyzeInto();
   renderHistory();
+}
+/* fills the "หมอเข้าใจคำถามว่า" fields from the question, leaving alone anything the asker changed by hand */
+function analyzeInto() {
+  const text = $("#q-text").value.trim(), ctx = analyzeQ(text);
+  if (!text) ["qa-subject", "qa-w", "qa-topic", "qa-type", "qa-a", "qa-b"].forEach(id => delete $("#" + id).dataset.touched);
+  const set = (id, v) => { const el = $("#" + id); if (!el.dataset.touched) el.value = v; };
+  set("qa-subject", ctx.subject); set("qa-w", ctx.w); set("qa-topic", ctx.topic); set("qa-type", ctx.type);
+  set("qa-a", ctx.type === "choice" ? ctx.A : ""); set("qa-b", ctx.type === "choice" ? ctx.B : "");
+  refreshQA();
+}
+function readQA() {
+  const subject = $("#qa-subject").value, w = $("#qa-w").value.trim();
+  return { subject, w, topic: $("#qa-topic").value, type: $("#qa-type").value,
+    A: $("#qa-a").value.trim() || "ทางเลือก A", B: $("#qa-b").value.trim() || "ทางเลือก B" };
+}
+function refreshQA() {
+  const ctx = readQA(), text = $("#q-text").value.trim();
+  const chosen = ($("input[name=spread]:checked") || {}).value;
+  $("#qa-w-wrap").hidden = !(ctx.subject === "other" || ctx.type === "mind" || chosen === "mind" || chosen === "love");
+  $("#qa-a-wrap").hidden = $("#qa-b-wrap").hidden = !(ctx.type === "choice" || chosen === "choice");
+  $("#qa-lead").textContent = text ? `หมอเข้าใจว่าคุณถาม${describeQ(ctx)} เป็น${QTYPES[ctx.type].th} ถ้าไม่ตรงแก้ได้ด้านล่าง` : "ยังไม่ได้พิมพ์คำถาม หมอจะอ่านเป็นภาพรวม";
+  const sug = suggestSpread(ctx);
+  $("#qa-suggest").innerHTML = text && sug !== chosen ? `การวางไพ่ที่ตอบคำถามนี้ได้ตรงที่สุดคือ <b>${SPREADS[sug].name}</b> <button type="button" class="icon-btn" data-use="${sug}">ใช้แบบนี้</button>` : "";
 }
 
 /* ================= STAGE 2: SHUFFLE ================= */
@@ -1361,9 +1625,9 @@ async function cutDeck() {
 
 /* ================= STAGE 3: PICK ================= */
 function startPick() {
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   S.picks = [];
-  $("#slots").innerHTML = sp.pos.map((p, i) => `<div class="slot"><div class="hole" id="hole-${i}"><div class="n">${i + 1}</div></div><span>${esc(p.k)}</span></div>`).join("");
+  $("#slots").innerHTML = sp.pos.map((p, i) => `<div class="slot"><div class="hole" id="hole-${i}"><div class="n">${i + 1}</div></div><span>${esc(p.ks || p.k)}</span></div>`).join("");
   $("#pick-hint").textContent = `แตะไพ่ที่ดึงดูดใจ ${sp.pos.length} ใบ ใบแรกที่เลือกจะไปอยู่ตำแหน่งที่ 1 ตามลำดับ`;
   goStage("pick");
   const fan = $("#fan");
@@ -1401,7 +1665,7 @@ function layoutFan(entrance) {
   });
 }
 function pickCard(i, el) {
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   if (S.picks.length >= sp.pos.length || el.classList.contains("taken")) return;
   const slot = S.picks.length;
   S.picks.push(i);
@@ -1428,7 +1692,7 @@ function pickCard(i, el) {
 
 /* ================= STAGE 4: REVEAL ================= */
 function startReveal() {
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   S.flipped = sp.pos.map(() => false);
   $("#reading").hidden = true; $("#reading").innerHTML = "";
   $("#reveal-controls").hidden = false;
@@ -1445,7 +1709,7 @@ function buildBoard(sp, open) {
   board.innerHTML = magicCircle("b");
   const setCw = () => board.style.setProperty("--cw", (board.clientWidth * sp.cw / 100) + "px");
   setCw();
-  if (!buildBoard.ro) { buildBoard.ro = new ResizeObserver(() => { const s = SPREADS[S.spreadKey]; board.style.setProperty("--cw", (board.clientWidth * s.cw / 100) + "px"); }); buildBoard.ro.observe(board); }
+  if (!buildBoard.ro) { buildBoard.ro = new ResizeObserver(() => { const s = S.sp; board.style.setProperty("--cw", (board.clientWidth * s.cw / 100) + "px"); }); buildBoard.ro.observe(board); }
   sp.pos.forEach((p, i) => {
     const c = S.deck[S.picks[i]], card = DECK[c.id];
     const b = document.createElement("button");
@@ -1455,7 +1719,7 @@ function buildBoard(sp, open) {
     if (p.rot) b.style.zIndex = 5;
     b.setAttribute("aria-label", `ตำแหน่ง ${i + 1} ${p.k}`);
     b.innerHTML = `<span class="badge">${i + 1}</span><div class="card-inner"><div class="face back">${backSVG()}</div><div class="face front">${cardFront(card)}</div></div>` +
-      (sp.cap ? `<span class="cap">${esc(p.k)}<small class="cap-name"></small></span>` : "");
+      (sp.cap ? `<span class="cap">${esc(p.ks || p.k)}<small class="cap-name"></small></span>` : "");
     /* the crossing card lies on top of the card beneath it, so the first tap opens the covered card */
     b.addEventListener("click", () => p.rot && !S.flipped[i - 1] ? flip(i - 1) : S.flipped[i] ? openModal(i) : flip(i));
     board.appendChild(b);
@@ -1487,7 +1751,7 @@ function flip(i, quiet) {
   }
 }
 async function revealAll() {
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   for (let i = 0; i < sp.pos.length; i++) { if (!S.flipped[i]) { flip(i, i > 0); await wait(sp.pos.length > 5 ? 220 : 380); } }
 }
 
@@ -1509,7 +1773,7 @@ function numerology(q) {
   return { lp, birth, yearCards, year, day: THAI_DAYS[wd], nameNum, d, m, y };
 }
 function computeReading() {
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   const cards = sp.pos.map((p, i) => { const c = S.deck[S.picks[i]]; return { card: DECK[c.id], rev: c.rev, pos: p, i }; });
   const sums = { love: 0, career: 0, money: 0, health: 0, luck: 0 }; let wsum = 0;
   const el = { fire: 0, water: 0, air: 0, earth: 0 };
@@ -1532,7 +1796,7 @@ function computeReading() {
   Object.keys(sums).forEach(d => scores[d] = Math.round(50 + 48 * Math.tanh(sums[d] / (wsum * 1.5))));
   const overall = Math.round(DOMAINS.reduce((a, d) => a + scores[d.k], 0) / DOMAINS.length);
   const num = numerology(S.q);
-  return { sp, cards, scores, overall, el, majors, revs, courts, ranks, suits, num, n: cards.length, date: new Date(), code: S.code, riffles: S.riffles, q: S.q, spreadKey: S.spreadKey };
+  return { sp, ctx: sp.ctx, cards, scores, overall, el, majors, revs, courts, ranks, suits, num, n: cards.length, date: new Date(), code: S.code, riffles: S.riffles, q: S.q, spreadKey: S.spreadKey };
 }
 const band = s => s >= 80 ? 0 : s >= 65 ? 1 : s >= 50 ? 2 : s >= 35 ? 3 : 4;
 const stars = s => { const n = clamp(Math.round(s / 20), 1, 5); return "★".repeat(n) + "☆".repeat(5 - n); };
@@ -1546,27 +1810,31 @@ function luckyNumbers(R) {
   if (two[0] === two[1]) two[1] = `${(c + 5) % 10}${b}`;
   return { two, three: `${a}${b}${c}` };
 }
-function domainOrder(sp) { const f = sp.focus; return f ? [...DOMAINS].sort((x, y) => (y.k === f) - (x.k === f) || (f === "career" && y.k === "money") - (f === "career" && x.k === "money")) : DOMAINS; }
+function domainOrder(R) {
+  const f = TOPICS[R.ctx.topic].dom || R.sp.focus;
+  return f ? [...DOMAINS].sort((x, y) => (y.k === f) - (x.k === f)) : DOMAINS;
+}
 function narrative(R) {
-  const out = [];
-  const who = R.q.name ? esc(R.q.name) : "คุณ";
+  const ctx = R.ctx, out = [];
+  const asker = R.q.name ? "คุณ" + esc(R.q.name) : "คุณ";
+  const actor = ctx.subject === "other" ? esc(ctx.w) : "คุณ";
   const ov = R.overall;
-  const tone = ov >= 75 ? "ไพ่ทั้งชุดส่องแสงเข้าข้าง ภาพรวมของคำถามนี้สว่างและมีแรงผลักดันสูง"
+  const tone = ov >= 75 ? "ไพ่ทั้งชุดส่องแสงเข้าข้าง เรื่องนี้มีแรงผลักดันสูง"
     : ov >= 60 ? "ภาพรวมเอนไปทางบวก มีทางไปต่อที่ชัดเจน แม้จะมีบางจุดต้องระวัง"
-    : ov >= 45 ? "ไพ่ชุดนี้ผสมทั้งแสงและเงา ผลลัพธ์ขึ้นกับการเลือกของคุณมากกว่าโชคชะตา"
+    : ov >= 45 ? `ไพ่ชุดนี้ผสมทั้งแสงและเงา ผลจะออกมาแบบไหนขึ้นกับการตัดสินใจของ${actor}มากกว่าโชคชะตา`
     : ov >= 30 ? "ไพ่เตือนว่าช่วงนี้มีแรงต้านมาก ต้องใช้ความอดทนและการวางแผน"
     : "ไพ่ชุดนี้เป็นพายุ แต่พายุมีไว้ล้างของเก่าเพื่อเปิดทางให้สิ่งใหม่";
-  out.push(`${R.q.text ? `${who}ถามว่า “${esc(R.q.text)}” ` : ""}${tone}`);
+  out.push(R.q.text ? `${asker}ถามว่า “${esc(R.q.text)}” หมอเข้าใจว่าเป็น${QTYPES[ctx.type].th} เกี่ยวกับ${describeQ(ctx).replace(/^เรื่อง/, "")} ${tone}` : tone);
   const K = R.cards[R.sp.key], O = R.cards[R.sp.out];
-  out.push(`หัวใจของการเปิดไพ่ครั้งนี้คือ <b>${esc(cardLabel(K.card, K.rev))}</b> ในตำแหน่ง “${esc(K.pos.k)}” ${esc(K.rev ? K.card.rv : K.card.up)}`);
-  if (R.sp.challenge !== undefined) { const C = R.cards[R.sp.challenge]; out.push(`แรงที่ตัดผ่านเรื่องนี้คือ <b>${esc(cardLabel(C.card, C.rev))}</b> สิ่งที่ต้องข้ามให้ได้คือ ${esc((C.rev ? C.card.kwR : C.card.kwU).split(" · ")[0])}`); }
-  if (O !== K) out.push(`ปลายทางที่ไพ่ชี้ไปคือ <b>${esc(cardLabel(O.card, O.rev))}</b> ในตำแหน่ง “${esc(O.pos.k)}” พลังหลักคือ ${esc(O.rev ? O.card.kwR : O.card.kwU)}`);
+  out.push(`หัวใจของการเปิดไพ่ครั้งนี้คือ <b>${esc(cardLabel(K.card, K.rev))}</b> ในตำแหน่ง “${esc(K.pos.k)}” ซึ่งบอกว่า ${esc(voice(K.rev ? K.card.rv : K.card.up, K.pos, ctx))}`);
+  if (R.sp.challenge !== undefined) { const C = R.cards[R.sp.challenge]; out.push(`แรงที่ตัดผ่านเรื่องนี้คือ <b>${esc(cardLabel(C.card, C.rev))}</b> สิ่งที่ต้องข้ามให้ได้คือเรื่อง “${esc(firstKw(C.card, C.rev))}”`); }
+  if (O !== K) out.push(`ปลายทางที่ไพ่ชี้ไปคือ <b>${esc(cardLabel(O.card, O.rev))}</b> ในตำแหน่ง “${esc(O.pos.k)}” มีพลังหลักคือ ${esc(kwList(O.rev ? O.card.kwR : O.card.kwU))}`);
   const extra = [];
   if (R.n >= 3) {
-    if (R.majors / R.n >= .5) extra.push(`ไพ่ชุดใหญ่ปรากฏถึง ${R.majors} จาก ${R.n} ใบ เรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิต มีแรงที่ใหญ่กว่าตัวคุณกำลังทำงานอยู่`);
-    else if (R.majors === 0) extra.push(`ไม่มีไพ่ชุดใหญ่เลย เรื่องนี้อยู่ในระดับชีวิตประจำวัน และอยู่ในมือคุณเกือบทั้งหมด`);
-    else extra.push(`มีไพ่ชุดใหญ่ ${R.majors} ใบผสมกับไพ่ชุดเล็ก ทั้งโชคชะตาและการกระทำของคุณมีส่วนพอๆ กัน`);
-    if (R.revs / R.n >= .5) extra.push(`ไพ่กลับหัว ${R.revs} ใบ พลังส่วนใหญ่ยังติดขัดหรือทำงานอยู่ข้างใน ให้เวลาตัวเองคลายปมก่อนเร่ง`);
+    if (R.majors / R.n >= .5) extra.push(`ไพ่ชุดใหญ่ปรากฏถึง ${R.majors} จาก ${R.n} ใบ เรื่องนี้เป็นจุดเปลี่ยนสำคัญ มีแรงที่ใหญ่กว่าตัว${actor === "คุณ" ? "คุณ" : actor}กำลังทำงานอยู่`);
+    else if (R.majors === 0) extra.push(`ไม่มีไพ่ชุดใหญ่เลย เรื่องนี้อยู่ในระดับชีวิตประจำวัน และอยู่ในมือของ${actor}เกือบทั้งหมด`);
+    else extra.push(`มีไพ่ชุดใหญ่ ${R.majors} ใบผสมกับไพ่ชุดเล็ก ทั้งจังหวะชีวิตและการกระทำของ${actor}มีส่วนพอๆ กัน`);
+    if (R.revs / R.n >= .5) extra.push(`ไพ่กลับหัว ${R.revs} ใบ พลังส่วนใหญ่ยังติดขัดหรือค้างอยู่ข้างใน ต้องให้เวลาคลายปมก่อนเร่ง`);
     else if (R.revs === 0) extra.push(`ไม่มีไพ่กลับหัวเลย พลังไหลตรงไม่มีอะไรกั้น`);
   }
   if (extra.length) out.push(extra.join(" "));
@@ -1577,15 +1845,14 @@ function narrative(R) {
   if (R.num) {
     const N = R.num, hits = [];
     R.cards.forEach(({ card }) => {
-      if (card.major && N.birth.includes(card.num)) hits.push(`ไพ่ประจำตัวของคุณ <b>${esc(card.th)}</b> ปรากฏในการเปิดไพ่ครั้งนี้ เรื่องนี้เกี่ยวกับตัวตนแท้ของคุณโดยตรง`);
+      if (card.major && N.birth.includes(card.num)) hits.push(`ไพ่ประจำตัวของคุณ <b>${esc(card.th)}</b> ปรากฏในการเปิดไพ่ครั้งนี้ คำถามนี้จึงผูกกับตัวตนแท้ของคุณโดยตรง`);
       if (card.major && N.yearCards.includes(card.num) && !N.birth.includes(card.num)) hits.push(`ไพ่ประจำปี ${N.year} ของคุณ <b>${esc(card.th)}</b> ปรากฏ คำตอบนี้คือบทเรียนหลักของปีนี้`);
       if (card.id === N.day.card) hits.push(`<b>${esc(card.th)}</b> คือไพ่ของ${N.day.planet} ดาวประจำวันเกิดของคุณ ดาวของคุณกำลังส่งเสียงผ่านไพ่ใบนี้`);
     });
     if (hits.length) out.push([...new Set(hits)].join(" "));
   }
   const A = R.cards[R.sp.adv];
-  const adv = A.card.major ? A.card.adv : A.card.adv + (A.rev ? ` แต่ระวังเรื่อง${A.card.kwR.split(" · ")[0]}` : "");
-  return { paras: out, advice: `คำแนะนำจาก${esc(A.card.th)}: ${esc(adv)}` };
+  return { paras: out, advice: `คำแนะนำจาก${esc(A.card.th)}: ${esc(cardAdvice(A))}` };
 }
 function finishReading() {
   const R = computeReading();
@@ -1613,48 +1880,72 @@ function bindTerms(root) {
     host.after(box);
   });
 }
+/* one sentence per position; templates given as a pair read differently when the card's energy is negative */
+const storyLine = (R, e, withName) => {
+  const t = R.sp.story[e.i], tpl = Array.isArray(t) ? t[e.val >= 0 ? 0 : 1] : t;
+  return tpl.replace("{kw}", ` <b>“${esc(firstKw(e.card, e.rev))}”</b>` + (withName ? ` (${esc(e.card.th)}${e.rev ? " กลับหัว" : ""})` : "") + " ").replace(/\s+$/, "").replace(/ \s+/g, " ");
+};
 function plainKit(R) {
-  const lines = R.cards.map(({ card, rev, i }) => STORY[R.spreadKey][i].replace("{kw}", `<b>${esc(firstKw(card, rev))}</b> (${esc(card.th)}${rev ? " กลับหัว" : ""})`));
+  const ctx = R.ctx;
+  const lines = R.cards.map(e => storyLine(R, e, true));
   const ov = R.overall;
-  const verdict = ov >= 75 ? "โดยรวมเป็นข่าวดีมาก ไพ่ส่วนใหญ่ส่งแรงบวกให้คุณ"
-    : ov >= 60 ? "โดยรวมออกไปทางดี มีเรื่องให้ระวังอยู่บ้างนิดหน่อย"
-    : ov >= 45 ? "โดยรวมกลางๆ ผลจะดีหรือไม่ ขึ้นกับสิ่งที่คุณเลือกทำต่อจากนี้"
-    : ov >= 30 ? "โดยรวมช่วงนี้มีอุปสรรคพอสมควร ต้องค่อยๆ แก้ทีละเรื่อง"
-    : "โดยรวมเป็นช่วงที่หนัก แต่ไพ่ไม่ได้บอกว่าจะแย่ตลอดไป มันบอกให้เตรียมตัวและดูแลใจให้ดี";
+  const verdict = ov >= 75 ? "ภาพรวมของไพ่ทั้งชุดเป็นข่าวดีมาก ไพ่ส่วนใหญ่ส่งแรงบวก"
+    : ov >= 60 ? "ภาพรวมของไพ่ทั้งชุดออกไปทางดี มีเรื่องให้ระวังอยู่บ้าง"
+    : ov >= 45 ? "ภาพรวมของไพ่ทั้งชุดกลางๆ ผลจะดีหรือไม่ ขึ้นกับสิ่งที่เลือกทำต่อจากนี้"
+    : ov >= 30 ? "ภาพรวมของไพ่ทั้งชุดมีอุปสรรคพอสมควร ต้องค่อยๆ แก้ทีละเรื่อง"
+    : "ภาพรวมของไพ่ทั้งชุดเป็นช่วงที่หนัก แต่ไพ่ไม่ได้บอกว่าจะแย่ตลอดไป มันบอกให้เตรียมตัวและดูแลใจให้ดี";
   const byVal = [...R.cards].sort((a, b) => b.val - a.val);
   const best = byVal[0], worst = byVal[byVal.length - 1];
   const A = R.cards[R.sp.adv];
   const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
-  const dos = [A.card.adv, best.card.adv, ELEMENT_DO[domEl]].filter((x, i, a) => a.indexOf(x) === i);
-  if (dos.length < 3) dos.push("จดสิ่งที่ไพ่บอกไว้ แล้วกลับมาดูอีกครั้งในสัปดาห์หน้าว่าอะไรเริ่มเกิดขึ้นจริง");
-  const lowDom = [...DOMAINS].sort((a, b) => R.scores[a.k] - R.scores[b.k])[0];
+  const dos = [cardAdvice(A), best.card.adv];
+  if (ctx.subject === "other" || ctx.type === "mind") dos.push(`สังเกตสิ่งที่${ctx.w || "เขา"}ทำ มากกว่าคำพูด แล้วคุยกันตรงๆ เมื่อจังหวะเหมาะ`);
+  dos.push(ELEMENT_DO[domEl]);
+  const doList = dos.filter((x, i, a) => a.findIndex(y => y.startsWith(x.split(" แต่")[0]) || x.startsWith(y.split(" แต่")[0])) === i).slice(0, 3);
+  if (doList.length < 3) doList.push("จดสิ่งที่ไพ่บอกไว้ แล้วกลับมาดูอีกครั้งในสัปดาห์หน้าว่าอะไรเริ่มเกิดขึ้นจริง");
+  const td = TOPICS[ctx.topic].dom;
+  const lowDom = td ? DOMAINS.find(d => d.k === td) : [...DOMAINS].sort((a, b) => R.scores[a.k] - R.scores[b.k])[0];
   const avoids = [];
-  if (worst.val < 0) avoids.push(`ระวังเรื่อง${firstKw(worst.card, worst.rev)} ซึ่งมาจากไพ่ ${worst.card.th}${worst.rev ? " กลับหัว" : ""} ในตำแหน่ง “${worst.pos.k}”`);
-  avoids.push(`${lowDom.th}ได้คะแนนต่ำที่สุด (${R.scores[lowDom.k]}) ดังนั้น${DOMAIN_AVOID[lowDom.k]}`);
+  if (worst.val < 0) avoids.push(`ระวังเรื่อง “${firstKw(worst.card, worst.rev)}” ซึ่งมาจากไพ่ ${worst.card.th}${worst.rev ? " กลับหัว" : ""} ในตำแหน่ง “${worst.pos.k}”`);
+  avoids.push(td ? `เรื่อง${TOPICS[ctx.topic].th}ที่ถามได้ ${R.scores[td]} คะแนน ${R.scores[td] < 50 ? "ซึ่งต่ำกว่ากลาง" : "ถึงจะไปได้ดี"} ข้อควรระวังคือ${DOMAIN_AVOID[td]}` : `${lowDom.th}ได้คะแนนต่ำที่สุด (${R.scores[lowDom.k]}) ดังนั้น${DOMAIN_AVOID[lowDom.k]}`);
   if (R.n >= 3 && R.revs / R.n >= .5) avoids.push("อย่าฝืนเร่งผลลัพธ์ ไพ่กลับหัวเยอะแปลว่าต้องคลายปมในใจก่อน");
   else { const miss = Object.entries(R.el).filter(e => e[1] === 0).map(e => e[0]); if (R.n >= 5 && miss.length) avoids.push(EL[miss[0]].miss); }
-  if (avoids.length < 3) avoids.push("อย่ายึดคำทำนายเป็นคำตัดสินตายตัว ไพ่บอกแนวโน้ม ส่วนการกระทำของคุณเปลี่ยนผลได้เสมอ");
-  const reasons = DOMAINS.map(d => {
+  if (avoids.length < 3) avoids.push("อย่ายึดคำทำนายเป็นคำตัดสินตายตัว ไพ่บอกแนวโน้ม ส่วนการกระทำเปลี่ยนผลได้เสมอ");
+  const reasons = domainOrder(R).map(d => {
     const sorted = [...R.cards].sort((a, b) => b.contrib[d.k] - a.contrib[d.k]);
     const up = sorted[0], down = sorted[sorted.length - 1], parts = [];
     if (up.contrib[d.k] > .3) parts.push(`ดันขึ้นมากที่สุดโดย <b>${esc(up.card.th)}</b>${up.rev ? " กลับหัว" : ""} ในตำแหน่ง “${esc(up.pos.k)}” (พลัง ${fmtVal(up.val)})`);
     if (down.contrib[d.k] < -.3) parts.push(`ถูกดึงลงโดย <b>${esc(down.card.th)}</b>${down.rev ? " กลับหัว" : ""} ในตำแหน่ง “${esc(down.pos.k)}” (พลัง ${fmtVal(down.val)})`);
     if (!parts.length) parts.push("ไม่มีไพ่ใบไหนส่งผลแรงเป็นพิเศษ คะแนนจึงอยู่ใกล้ 50 ซึ่งคือกลางๆ");
-    return { d, s: R.scores[d.k], txt: parts.join(" และ") };
+    return { d, s: R.scores[d.k], asked: d.k === td, txt: parts.join(" และ") };
   });
-  return { lines, verdict, dos, avoids, reasons };
+  return { lines, verdict, dos: doList, avoids: avoids.slice(0, 3), reasons, ans: answerFor(R) };
 }
+/* how one card bears on the question itself, not on fortune in general */
+function relevance(R, entry) {
+  const ctx = R.ctx, td = TOPICS[ctx.topic].dom, tp = TOPICS[ctx.topic].th, v = entry.val;
+  if (ctx.type === "yesno") return v > .3 ? "ใบนี้หนุนให้คำตอบเป็น “ใช่”" : v < -.3 ? "ใบนี้ดึงคำตอบไปทาง “ไม่”" : "ใบนี้เป็นกลาง ไม่ได้ชี้ขาดคำตอบ";
+  if (ctx.type === "choice" && entry.pos.path) return `ใบนี้${v > .3 ? "เป็นข้อดี" : v < -.3 ? "เป็นข้อควรระวัง" : "เป็นกลาง ไม่ได้ทำให้ต่าง"}ของทาง “${esc(entry.pos.path === "A" ? ctx.A : ctx.B)}”`;
+  if (ctx.type === "mind" && aboutOther(entry.pos, ctx)) return v > .3 ? `ใบนี้บอกว่า${esc(ctx.w || "เขา")}มีความรู้สึกดีต่อคุณ` : v < -.3 ? `ใบนี้บอกว่าใจของ${esc(ctx.w || "เขา")}ยังมีเรื่องหนักหรือระยะห่างอยู่` : `ใบนี้บอกว่า${esc(ctx.w || "เขา")}ยังไม่ได้แสดงออกชัดเจน`;
+  if (R.spreadKey === "year12") { const c = td ? entry.contrib[td] : v; return `เดือนนี้${c > .3 ? "เป็นช่วงที่หนุน" : c < -.3 ? "เป็นช่วงที่ต้องระวังสำหรับ" : "เป็นช่วงกลางๆ สำหรับ"}เรื่อง${td ? tp : "ที่ถาม"}`; }
+  if (ctx.type === "timing") return entry.card.major ? "ไพ่ชุดใหญ่ไม่ได้บอกความเร็ว แต่บอกว่าเรื่องจะเกิดเมื่อเงื่อนไขพร้อม" : `ชุด${SUITS[entry.card.suitIdx].th}บอกจังหวะ “${TIME_SPEED[SUIT_SPEED[entry.card.suit]]}”${entry.rev ? " แต่กลับหัวจึงอาจช้ากว่านั้น" : ""}`;
+  if (td) { const c = entry.contrib[td]; return c > .3 ? `ใบนี้หนุนเรื่อง${tp}ที่ถาม` : c < -.3 ? `ใบนี้เป็นแรงต้านของเรื่อง${tp}ที่ถาม` : `ใบนี้ไม่ได้กระทบเรื่อง${tp}มากนัก`; }
+  return v > .3 ? "ใบนี้ส่งพลังบวกให้เรื่องที่ถาม" : v < -.3 ? "ใบนี้เป็นแรงต้านของเรื่องที่ถาม" : "ใบนี้เป็นกลางต่อเรื่องที่ถาม";
+}
+const SUIT_AREA = { wands: "การลงมือและงาน", cups: "หัวใจและความสัมพันธ์", swords: "ความคิดและการตัดสินใจ", pentacles: "เงินและสิ่งที่จับต้องได้" };
 function cardStep(R, entry) {
-  const { card, rev, pos, i } = entry;
-  const name = R.q.name ? esc(R.q.name) : "คุณ";
+  const { card, rev, pos, i } = entry, ctx = R.ctx;
+  const other = aboutOther(pos, ctx);
+  const lifeOf = other ? esc(whoFull(ctx.w)) : R.q.name ? "คุณ" + esc(R.q.name) : "คุณ";
   const suit = card.major ? null : SUITS[card.suitIdx];
   const what = card.major
     ? `ใบนี้เป็น${T("major")} ลำดับที่ ${ROMAN[card.num]} ซึ่งเป็นไพ่ที่พูดถึงเรื่องใหญ่ของชีวิต`
     : `ใบนี้เป็น${T("minor")} ${esc(SUIT_PLAIN[card.suit])}` + (card.rank > 10 ? ` และเป็น${T("court")} ${COURT_PLAIN[card.rank - 11]}` : "");
-  const pic = card.major ? `ภาพบนไพ่คือ${esc(card.img)}`
-    : card.rank === 1 ? `ภาพบนไพ่คือ${suit.th}อันเดียวส่องแสงอยู่กลางไพ่ เอซคือเมล็ดพันธุ์ของพลังชุดนี้ เป็นจุดเริ่มต้นที่บริสุทธิ์ที่สุด`
-    : card.rank <= 10 ? `ไพ่เลข ${card.rank} ในทาโรต์หมายถึง${RANK_MEANING[card.rank - 1]} เมื่อรวมกับชุด${suit.th} จึงเป็นเรื่อง${RANK_MEANING[card.rank - 1]}ในด้านที่ชุดนี้ดูแล`
-    : `ภาพบนไพ่คือ${COURT_TH[card.rank - 11]}ถือ${suit.th}`;
+  const numbered = !card.major && card.rank > 1 && card.rank <= 10;
+  const pic = card.major ? esc(card.img)
+    : card.rank === 1 ? `${suit.th}อันเดียวส่องแสงอยู่กลางไพ่ เอซคือเมล็ดพันธุ์ของพลังชุดนี้ เป็นจุดเริ่มต้นที่บริสุทธิ์ที่สุด`
+    : numbered ? `เลข ${card.rank} ในทาโรต์หมายถึง${RANK_MEANING[card.rank - 1]} พอมาอยู่ในชุด${suit.th} จึงหมายถึง${RANK_MEANING[card.rank - 1]}ในเรื่อง${SUIT_AREA[card.suit]}`
+    : `${COURT_TH[card.rank - 11]}ถือ${suit.th} ${RANK_MEANING[card.rank - 1]}`;
   const orient = rev
     ? `ไพ่ออกมา${T("reversed", "กลับหัว")} ปกติใบนี้หมายถึง “${esc(firstKw(card, false))}” แต่พอกลับหัว พลังนั้นติดขัดหรือเปลี่ยนทิศ กลายเป็น “${esc(firstKw(card, true))}”`
     : `ไพ่ออกมา${T("upright", "ตั้งตรง")} พลังของมันจึงทำงานเต็มที่`;
@@ -1663,34 +1954,42 @@ function cardStep(R, entry) {
   const effect = Math.abs(c) < .3 ? `ใบนี้ส่งผลต่อ${T("score")}ไม่มากนัก`
     : `ใบนี้ส่งผลต่อ${T("score")}ด้าน${dom.th}มากที่สุด โดย${c > 0 ? "ช่วยดันขึ้น" : "ดึงลง"} (พลังของใบนี้ ${fmtVal(entry.val)} จากสเกล −3 ถึง +3)`;
   return `
-    <div class="st-kicker">ใบที่ ${i + 1} จาก ${R.n} · ${T("position", "ตำแหน่ง")} “${esc(pos.k)}”</div>
+    <div class="st-kicker">ใบที่ ${i + 1} จาก ${R.n} · ${T("position", "ตำแหน่ง")} “${esc(pos.k)}”${other ? ` · ใบนี้พูดถึง${esc(whoFull(ctx.w))}` : ""}</div>
     <h3>${esc(card.th)} <span class="en">${esc(card.en)}</span> <span class="tag ${rev ? "rv" : "up"}">${rev ? "กลับหัว" : "ตั้งตรง"}</span></h3>
     <p><b>ช่องนี้ถามว่า</b> ${esc(pos.d)}</p>
     <p><b>ไพ่ใบนี้คืออะไร</b> ${what}</p>
-    <p><b>ภาพบนไพ่</b> ${pic}</p>
+    <p><b>${numbered ? "ความหมายของตัวเลข" : "ภาพบนไพ่"}</b> ${pic}</p>
     <p><b>หัวใจของไพ่</b> ${orient}</p>
-    <p><b>แปลให้ฟังง่ายๆ</b> ${esc(rev ? card.rv : card.up)}</p>
-    <p><b>ในชีวิตจริงของ${name}</b> ${esc(rev ? card.exR : card.exU)}</p>
-    <p class="st-link">${STORY[R.spreadKey][i].replace("{kw}", `<b>${esc(firstKw(card, rev))}</b>`)}</p>
+    <p><b>แปลให้ฟังง่ายๆ</b> ${esc(voice(rev ? card.rv : card.up, pos, ctx))}</p>
+    <p><b>ในชีวิตจริงของ${lifeOf}</b> ${esc(voice(rev ? card.exR : card.exU, pos, ctx))}</p>
+    <p class="st-link">${storyLine(R, entry, false)}</p>
+    <p><b>เทียบกับคำถาม</b> ${relevance(R, entry)}</p>
+    <p><b>คำแนะนำจากใบนี้</b> ${esc(cardAdvice(entry))}</p>
     <p class="muted">${effect}</p>`;
 }
 function storySteps(R, K) {
+  const ctx = R.ctx;
   const name = R.q.name ? "คุณ" + esc(R.q.name) : "";
   const steps = [];
   steps.push({ title: "ก่อนเริ่ม", spot: null, html: `
     <h3>สวัสดี${name ? " " + name : ""} มานั่งฟังสบายๆ นะ</h3>
     <p>เดี๋ยวหมอจะไล่ไพ่ให้ฟังทีละใบ ไม่ต้องรู้เรื่องไพ่มาก่อนเลย ทุกคำที่มีเส้นประใต้ แตะเพื่อดูคำอธิบายได้</p>
+    ${R.q.text ? `<p>คำถามของ${name || "คุณ"}คือ “${esc(R.q.text)}” หมอเข้าใจว่าเป็น${QTYPES[ctx.type].th} เกี่ยวกับ${describeQ(ctx).replace(/^เรื่อง/, "")} ทุกใบที่จะเล่าต่อจากนี้ หมอจะโยงกลับมาที่คำถามนี้เสมอ</p>` : `<p>ครั้งนี้ไม่ได้ตั้งคำถามไว้ หมอจะอ่านเป็นภาพรวมของช่วงนี้ให้นะ</p>`}
     <p>ไพ่ทาโรต์มีทั้งหมด 78 ใบ แบ่งเป็น${T("major")} 22 ใบ กับ${T("minor")} 56 ใบ ${T("shuffle", "คุณสับและเลือกไพ่เอง")}ทั้งหมด ${R.n} ใบ แล้ววางแบบ “${esc(R.sp.name)}” (${T("spread")})</p>
     <p>เคล็ดลับของการอ่านไพ่คือ${T("position")} ไพ่แต่ละใบตอบคำถามของช่องที่มันวางอยู่ แล้วเราจะเอาคำตอบทุกช่องมาร้อยเป็นเรื่องเดียวกัน</p>
-    ${R.q.text ? `<p>คำถามของ${name || "คุณ"}คือ “${esc(R.q.text)}” จำคำถามนี้ไว้ในใจระหว่างฟังนะ</p>` : ""}
     <p>กด “ต่อไป” เพื่อเริ่มที่ใบแรก</p>` });
-  R.cards.forEach(e => steps.push({ title: `ใบที่ ${e.i + 1}`, spot: e.i, html: cardStep(R, e) }));
+  R.cards.forEach(e => steps.push({ title: R.spreadKey === "year12" ? e.pos.k : `ใบที่ ${e.i + 1}`, spot: e.i, html: cardStep(R, e) }));
   const majorTxt = R.n < 3 ? "" : R.majors / R.n >= .5 ? `${T("major")}ออกมาถึง ${R.majors} จาก ${R.n} ใบ แปลว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญ ไม่ใช่เรื่องเล็ก`
-    : R.majors === 0 ? `ไม่มี${T("major")}เลย แปลว่าเรื่องนี้เป็นเรื่องในชีวิตประจำวันที่คุณจัดการเองได้เกือบทั้งหมด`
-    : `มี${T("major")} ${R.majors} ใบ ผสมกับ${T("minor")} แปลว่าทั้งจังหวะชีวิตและการกระทำของคุณมีส่วนพอๆ กัน`;
+    : R.majors === 0 ? `ไม่มี${T("major")}เลย แปลว่าเรื่องนี้เป็นเรื่องในชีวิตประจำวันที่จัดการเองได้เกือบทั้งหมด`
+    : `มี${T("major")} ${R.majors} ใบ ผสมกับ${T("minor")} แปลว่าทั้งจังหวะชีวิตและการกระทำมีส่วนพอๆ กัน`;
   const revTxt = R.n < 3 ? "" : R.revs === 0 ? `ไม่มี${T("reversed")}เลย พลังไหลตรง ไม่มีอะไรกั้น`
     : `มี${T("reversed")} ${R.revs} ใบ ${R.revs / R.n >= .5 ? "ซึ่งเยอะ แปลว่าหลายเรื่องยังติดขัดหรือค้างอยู่ในใจ" : "แปลว่ามีบางจุดที่ยังติดขัดอยู่"}`;
   const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
+  steps.push({ title: "คำตอบของคำถาม", spot: "all", html: `
+    <h3>${R.q.text ? "ตอบคำถาม “" + esc(R.q.text) + "”" : "สรุปภาพรวม"}</h3>
+    <p class="ans-inline tone-${K.ans.tone}">${K.ans.head}</p>
+    ${K.ans.bars}
+    ${K.ans.lines.map(l => `<p>${l}</p>`).join("")}` });
   steps.push({ title: "ร้อยเป็นเรื่องเดียว", spot: "all", html: `
     <h3>ทีนี้เอาทุกใบมาเล่าต่อกัน</h3>
     <p>${K.lines.join(" ")}</p>
@@ -1700,7 +1999,7 @@ function storySteps(R, K) {
   steps.push({ title: "ทำไมได้คะแนนนี้", spot: "all", html: `
     <h3>คะแนน ${R.overall} มาจากไหน</h3>
     <p>${T("score")}ไม่ได้สุ่มขึ้นมาเฉยๆ ไพ่ทุกใบมีค่าพลังตั้งแต่ −3 (หนักมาก) ถึง +3 (ดีมาก) แล้วคูณกับความสำคัญของตำแหน่งและความเกี่ยวข้องกับแต่ละด้าน เช่น ชุดถ้วยเกี่ยวกับความรักมาก ชุดเหรียญเกี่ยวกับเงินมาก</p>
-    <ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}</b> · ${r.txt}</li>`).join("")}</ul>` });
+    <ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}${r.asked ? " (เรื่องที่ถาม)" : ""}</b> · ${r.txt}</li>`).join("")}</ul>` });
   steps.push({ title: "ทำอะไรต่อดี", spot: null, html: `
     <h3>แล้วจะเอาไปใช้ยังไง</h3>
     <div class="do-grid">
@@ -1753,7 +2052,8 @@ function renderReading(R) {
   const el = $("#reading");
   const N = narrative(R);
   const K = plainKit(R);
-  const ord = domainOrder(R.sp);
+  const ord = domainOrder(R);
+  const td = TOPICS[R.ctx.topic].dom;
   const ringC = 2 * Math.PI * 52, ov = R.overall;
   const ovLabel = ov >= 75 ? "ดวงรุ่ง" : ov >= 60 ? "ดวงดี" : ov >= 45 ? "ดวงกลางๆ" : ov >= 30 ? "ดวงมีแรงต้าน" : "ช่วงพายุ";
   const lucky = luckyNumbers(R);
@@ -1787,7 +2087,15 @@ function renderReading(R) {
         <span class="chip">รหัสพิธี <b>${R.code}</b></span>
       </div>
     </div>
+    <div class="panel answer tone-${K.ans.tone}">
+      <div class="eyebrow">The Answer · คำตอบของคำถาม</div>
+      <div class="ans-meta">${R.q.text ? `หมอเข้าใจว่าเป็น${QTYPES[R.ctx.type].th} เกี่ยวกับ${describeQ(R.ctx).replace(/^เรื่อง/, "")}` : "ไม่ได้ตั้งคำถาม จึงอ่านเป็นภาพรวม"}</div>
+      <div class="ans-head">${K.ans.head}</div>
+      ${K.ans.bars}
+      ${K.ans.lines.map(l => `<p>${l}</p>`).join("")}
+    </div>
     <div class="panel plain" id="plain">
+
       <h3><small>In Plain Words</small>สรุปแบบเข้าใจง่าย</h3>
       <p class="lead">${K.verdict}</p>
       <p>${K.lines.join(" ")}</p>
@@ -1795,8 +2103,8 @@ function renderReading(R) {
         <div><h4 class="ok">สิ่งที่ควรทำ</h4><ol>${K.dos.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
         <div><h4 class="ng">สิ่งที่ควรเลี่ยง</h4><ol>${K.avoids.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
       </div>
-      <details class="why"><summary>ทำไมคะแนนดวงออกมาแบบนี้</summary><p class="muted" style="margin:8px 0 0;font-size:14px">${GLOSS.score[1]}</p><ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}</b> · ${r.txt}</li>`).join("")}</ul></details>
-      <div class="btn-row"><button class="btn" type="button" id="btn-story">ให้หมอดูเล่าให้ฟังทีละใบ</button><span class="muted" style="font-size:13.5px">เดินเรื่องบนโต๊ะไพ่ ${R.n + 4} ตอน อธิบายทุกศัพท์</span></div>
+      <details class="why"><summary>ทำไมคะแนนดวงออกมาแบบนี้</summary><p class="muted" style="margin:8px 0 0;font-size:14px">${GLOSS.score[1]}</p><ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}${r.asked ? " (เรื่องที่ถาม)" : ""}</b> · ${r.txt}</li>`).join("")}</ul></details>
+      <div class="btn-row"><button class="btn" type="button" id="btn-story">ให้หมอดูเล่าให้ฟังทีละใบ</button><span class="muted" style="font-size:13.5px">เดินเรื่องบนโต๊ะไพ่ ${R.n + 5} ตอน โยงทุกใบกลับมาที่คำถาม</span></div>
     </div>
     <div class="grid-2">
       <div class="panel verdict">
@@ -1810,7 +2118,7 @@ function renderReading(R) {
           </svg>
           <div class="ring-txt"><b>${ovLabel}</b><span>ค่าเฉลี่ยห้าด้าน คำนวณจากพลังของไพ่แต่ละใบ ทิศตั้งตรงหรือกลับหัว น้ำหนักตำแหน่ง และไพ่ชุดใหญ่มีน้ำหนักมากกว่า</span></div>
         </div>
-        <div class="dom">${ord.map(d => { const s = R.scores[d.k]; return `<div class="dom-row"><span>${d.th}</span><div class="bar"><i class="${s >= 60 ? "good" : s >= 45 ? "mid" : "low"}" style="width:${s}%"></i></div><span class="stars"><span class="val">${s}</span></span></div>`; }).join("")}</div>
+        <div class="dom">${ord.map(d => { const s = R.scores[d.k]; return `<div class="dom-row${d.k === td ? " asked" : ""}"><span>${d.th}${d.k === td ? " ✦" : ""}</span><div class="bar"><i class="${s >= 60 ? "good" : s >= 45 ? "mid" : "low"}" style="width:${s}%"></i></div><span class="stars"><span class="val">${s}</span></span></div>`; }).join("")}</div>
         <div class="dom-notes">${ord.map(d => `<p><b>${d.th} <span class="stars" style="color:var(--gold);font-family:var(--f-sym)">${stars(R.scores[d.k])}</span></b><br>${DOMAIN_TXT[d.k][band(R.scores[d.k])]}</p>`).join("")}</div>
       </div>
       <div class="panel narrative">
@@ -1825,10 +2133,11 @@ function renderReading(R) {
         <div class="pos-row">
           <button type="button" class="mini${rev ? " rev" : ""}" data-modal="${i}" aria-label="ดู ${esc(card.en)} แบบเต็ม">${cardFront(card)}</button>
           <div>
-            <div class="where">POSITION ${i + 1} · <span>${esc(pos.k)}: ${esc(pos.d)}</span></div>
+            <div class="where">POSITION ${i + 1} · <span>${esc(pos.k)}: ${esc(pos.d)}${aboutOther(pos, R.ctx) ? ` · พูดถึง${esc(whoFull(R.ctx.w))}` : ""}</span></div>
             <h4>${esc(card.th)}<span class="en">${esc(card.en)}</span><span class="tag ${rev ? "rv" : "up"}">${rev ? "กลับหัว" : "ตั้งตรง"}</span></h4>
             <div class="kw">${esc(rev ? card.kwR : card.kwU)}</div>
-            <p>${esc(rev ? card.rv : card.up)}</p>
+            <p>${esc(voice(rev ? card.rv : card.up, pos, R.ctx))}</p>
+            <p class="rel">${relevance(R, R.cards[i])}</p>
             <div class="ctx">ธาตุ${EL[card.el].th} · ${card.major ? "ไพ่ชุดใหญ่ ลำดับ " + ROMAN[card.num] : "ชุด" + SUITS[card.suitIdx].th + " · " + RANK_MEANING[card.rank - 1]}</div>
           </div>
         </div>`).join("")}
@@ -1885,6 +2194,7 @@ function copyReading(R, N, K) {
   const lines = [
     "หอดาราทาโรต์ · " + R.sp.name + " · " + R.date.toLocaleDateString("th-TH"),
     R.q.text ? "คำถาม: " + R.q.text : "",
+    "คำตอบ: " + strip(K.ans.head), ...K.ans.lines.map(strip),
     "",
     ...R.cards.map(({ card, rev, pos, i }) => `${i + 1}. ${pos.k}: ${card.th} (${card.en})${rev ? " กลับหัว" : ""} · ${rev ? card.kwR : card.kwU}`),
     "",
@@ -1911,7 +2221,7 @@ function fallbackCopy(text) {
 /* ================= MODAL ================= */
 function openModal(i) {
   const R = S.reading;
-  const sp = SPREADS[S.spreadKey];
+  const sp = S.sp;
   const c = S.deck[S.picks[i]], card = DECK[c.id], rev = c.rev, pos = sp.pos[i];
   $("#modal-box").innerHTML = `
     <button class="icon-btn close-x" type="button" id="modal-close">ปิด</button>
@@ -1923,7 +2233,8 @@ function openModal(i) {
       <p class="muted" style="font-size:14px">${esc(pos.d)}</p>
       <p><span class="tag ${rev ? "rv" : "up"}" style="margin-left:0">${rev ? "กลับหัว" : "ตั้งตรง"}</span></p>
       <div class="kw">${esc(rev ? card.kwR : card.kwU)}</div>
-      <p>${esc(rev ? card.rv : card.up)}</p>
+      <p>${esc(R ? voice(rev ? card.rv : card.up, pos, R.ctx) : rev ? card.rv : card.up)}</p>
+      ${R ? `<p class="rel">${relevance(R, R.cards[i])}</p>` : ""}
       <dl>
         <dt>ความหมายอีกทิศ</dt><dd>${esc(rev ? card.kwU : card.kwR)}</dd>
         <dt>ธาตุ</dt><dd>${EL[card.el].th}</dd>
@@ -1972,12 +2283,13 @@ function renderHistory() {
 }
 function reopen(h) {
   S.spreadKey = h.sp; S.q = h.q; S.code = h.code; S.riffles = h.r;
+  S.sp = resolveSpread(h.sp, h.q.ctx, h.t);
   S.deck = h.picks.map(([id, rev]) => ({ id, rev: !!rev }));
   S.picks = S.deck.map((_, i) => i);
   S.flipped = S.deck.map(() => true);
   goStage("reveal");
   $("#reveal-controls").hidden = true;
-  buildBoard(SPREADS[h.sp], true);
+  buildBoard(S.sp, true);
   const R = computeReading(); R.date = new Date(h.t);
   S.reading = R;
   renderReading(R);
