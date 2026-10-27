@@ -331,6 +331,64 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shad
 .modal-box dt { color: var(--mist); }
 .modal-box dd { margin: 0; }
 .close-x { position: absolute; top: 10px; right: 12px; }
+/* ---------- plain summary + storyteller ---------- */
+.term {
+  font: inherit; color: var(--gold-hi); background: none; border: 0; padding: 0; cursor: help;
+  border-bottom: 1px dashed var(--gold); line-height: inherit;
+}
+.term:hover { color: var(--gold); }
+.defbox {
+  margin-top: 12px; padding: 10px 14px; border-radius: 12px; font-size: 14.5px;
+  background: rgba(232,196,106,.08); border: 1px solid var(--line-strong);
+}
+.defbox b { color: var(--gold-hi); margin-right: 6px; }
+.plain .lead { font-size: 18px; color: var(--gold-hi); margin: 0 0 8px; }
+.plain p { max-width: 72ch; }
+.do-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-block: 14px; }
+.do-grid > div { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+.do-grid h4 { margin: 0 0 6px; font-size: 15.5px; }
+.do-grid h4.ok { color: var(--good); }
+.do-grid h4.ng { color: var(--bad); }
+.do-grid ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 14.5px; }
+.why summary { cursor: pointer; color: var(--gold-hi); }
+.reasons { margin: 10px 0 0; padding-left: 1.1em; display: grid; gap: 8px; font-size: 14.5px; }
+.reasons b { color: var(--gold-hi); }
+.plain .btn-row { margin-top: 14px; }
+.story {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 65; pointer-events: none;
+  padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.story-box {
+  pointer-events: auto; max-width: 780px; margin: 0 auto; max-height: min(52vh, 520px);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 20px;
+  box-shadow: 0 -10px 50px rgba(0,0,0,.6), 0 0 40px rgba(232,196,106,.12);
+  animation: rise .4s ease both; overflow: hidden;
+}
+.st-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px 8px; border-bottom: 1px solid var(--line); }
+.st-label { font-size: 13px; color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.st-dots { flex: 1; display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; min-width: 0; }
+.st-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(232,196,106,.2); }
+.st-dots i.past { background: var(--gold-deep); }
+.st-dots i.on { background: var(--gold-hi); box-shadow: 0 0 8px var(--gold); }
+.st-body { overflow-y: auto; padding: 12px 18px 4px; font-size: 15.5px; }
+.st-body h3 { font-size: 21px; color: var(--gold-hi); margin-bottom: 8px; }
+.st-body h3 .en { font-family: var(--f-latin); font-size: 13px; color: var(--gold); font-weight: 600; }
+.st-body p { margin: 0 0 9px; }
+.st-body p > b:first-child { color: var(--gold); margin-right: 4px; }
+.st-kicker { font-size: 12.5px; color: var(--mist); margin-bottom: 2px; }
+.st-link { padding: 8px 12px; border-left: 2px solid var(--gold); background: rgba(232,196,106,.06); border-radius: 0 10px 10px 0; }
+.defbox + p, .defbox + li { margin-top: 10px; }
+.st-body .defbox { margin: 0 0 10px; }
+.st-foot { display: flex; justify-content: space-between; gap: 10px; padding: 10px 14px 12px; border-top: 1px solid var(--line); }
+.st-foot .btn { padding: 8px 22px; font-size: 15px; }
+body.story-open .wrap { padding-bottom: 56vh; }
+.board .card { transition: opacity .5s, filter .5s, scale .5s; }
+.board.story-on .card:not(.spot) { opacity: .28; filter: saturate(.4); }
+.board .card.spot { z-index: 20 !important; scale: 1.1; }
+.board .card.spot .front { box-shadow: 0 0 0 2px var(--gold-hi), 0 0 44px rgba(232,196,106,.75); }
+.board .card .card-inner { transition: transform 1s cubic-bezier(.2,.75,.2,1), translate .25s ease; }
 @media (max-width: 900px) {
   .intro { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
@@ -340,6 +398,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shad
   .two { grid-template-columns: 1fr; }
   .steps li { padding: 2px 7px; font-size: 11.5px; }
   .modal-box { grid-template-columns: 1fr; }
+  .do-grid { grid-template-columns: 1fr; }
+  .st-body { padding-inline: 14px; font-size: 15px; }
+  .story-box { max-height: 50vh; }
   .modal-box .bigcard { width: min(220px, 70%); margin: 0 auto; }
   .pos-row { grid-template-columns: 70px minmax(0,1fr); gap: 12px; }
   .pos-row .mini { width: 70px; }
@@ -468,6 +529,20 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shad
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-box" id="modal-box"></div>
 </div>
+<div class="story" id="story" hidden role="region" aria-label="หมอดูเล่าให้ฟังทีละใบ">
+  <div class="story-box">
+    <div class="st-head">
+      <span class="st-label" id="st-label"></span>
+      <span class="st-dots" id="st-dots" aria-hidden="true"></span>
+      <button class="icon-btn" type="button" id="st-close">ปิด</button>
+    </div>
+    <div class="st-body" id="st-body" aria-live="polite"></div>
+    <div class="st-foot">
+      <button class="btn ghost" type="button" id="st-prev">ย้อนกลับ</button>
+      <button class="btn" type="button" id="st-next">ต่อไป</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -593,6 +668,150 @@ const MINOR = {
   ["มั่งคั่ง · นักธุรกิจ · ความสำเร็จทางวัตถุ","โลภ · ยึดติดวัตถุ","เจ้าแห่งความมั่งคั่ง ความสำเร็จทางธุรกิจและการเงินที่มั่นคงอยู่ในมือ","การยึดติดเงินและสถานะจนลืมคุณค่าอื่น หรือการตัดสินใจทางเงินที่เสี่ยง",2.4]
  ]
 };
+/* Plain-language layer for readers who know nothing about tarot: card imagery and real-life examples [upright, reversed] */
+const MAJOR_IMG = [
+ "ชายหนุ่มเดินเหยียบขอบหน้าผาอย่างไม่กลัว ถือดอกไม้ขาว มีสุนัขตัวเล็กกระโดดตาม",
+ "ชายยืนหน้าโต๊ะที่มีถ้วย ดาบ ไม้เท้า และเหรียญ มือหนึ่งชี้ฟ้า อีกมือชี้ดิน",
+ "หญิงนั่งนิ่งระหว่างเสาขาวกับเสาดำ ถือม้วนคัมภีร์ที่ซ่อนไว้ครึ่งหนึ่ง",
+ "หญิงนั่งบนบัลลังก์ท่ามกลางทุ่งข้าวสาลีและป่าเขียวขจี",
+ "กษัตริย์นั่งบนบัลลังก์หินประดับหัวแกะ ถือคทา ฉากหลังเป็นภูเขาแข็งแกร่ง",
+ "นักบวชนั่งให้พร มีศิษย์สองคนคุกเข่ารับคำสอน",
+ "ชายหญิงยืนคู่กันใต้เทวดาที่กางปีกอวยพร",
+ "นักรบยืนบนรถศึก ลากด้วยสฟิงซ์ขาวและดำที่หันไปคนละทาง",
+ "หญิงสาวลูบหัวสิงโตอย่างอ่อนโยน และสิงโตก็ยอมสงบ",
+ "ชายชราถือตะเกียง ยืนอยู่ลำพังบนยอดเขาหิมะ",
+ "กงล้อใหญ่หมุนกลางท้องฟ้า มีสัตว์และเทพเกาะอยู่รอบวง",
+ "หญิงถือดาบตั้งตรงในมือหนึ่ง และตาชั่งในอีกมือ",
+ "ชายห้อยหัวกลับจากต้นไม้ด้วยข้อเท้าข้างเดียว แต่ใบหน้าสงบและมีรัศมีรอบศีรษะ",
+ "อัศวินชุดเกราะดำขี่ม้าขาว ผู้คนทุกชนชั้นก้มลงตรงหน้า และไกลๆ มีดวงอาทิตย์กำลังขึ้น",
+ "เทวดายืนเท้าหนึ่งในน้ำ อีกเท้าบนบก รินน้ำไปมาระหว่างถ้วยสองใบ",
+ "ปีศาจนั่งบนแท่น มีชายหญิงถูกล่ามโซ่ที่คอ แต่โซ่นั้นหลวมพอจะถอดออกเองได้",
+ "ฟ้าผ่าหอคอยสูง มงกุฎกระเด็น และคนสองคนร่วงลงมา",
+ "หญิงรินน้ำลงสระและแผ่นดิน ใต้ดาวแปดแฉกดวงใหญ่ที่ส่องสว่าง",
+ "ดวงจันทร์ส่องทางเดินระหว่างหอคอยสองหลัง หมาป่ากับสุนัขเห่าหอน และกุ้งคลานขึ้นจากน้ำ",
+ "เด็กน้อยขี่ม้าขาวอย่างร่าเริงใต้ดวงอาทิตย์ยิ้ม มีดอกทานตะวันบานสะพรั่ง",
+ "เทวดาเป่าแตรจากฟ้า ผู้คนลุกขึ้นจากหลุมศพกางแขนรับ",
+ "นักเต้นลอยอยู่กลางพวงมาลัยวงกลม รายล้อมด้วยสัญลักษณ์สี่มุม"
+];
+const MAJOR_EX = [
+ ["เช่น อยากลาออกไปลองงานใหม่ ย้ายเมือง หรือเริ่มคุยกับคนใหม่ ทั้งที่ยังไม่รู้ว่าจะออกมาเป็นยังไง", "เช่น ลงเงินในสิ่งที่ยังไม่ได้ศึกษา หรือมัวลังเลจนโอกาสหลุดไป"],
+ ["เช่น ถึงเวลาเสนอไอเดียกับหัวหน้า เปิดร้านออนไลน์ หรือเริ่มโปรเจกต์ที่คิดมานาน", "เช่น มีคนพูดสวยแต่ทำไม่ได้จริง หรือคุณเก่งแต่ยังไม่กล้าโชว์ฝีมือ"],
+ ["เช่น ยังไม่ต้องรีบตัดสินใจ รอข้อมูลอีกหน่อย และเชื่อลางสังหรณ์ของตัวเอง", "เช่น รู้สึกตะหงิดๆ แต่ทำเป็นไม่สนใจ หรือมีเรื่องที่คนอื่นปิดบังอยู่"],
+ ["เช่น ความรักอบอุ่น งานสร้างสรรค์ไปได้ดี หรือข่าวดีเรื่องครอบครัว", "เช่น ดูแลทุกคนจนตัวเองหมดแรง หรือช่วงนี้คิดงานไม่ออก"],
+ ["เช่น หัวหน้าหรือพ่อแม่ที่เด็ดขาดช่วยวางแผนให้ หรือถึงเวลาจัดการเงินให้เป็นระบบ", "เช่น เจอคนคุมเข้มจนอึดอัด หรือชีวิตไม่มีตารางจนงานค้าง"],
+ ["เช่น หาคนมีประสบการณ์มาเป็นพี่เลี้ยง สมัครเรียน หรือทำตามขั้นตอนที่ถูกต้อง", "เช่น ถึงเวลาทำในแบบของตัวเอง แม้จะไม่เหมือนที่คนอื่นคาดหวัง"],
+ ["เช่น ความสัมพันธ์ที่ใจตรงกัน หรือต้องเลือกระหว่างสองทางโดยฟังใจตัวเอง", "เช่น ทะเลาะเพราะมองอนาคตไม่ตรงกัน หรือเลือกเพราะเกรงใจคนอื่น"],
+ ["เช่น สอบผ่าน ได้งาน หรือชนะการแข่งขันเพราะไม่ยอมถอย", "เช่น ทำหลายอย่างพร้อมกันจนไม่มีอะไรเสร็จ"],
+ ["เช่น คุยกับคนอารมณ์ร้อนด้วยความใจเย็นจนเรื่องจบดี หรือเลิกนิสัยไม่ดีได้สำเร็จ", "เช่น รู้สึกไม่มั่นใจ ขี้กังวล หรือหลุดอารมณ์ใส่คนใกล้ตัว"],
+ ["เช่น ไปเที่ยวคนเดียว พักโซเชียล หรือใช้เวลาคิดว่าชีวิตอยากได้อะไร", "เช่น เก็บตัวจนเพื่อนห่าง หรือหนีปัญหาด้วยการเงียบ"],
+ ["เช่น ได้โอกาสที่ไม่คาดคิด ได้เลื่อนตำแหน่ง หรือเรื่องที่ติดอยู่กลับมาเดินหน้า", "เช่น เจอเรื่องไม่เป็นใจติดๆ กัน หรือทำพลาดซ้ำแบบเดิม"],
+ ["เช่น เรื่องสัญญา คดี หรือการประเมินผลงานจะออกมาตามความจริง", "เช่น ถูกตัดสินไม่เป็นธรรม หรือมีคนไม่ยอมรับผิด"],
+ ["เช่น โปรเจกต์ถูกพักไว้ก่อน ซึ่งเป็นโอกาสให้คิดใหม่ทำใหม่", "เช่น รอคนที่ไม่ชัดเจนมานาน หรือทนงานที่ไม่ได้อะไรกลับมา"],
+ ["เช่น เลิกกัน ลาออก ย้ายบ้าน หรือเลิกนิสัยเดิม แล้วชีวิตเริ่มบทใหม่ (ไพ่ใบนี้ไม่ได้แปลว่าจะมีคนเสียชีวิต)", "เช่น รู้ว่าความสัมพันธ์หรืองานจบแล้ว แต่ยังไม่กล้าปล่อย"],
+ ["เช่น แบ่งเวลางานกับพักให้ดี กินนอนให้สมดุล หรือหาจุดตรงกลางกับอีกฝ่าย", "เช่น ทำงานหักโหม ใช้เงินเกินตัว หรืออารมณ์ขึ้นลงแรง"],
+ ["เช่น ติดโทรศัพท์ ติดหนี้ หรือติดความสัมพันธ์ที่รู้ว่าไม่ดีแต่เลิกไม่ได้", "เช่น ตัดสินใจเลิกนิสัยเสีย ปลดหนี้ หรือเดินออกจากความสัมพันธ์ที่เป็นพิษ"],
+ ["เช่น ถูกเลิกจ้างกะทันหัน ความลับแตก หรือแผนที่วางไว้พังในพริบตา", "เช่น เกือบเกิดเรื่องใหญ่แต่รอดมาได้ หรือรู้ว่ามีปัญหาแต่ยังปะผุไว้"],
+ ["เช่น หายป่วย หายเศร้า หรือเริ่มมีกำลังใจกลับมาวางแผนชีวิตใหม่", "เช่น รู้สึกท้อจนไม่อยากหวังอะไร ทั้งที่จริงยังมีทางไป"],
+ ["เช่น ข่าวลือ ความระแวงคนรัก หรือดีลงานที่ข้อมูลไม่ครบ อย่าเพิ่งเชื่อทุกอย่างที่ได้ยิน", "เช่น ความเข้าใจผิดคลี่คลาย หรือได้รู้ความจริงที่ค้างคาใจ"],
+ ["เช่น ได้ข่าวดี สมหวังเรื่องงานหรือความรัก สุขภาพแข็งแรง ใจสดใส", "เช่น เรื่องดียังมา แต่ช้ากว่าที่หวัง หรือช่วงนี้เหนื่อยจนยิ้มไม่ค่อยออก"],
+ ["เช่น ได้โอกาสแก้ตัว คืนดีกับคนเก่า หรือรู้ตัวว่าถึงเวลาเปลี่ยนเส้นทางชีวิต", "เช่น โทษตัวเองกับเรื่องเก่าไม่เลิก หรือรู้ว่าควรเปลี่ยนแต่ไม่ยอมขยับ"],
+ ["เช่น เรียนจบ ปิดโปรเจกต์สำเร็จ ได้เดินทางไกล หรือรู้สึกว่าชีวิตครบ", "เช่น งานเหลืออีกนิดเดียวแต่ค้างอยู่ หรือรีบข้ามขั้นจนต้องย้อนกลับมาทำใหม่"]
+];
+const MINOR_EX = {
+ wands: [
+  ["เช่น ได้ไอเดียธุรกิจใหม่ เริ่มงานอดิเรกที่ชอบ หรือจู่ๆ ก็มีแรงอยากทำอะไรขึ้นมา", "เช่น อยากเริ่มแต่ยังไม่ลงมือ หรือไฟที่เคยมีเริ่มหายไป"],
+  ["เช่น กำลังเลือกว่าจะอยู่ที่เดิม หรือไปเติบโตที่ใหม่", "เช่น วางแผนไว้เยอะ แต่กลัวเกินกว่าจะก้าวออกจากจุดเดิม"],
+  ["เช่น งานที่ส่งไปเริ่มได้ผลตอบรับ หรือมีโอกาสทำงานกับคนต่างถิ่น", "เช่น รอผลนานกว่าที่คิด หรือแผนเดินทางสะดุด"],
+  ["เช่น งานเลี้ยง งานแต่ง ขึ้นบ้านใหม่ หรือฉลองความสำเร็จเล็กๆ", "เช่น ที่บ้านหรือในทีมมีเรื่องไม่ลงรอยกัน แต่ไม่ใช่เรื่องใหญ่"],
+  ["เช่น ประชุมที่เถียงกันไม่จบ หรือต้องแข่งกับคู่แข่งหลายเจ้า", "เช่น ความขัดแย้งเริ่มเบาลง หรือคุณเก็บความไม่พอใจไว้ไม่พูด"],
+  ["เช่น ได้รับคำชม ได้รางวัล หรือผลงานได้รับการยอมรับต่อหน้าคนอื่น", "เช่น ทำดีแต่ไม่มีใครเห็น หรือเริ่มมั่นใจจนคนรอบข้างไม่ชอบ"],
+  ["เช่น ต้องปกป้องไอเดียของตัวเองในที่ประชุม หรือรับมือกับคนที่อยากแย่งตำแหน่ง", "เช่น ถูกกดดันจากหลายทางจนอยากยอมแพ้"],
+  ["เช่น ได้รับข้อความที่รอ งานคืบหน้าเร็ว หรือมีทริปเดินทางกะทันหัน", "เช่น ข้อความไม่ตอบ งานล่าช้า หรือรีบส่งงานจนผิดพลาด"],
+  ["เช่น เหนื่อยมากแต่เหลืออีกนิดเดียวจะถึงเป้า", "เช่น ระแวงคนรอบตัว หรือแบกเรื่องคนเดียวจนเครียดสะสม"],
+  ["เช่น รับงานเกินตัว หรือดูแลทุกคนในบ้านอยู่คนเดียว", "เช่น ถึงเวลาปฏิเสธงานบางอย่าง หรือขอให้คนอื่นช่วยแบ่ง"],
+  ["เช่น ได้ข่าวงานใหม่ ได้เรียนคอร์สที่สนใจ หรือเจอสิ่งที่ทำให้ตื่นเต้น", "เช่น เริ่มหลายอย่างแต่ทำไม่จบสักอย่าง"],
+  ["เช่น ตัดสินใจย้ายงานหรือออกเดินทางแบบฉับพลัน หรือมีคนมาจีบแบบร้อนแรง", "เช่น ใจร้อนจนพูดหรือทำอะไรที่ต้องมาเสียใจทีหลัง"],
+  ["เช่น เป็นที่สนใจในงานสังคม หรือมั่นใจจนคนอยากร่วมงานด้วย", "เช่น อิจฉาคนอื่นในโซเชียล หรือรู้สึกว่าตัวเองไม่ดีพอ"],
+  ["เช่น ได้รับบทหัวหน้าทีม หรือได้เป็นคนตัดสินใจเรื่องสำคัญ", "เช่น สั่งงานโดยไม่ฟังใคร หรือตั้งเป้าสูงเกินกว่าทีมจะไหว"]
+ ],
+ cups: [
+  ["เช่น เริ่มความสัมพันธ์ใหม่ ได้คืนดี หรือรู้สึกอิ่มใจขึ้นมาเฉยๆ", "เช่น เก็บความรู้สึกไว้จนอึดอัด หรือรักคนอื่นจนลืมรักตัวเอง"],
+  ["เช่น เดตที่คุยถูกคอ ได้หุ้นส่วนที่ใจตรงกัน หรือคืนดีกับเพื่อน", "เช่น ฝ่ายหนึ่งพยายามอยู่คนเดียว หรือคุยกันไม่รู้เรื่อง"],
+  ["เช่น สังสรรค์กับเพื่อน งานรวมญาติ หรือฉลองกับทีม", "เช่น เที่ยวหรือดื่มมากไป หรือมีคนนินทาลับหลัง"],
+  ["เช่น เบื่องาน เบื่อชีวิต จนไม่สนใจข้อเสนอดีๆ ที่เข้ามา", "เช่น เริ่มกลับมามีแรงสนใจโอกาสใหม่ๆ"],
+  ["เช่น อกหัก ผิดหวังกับเพื่อน หรือเสียใจกับสิ่งที่พลาดไป", "เช่น เริ่มทำใจได้ และเห็นว่ายังมีคนที่รักคุณอยู่"],
+  ["เช่น แฟนเก่าทักมา เจอเพื่อนสมัยเรียน หรือกลับไปเยี่ยมบ้านเกิด", "เช่น คิดถึงแต่วันเก่าจนไม่เปิดใจกับปัจจุบัน"],
+  ["เช่น มีตัวเลือกงานหรือคนคุยหลายทางจนเลือกไม่ถูก บางอันดูดีเกินจริง", "เช่น ตัดตัวเลือกที่ไม่ใช่ออกได้ และรู้ชัดว่าต้องการอะไร"],
+  ["เช่น ลาออกจากงานที่มั่นคงแต่ไม่มีความสุข หรือเดินออกจากความสัมพันธ์ที่จืดจาง", "เช่น อยากไปแต่ไม่กล้า หรือไปๆ มาๆ ไม่จบสักที"],
+  ["เช่น ได้สิ่งที่อธิษฐานไว้ ได้ของที่อยากได้ หรือสมหวังเรื่องรัก", "เช่น ได้มาแล้วแต่ไม่อิ่มใจ เพราะไม่ใช่สิ่งที่ต้องการจริง"],
+  ["เช่น ครอบครัวอบอุ่น แต่งงาน หรือได้อยู่บ้านที่มีความสุข", "เช่น ภายนอกดูดี แต่ข้างในบ้านมีเรื่องตึงเครียด"],
+  ["เช่น มีคนส่งข้อความหวานๆ มา หรือได้ไอเดียสร้างสรรค์แปลกใหม่", "เช่น น้อยใจง่าย หรือเจอคนพูดหวานแต่ไม่จริงใจ"],
+  ["เช่น มีคนมาขอเป็นแฟน ได้รับคำเชิญ หรือได้ข้อเสนอที่ถูกใจ", "เช่น เจอคนที่สัญญาเยอะแต่ไม่ทำตาม"],
+  ["เช่น เพื่อนมาปรึกษาเพราะคุณเข้าใจคนเก่ง หรือคุณรู้สึกได้ล่วงหน้าว่าอะไรจะเกิด", "เช่น รับอารมณ์คนอื่นมาจนเครียดเอง"],
+  ["เช่น รับมือกับเรื่องดราม่าได้อย่างใจเย็น หรือเจอคนที่เป็นผู้ใหญ่ทางอารมณ์", "เช่น เก็บกดจนระเบิด หรือใช้ความเงียบลงโทษอีกฝ่าย"]
+ ],
+ swords: [
+  ["เช่น คิดออกแล้วว่าต้องทำอะไร หรือได้คุยกันตรงๆ จนเรื่องชัดเจน", "เช่น คิดวนไปมา หรือพูดแรงจนทำร้ายใจคนอื่น"],
+  ["เช่น ต้องเลือกระหว่างสองงานหรือสองคน แต่ยังทำเป็นไม่เห็นปัญหา", "เช่น ข้อมูลเยอะจนสับสน แต่ถึงเวลาต้องเลือกแล้ว"],
+  ["เช่น อกหัก ถูกหักหลัง หรือได้ยินคำพูดที่เจ็บปวด", "เช่น แผลใจเริ่มดีขึ้น เริ่มยิ้มได้อีกครั้ง"],
+  ["เช่น ลาพักร้อน นอนพักให้เต็มที่ หรือพักจากเรื่องเครียดสักระยะ", "เช่น ฝืนทำงานทั้งที่ป่วยหรือหมดแรง"],
+  ["เช่น ชนะทะเลาะแต่เพื่อนหาย หรือได้งานด้วยวิธีที่ทำให้คนอื่นไม่พอใจ", "เช่น ยอมขอโทษก่อน และปล่อยเรื่องเก่าไป"],
+  ["เช่น ย้ายออกจากที่ที่ทำให้ทุกข์ เปลี่ยนงาน หรือเดินทางไปเริ่มใหม่", "เช่น อยากไปต่อแต่ยังติดภาระหรือความทรงจำเดิม"],
+  ["เช่น มีคนแอบโกหกหรือเอาเปรียบ หรือคุณเองกำลังคิดหาทางลัด", "เช่น ความลับถูกเปิดเผย หรือคนที่ทำผิดยอมรับ"],
+  ["เช่น รู้สึกว่าไม่มีทางเลือก ทั้งที่จริงแค่กลัวการเปลี่ยนแปลง", "เช่น เริ่มเห็นทางออก และกล้าก้าวออกจากสถานการณ์ที่ติดอยู่"],
+  ["เช่น นอนไม่หลับเพราะคิดมาก กังวลเรื่องเงินหรือความรักทั้งคืน", "เช่น ได้ระบายกับคนที่ไว้ใจแล้วรู้สึกเบาขึ้น"],
+  ["เช่น เรื่องที่แย่ที่สุดเกิดขึ้นแล้ว แต่มันคือจุดจบของความทุกข์นี้", "เช่น เพิ่งผ่านช่วงหนักมา และกำลังค่อยๆ ลุกขึ้น"],
+  ["เช่น ได้ข้อมูลสำคัญจากการสังเกต หรืออยากเรียนรู้เรื่องใหม่", "เช่น พูดไม่คิดจนเป็นเรื่อง หรือหลงเชื่อข่าวลือ"],
+  ["เช่น ตัดสินใจเร็ว พูดตรง และลงมือทันที", "เช่น พูดแรงหรือทำอะไรบุ่มบ่ามจนเสียความสัมพันธ์"],
+  ["เช่น พูดความจริงอย่างตรงไปตรงมา และตั้งขอบเขตกับคนที่เอาเปรียบ", "เช่น ยังเจ็บจากอดีตจนพูดจาประชดประชัน"],
+  ["เช่น ตัดสินใจด้วยข้อมูลและเหตุผล หรือได้คำปรึกษาจากผู้เชี่ยวชาญ", "เช่น ใช้เหตุผลอย่างเย็นชาจนลืมความรู้สึกคน"]
+ ],
+ pentacles: [
+  ["เช่น ได้งานใหม่ ได้เงินก้อน หรือมีโอกาสลงทุนที่ดี", "เช่น พลาดโอกาสเพราะไม่พร้อม หรือใช้เงินโดยไม่วางแผน"],
+  ["เช่น ทำงานสองที่ หรือจัดการรายรับรายจ่ายหลายทางได้ดี", "เช่น รับภาระเยอะจนเริ่มจัดการไม่ไหว"],
+  ["เช่น ทำงานกลุ่มได้ดี หรือได้รับคำชมเรื่องฝีมือ", "เช่น ทีมไม่ช่วยกัน หรือรีบทำจนงานออกมาไม่ดี"],
+  ["เช่น เก็บเงินได้ แต่ระวังจะหวงจนไม่กล้าใช้กับสิ่งที่จำเป็น", "เช่น กลัวเสียเงินจนพลาดโอกาส หรือเริ่มใช้เงินมือเติบ"],
+  ["เช่น เงินช็อต ตกงาน หรือรู้สึกโดดเดี่ยว แต่ความช่วยเหลือมีอยู่ถ้ายอมขอ", "เช่น สถานการณ์การเงินเริ่มดีขึ้น หรือได้คนช่วยเหลือ"],
+  ["เช่น ได้รับความช่วยเหลือ ได้ทุน หรือได้เป็นผู้ให้กับคนอื่น", "เช่น ยืมเงินแล้วมีเงื่อนไขตามมา หรือให้ไปแล้วไม่ได้รับความเคารพ"],
+  ["เช่น ลงทุนหรือทำงานมาสักพัก และกำลังรอผล", "เช่น ลงแรงเยอะแต่ผลตอบแทนน้อย ควรทบทวนว่าจะไปต่อไหม"],
+  ["เช่น ฝึกทักษะใหม่ หรือทำงานละเอียดจนกลายเป็นผู้เชี่ยวชาญ", "เช่น เบื่องานซ้ำๆ หรือทำงานแบบขอไปที"],
+  ["เช่น มีเงินเก็บ ซื้อของดีให้ตัวเอง หรือใช้ชีวิตแบบพึ่งตัวเองได้", "เช่น ใช้จ่ายเกินตัวเพื่อภาพลักษณ์ หรือยังต้องพึ่งเงินคนอื่น"],
+  ["เช่น เรื่องบ้าน ที่ดิน มรดก หรือความมั่นคงของครอบครัว", "เช่น ทะเลาะเรื่องเงินในครอบครัว หรือเรื่องมรดก"],
+  ["เช่น เริ่มเรียนหรือฝึกงาน ได้โอกาสเล็กๆ ที่จะเติบโต", "เช่น ผัดวันประกันพรุ่ง เริ่มแล้วไม่ทำต่อ"],
+  ["เช่น ทำงานอย่างสม่ำเสมอทุกวันจนเห็นผล", "เช่น ทำแบบเดิมจนไม่พัฒนา หรือขี้เกียจขยับ"],
+  ["เช่น ดูแลบ้าน ครอบครัว และการเงินได้ลงตัว", "เช่น ทำงานจนไม่มีเวลาให้ที่บ้าน"],
+  ["เช่น ธุรกิจมั่นคง หรือได้ผู้ใหญ่ที่มีฐานะช่วยสนับสนุน", "เช่น เอาเงินเป็นที่ตั้งจนลืมความสัมพันธ์ หรือลงทุนเสี่ยงเกินไป"]
+ ]
+};
+const SUIT_PLAIN = {
+  wands: "ชุดไม้เท้าเป็นธาตุไฟ พูดถึงไฟในตัว ความอยาก การลงมือ และงานที่ต้องใช้ความกล้า",
+  cups: "ชุดถ้วยเป็นธาตุน้ำ พูดถึงหัวใจ ความรู้สึก ความรัก และความสัมพันธ์",
+  swords: "ชุดดาบเป็นธาตุลม พูดถึงความคิด คำพูด การตัดสินใจ และความขัดแย้ง",
+  pentacles: "ชุดเหรียญเป็นธาตุดิน พูดถึงเงิน งาน ร่างกาย และสิ่งที่จับต้องได้"
+};
+const COURT_PLAIN = ["มหาดเล็กคือผู้เริ่มเรียนรู้ มักมาพร้อมข่าวสารหรือความอยากรู้", "อัศวินคือคนที่กำลังเคลื่อนไหว ไล่ตามเป้าหมายอย่างเต็มกำลัง", "ราชินีคือคนที่เข้าใจพลังของชุดนี้อย่างลึกซึ้งและใช้มันโอบอุ้มคนอื่น", "ราชาคือคนที่ควบคุมพลังของชุดนี้ได้เต็มที่และใช้มันนำผู้อื่น"];
+/* how each position reads as one sentence of the story; {kw} = the card's main keyword */
+const STORY = {
+  daily: ["วันนี้พลังหลักของคุณคือ{kw}"],
+  ppf: ["เรื่องนี้เริ่มต้นมาจาก{kw}", "ตอนนี้คุณกำลังอยู่ในช่วงของ{kw}", "และถ้าเดินทางนี้ต่อไป สิ่งที่รออยู่คือ{kw}"],
+  love: ["ฝั่งคุณตอนนี้มีพลังของ{kw}", "ฝั่งอีกคนมีพลังของ{kw}", "สิ่งที่เชื่อมคุณสองคนไว้คือ{kw}", "สิ่งที่ต้องข้ามไปด้วยกันคือ{kw}", "และความสัมพันธ์มีแนวโน้มไปทาง{kw}"],
+  career: ["งานของคุณตอนนี้อยู่ในช่วง{kw}", "เรื่องเงินมีพลังของ{kw}", "ของดีที่คุณมีอยู่ในมือคือ{kw}", "สิ่งที่ขวางทางอยู่คือ{kw}", "ผลที่น่าจะเกิดใน 1–3 เดือนคือ{kw}"],
+  celtic: ["หัวใจของเรื่องตอนนี้คือ{kw}", "แต่มีแรงขวางคือ{kw}", "ลึกๆ แล้วต้นเหตุมาจาก{kw}", "สิ่งที่เพิ่งผ่านไปคือ{kw}", "สิ่งที่คุณหวังไว้คือ{kw}", "อีกไม่นานจะเจอ{kw}", "ตัวคุณเองตอนนี้มีท่าทีแบบ{kw}", "คนรอบตัวส่งผลแบบ{kw}", "ในใจคุณทั้งหวังและกลัวเรื่อง{kw}", "สุดท้ายเรื่องนี้มีแนวโน้มจบที่{kw}"]
+};
+const GLOSS = {
+  major: ["ไพ่ชุดใหญ่", "ไพ่ 22 ใบ (Major Arcana) ที่หมายถึงบทเรียนใหญ่และจุดเปลี่ยนของชีวิต ถ้าออกมาหลายใบ แปลว่าเรื่องนี้สำคัญกว่าเรื่องทั่วไป"],
+  minor: ["ไพ่ชุดเล็ก", "ไพ่ 56 ใบ (Minor Arcana) แบ่งเป็น 4 ชุด ได้แก่ ไม้เท้า ถ้วย ดาบ เหรียญ พูดถึงเรื่องในชีวิตประจำวันที่เราลงมือเปลี่ยนได้"],
+  upright: ["ไพ่ตั้งตรง", "ไพ่ที่ออกมาหัวตั้ง พลังของไพ่ทำงานเต็มที่ตามความหมายหลัก"],
+  reversed: ["ไพ่กลับหัว", "ไพ่ที่ออกมาหัวกลับ ไม่ได้แปลว่าร้ายเสมอไป แต่หมายถึงพลังของไพ่ใบนั้นติดขัด มาช้า เกินพอดี หรือกำลังเกิดขึ้นในใจมากกว่าภายนอก ถ้าเป็นไพ่ที่ความหมายหนัก การกลับหัวมักแปลว่าเรื่องร้ายเบาลง"],
+  court: ["ไพ่ราชสำนัก", "ไพ่รูปคน 16 ใบ คือ มหาดเล็ก อัศวิน ราชินี ราชา มักหมายถึงคนจริงๆ ในชีวิตคุณ หรือบุคลิกที่คุณควรหยิบมาใช้"],
+  element: ["ธาตุ", "ไพ่ทุกใบผูกกับธาตุหนึ่ง ไฟคือการลงมือ น้ำคือความรู้สึก ลมคือความคิด ดินคือเงินและสิ่งที่จับต้องได้ นับรวมแล้วจะรู้ว่าเรื่องนี้หนักไปทางไหน"],
+  position: ["ตำแหน่ง", "ช่องที่วางไพ่ แต่ละช่องมีคำถามของตัวเอง ไพ่ใบเดียวกันวางคนละช่องจะอ่านคนละแบบ เหมือนคำตอบเดียวกันแต่ตอบคนละคำถาม"],
+  spread: ["การวางไพ่", "รูปแบบการจัดวางไพ่ เปรียบเหมือนแบบฟอร์มคำถาม ยิ่งไพ่เยอะยิ่งมองเรื่องได้หลายมุม"],
+  score: ["คะแนนดวง", "ตัวเลข 0 ถึง 100 ที่หอดาราคำนวณจากพลังบวกและลบของไพ่ทุกใบ 50 คือกลางๆ ยิ่งสูงยิ่งเอนไปทางดี ไพ่ชุดใหญ่และตำแหน่งสำคัญอย่างผลลัพธ์มีน้ำหนักมากกว่า ส่วนไพ่กลับหัวจะกลับทิศหรือลดพลังลง"],
+  shuffle: ["การสับไพ่", "คุณเป็นคนสับ ตัด และเลือกไพ่เองทุกใบ ไพ่ที่ได้จึงเป็นของคุณจริงๆ ไม่ได้ถูกเลือกไว้ล่วงหน้า"]
+};
+const ELEMENT_DO = { fire: "ลงมือทำสิ่งที่คิดไว้ภายในสัปดาห์นี้ ไม่ต้องรอให้พร้อมร้อยเปอร์เซ็นต์", water: "หาเวลาคุยกับคนสำคัญแบบเปิดใจ และฟังความรู้สึกของตัวเองให้ชัด", air: "เขียนทางเลือกออกมาเป็นข้อๆ แล้วชั่งข้อดีข้อเสียก่อนตัดสินใจ", earth: "จัดการเรื่องเงินและตารางชีวิตให้เป็นรูปธรรม ทำทีละขั้นเล็กๆ" };
+const DOMAIN_AVOID = { love: "อย่าตัดสินเรื่องความสัมพันธ์ตอนที่อารมณ์กำลังขึ้น", career: "อย่าเพิ่งเซ็นสัญญาหรือลาออกแบบกะทันหัน", money: "เลี่ยงการกู้ ยืม ค้ำประกัน หรือลงทุนตามกระแส", health: "อย่าฝืนร่างกาย นอนให้พอและพักเมื่อเหนื่อย", luck: "เลี่ยงการเสี่ยงโชคและการตัดสินใจด้วยอารมณ์" };
 const DECK = [];
 MAJOR.forEach(m => DECK.push({
   id: m[0], major: true, num: m[0], en: m[1], th: m[2], glyph: m[3], el: m[4], v: m[5],
@@ -606,9 +825,11 @@ SUITS.forEach((s, si) => MINOR[s.key].forEach((m, r) => {
   DECK.push({
     id: 22 + si * 14 + r, major: false, rank, suit: s.key, suitIdx: si, en: RANK_EN[r] + " of " + s.en, th, el: s.el,
     v: m[4], vr: m[4] > 0 ? -m[4] * .6 : -m[4] * .55, aff: s.aff,
-    kwU: m[0], kwR: m[1], up: m[2], rv: m[3], adv: s.adv
+    kwU: m[0], kwR: m[1], up: m[2], rv: m[3], adv: s.adv,
+    exU: MINOR_EX[s.key][r][0], exR: MINOR_EX[s.key][r][1]
   });
 }));
+DECK.forEach(c => { if (c.major) { c.img = MAJOR_IMG[c.num]; c.exU = MAJOR_EX[c.num][0]; c.exR = MAJOR_EX[c.num][1]; } });
 /* Spreads: positions in % of board (x, y), weight, label, meaning. aspect = width / height. cw = card width % of board width */
 const SPREADS = {
   daily: { name: "ไพ่ประจำวัน", sub: "1 ใบ · พลังของวัน", aspect: 1.5, cw: 22, max: 520, key: 0, out: 0, adv: 0, cap: true,
@@ -994,6 +1215,7 @@ const S = { stage: "ask", deck: [], riffles: 0, spreadKey: "ppf", allowRev: true
 const freshDeck = () => DECK.map(c => ({ id: c.id, rev: false }));
 
 function goStage(name) {
+  if (typeof closeStory === "function") closeStory();
   S.stage = name;
   ["ask", "shuffle", "pick", "reveal"].forEach(s => $("#stage-" + s).hidden = !(s === name || (name === "reading" && s === "reveal")));
   const order = ["ask", "shuffle", "pick", "reveal", "reading"], idx = order.indexOf(name);
@@ -1293,10 +1515,14 @@ function computeReading() {
   const el = { fire: 0, water: 0, air: 0, earth: 0 };
   let majors = 0, revs = 0, courts = 0;
   const ranks = {}, suits = {};
-  cards.forEach(({ card, rev, pos }) => {
+  cards.forEach(entry => {
+    const { card, rev, pos } = entry;
     const val = rev ? card.vr : card.v, mult = card.major ? 1.3 : 1, w = pos.w;
-    ["love", "career", "money", "health"].forEach(d => sums[d] += val * card.aff[d] * mult * w);
-    sums.luck += val * mult * w * (card.id === 10 ? 1.8 : 1);
+    entry.val = val;
+    entry.contrib = {};
+    ["love", "career", "money", "health"].forEach(d => { entry.contrib[d] = val * card.aff[d] * mult * w; sums[d] += entry.contrib[d]; });
+    entry.contrib.luck = val * mult * w * (card.id === 10 ? 1.8 : 1);
+    sums.luck += entry.contrib.luck;
     wsum += w;
     el[card.el] += card.major ? 1.5 : 1;
     if (card.major) majors++; else { ranks[card.rank] = (ranks[card.rank] || 0) + 1; suits[card.suit] = (suits[card.suit] || 0) + 1; if (card.rank > 10) courts++; }
@@ -1368,10 +1594,165 @@ function finishReading() {
   renderReading(R);
 }
 
+/* ================= PLAIN-LANGUAGE SUMMARY ================= */
+const T = (k, label) => `<button type="button" class="term" data-term="${k}">${label || GLOSS[k][0]}</button>`;
+const firstKw = (card, rev) => (rev ? card.kwR : card.kwU).split(" · ")[0];
+const fmtVal = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
+/* tapping a term opens its definition right under the line it sits in; tapping it again closes it */
+function bindTerms(root) {
+  root.addEventListener("click", e => {
+    const b = e.target.closest(".term"); if (!b) return;
+    const host = b.closest("p, li, .st-kicker, h3") || b;
+    const open = host.nextElementSibling && host.nextElementSibling.classList.contains("defbox") ? host.nextElementSibling : null;
+    const same = open && open.dataset.term === b.dataset.term;
+    $$(".defbox", root).forEach(d => d.remove());
+    if (same) return;
+    const g = GLOSS[b.dataset.term], box = document.createElement("div");
+    box.className = "defbox"; box.dataset.term = b.dataset.term;
+    box.innerHTML = `<b>${g[0]}</b> ${g[1]}`;
+    host.after(box);
+  });
+}
+function plainKit(R) {
+  const lines = R.cards.map(({ card, rev, i }) => STORY[R.spreadKey][i].replace("{kw}", `<b>${esc(firstKw(card, rev))}</b> (${esc(card.th)}${rev ? " กลับหัว" : ""})`));
+  const ov = R.overall;
+  const verdict = ov >= 75 ? "โดยรวมเป็นข่าวดีมาก ไพ่ส่วนใหญ่ส่งแรงบวกให้คุณ"
+    : ov >= 60 ? "โดยรวมออกไปทางดี มีเรื่องให้ระวังอยู่บ้างนิดหน่อย"
+    : ov >= 45 ? "โดยรวมกลางๆ ผลจะดีหรือไม่ ขึ้นกับสิ่งที่คุณเลือกทำต่อจากนี้"
+    : ov >= 30 ? "โดยรวมช่วงนี้มีอุปสรรคพอสมควร ต้องค่อยๆ แก้ทีละเรื่อง"
+    : "โดยรวมเป็นช่วงที่หนัก แต่ไพ่ไม่ได้บอกว่าจะแย่ตลอดไป มันบอกให้เตรียมตัวและดูแลใจให้ดี";
+  const byVal = [...R.cards].sort((a, b) => b.val - a.val);
+  const best = byVal[0], worst = byVal[byVal.length - 1];
+  const A = R.cards[R.sp.adv];
+  const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
+  const dos = [A.card.adv, best.card.adv, ELEMENT_DO[domEl]].filter((x, i, a) => a.indexOf(x) === i);
+  if (dos.length < 3) dos.push("จดสิ่งที่ไพ่บอกไว้ แล้วกลับมาดูอีกครั้งในสัปดาห์หน้าว่าอะไรเริ่มเกิดขึ้นจริง");
+  const lowDom = [...DOMAINS].sort((a, b) => R.scores[a.k] - R.scores[b.k])[0];
+  const avoids = [];
+  if (worst.val < 0) avoids.push(`ระวังเรื่อง${firstKw(worst.card, worst.rev)} ซึ่งมาจากไพ่ ${worst.card.th}${worst.rev ? " กลับหัว" : ""} ในตำแหน่ง “${worst.pos.k}”`);
+  avoids.push(`${lowDom.th}ได้คะแนนต่ำที่สุด (${R.scores[lowDom.k]}) ดังนั้น${DOMAIN_AVOID[lowDom.k]}`);
+  if (R.n >= 3 && R.revs / R.n >= .5) avoids.push("อย่าฝืนเร่งผลลัพธ์ ไพ่กลับหัวเยอะแปลว่าต้องคลายปมในใจก่อน");
+  else { const miss = Object.entries(R.el).filter(e => e[1] === 0).map(e => e[0]); if (R.n >= 5 && miss.length) avoids.push(EL[miss[0]].miss); }
+  if (avoids.length < 3) avoids.push("อย่ายึดคำทำนายเป็นคำตัดสินตายตัว ไพ่บอกแนวโน้ม ส่วนการกระทำของคุณเปลี่ยนผลได้เสมอ");
+  const reasons = DOMAINS.map(d => {
+    const sorted = [...R.cards].sort((a, b) => b.contrib[d.k] - a.contrib[d.k]);
+    const up = sorted[0], down = sorted[sorted.length - 1], parts = [];
+    if (up.contrib[d.k] > .3) parts.push(`ดันขึ้นมากที่สุดโดย <b>${esc(up.card.th)}</b>${up.rev ? " กลับหัว" : ""} ในตำแหน่ง “${esc(up.pos.k)}” (พลัง ${fmtVal(up.val)})`);
+    if (down.contrib[d.k] < -.3) parts.push(`ถูกดึงลงโดย <b>${esc(down.card.th)}</b>${down.rev ? " กลับหัว" : ""} ในตำแหน่ง “${esc(down.pos.k)}” (พลัง ${fmtVal(down.val)})`);
+    if (!parts.length) parts.push("ไม่มีไพ่ใบไหนส่งผลแรงเป็นพิเศษ คะแนนจึงอยู่ใกล้ 50 ซึ่งคือกลางๆ");
+    return { d, s: R.scores[d.k], txt: parts.join(" และ") };
+  });
+  return { lines, verdict, dos, avoids, reasons };
+}
+function cardStep(R, entry) {
+  const { card, rev, pos, i } = entry;
+  const name = R.q.name ? esc(R.q.name) : "คุณ";
+  const suit = card.major ? null : SUITS[card.suitIdx];
+  const what = card.major
+    ? `ใบนี้เป็น${T("major")} ลำดับที่ ${ROMAN[card.num]} ซึ่งเป็นไพ่ที่พูดถึงเรื่องใหญ่ของชีวิต`
+    : `ใบนี้เป็น${T("minor")} ${esc(SUIT_PLAIN[card.suit])}` + (card.rank > 10 ? ` และเป็น${T("court")} ${COURT_PLAIN[card.rank - 11]}` : "");
+  const pic = card.major ? `ภาพบนไพ่คือ${esc(card.img)}`
+    : card.rank === 1 ? `ภาพบนไพ่คือ${suit.th}อันเดียวส่องแสงอยู่กลางไพ่ เอซคือเมล็ดพันธุ์ของพลังชุดนี้ เป็นจุดเริ่มต้นที่บริสุทธิ์ที่สุด`
+    : card.rank <= 10 ? `ไพ่เลข ${card.rank} ในทาโรต์หมายถึง${RANK_MEANING[card.rank - 1]} เมื่อรวมกับชุด${suit.th} จึงเป็นเรื่อง${RANK_MEANING[card.rank - 1]}ในด้านที่ชุดนี้ดูแล`
+    : `ภาพบนไพ่คือ${COURT_TH[card.rank - 11]}ถือ${suit.th}`;
+  const orient = rev
+    ? `ไพ่ออกมา${T("reversed", "กลับหัว")} ปกติใบนี้หมายถึง “${esc(firstKw(card, false))}” แต่พอกลับหัว พลังนั้นติดขัดหรือเปลี่ยนทิศ กลายเป็น “${esc(firstKw(card, true))}”`
+    : `ไพ่ออกมา${T("upright", "ตั้งตรง")} พลังของมันจึงทำงานเต็มที่`;
+  const dom = DOMAINS.slice(0, 4).reduce((a, d) => Math.abs(entry.contrib[d.k]) > Math.abs(entry.contrib[a.k]) ? d : a, DOMAINS[0]);
+  const c = entry.contrib[dom.k];
+  const effect = Math.abs(c) < .3 ? `ใบนี้ส่งผลต่อ${T("score")}ไม่มากนัก`
+    : `ใบนี้ส่งผลต่อ${T("score")}ด้าน${dom.th}มากที่สุด โดย${c > 0 ? "ช่วยดันขึ้น" : "ดึงลง"} (พลังของใบนี้ ${fmtVal(entry.val)} จากสเกล −3 ถึง +3)`;
+  return `
+    <div class="st-kicker">ใบที่ ${i + 1} จาก ${R.n} · ${T("position", "ตำแหน่ง")} “${esc(pos.k)}”</div>
+    <h3>${esc(card.th)} <span class="en">${esc(card.en)}</span> <span class="tag ${rev ? "rv" : "up"}">${rev ? "กลับหัว" : "ตั้งตรง"}</span></h3>
+    <p><b>ช่องนี้ถามว่า</b> ${esc(pos.d)}</p>
+    <p><b>ไพ่ใบนี้คืออะไร</b> ${what}</p>
+    <p><b>ภาพบนไพ่</b> ${pic}</p>
+    <p><b>หัวใจของไพ่</b> ${orient}</p>
+    <p><b>แปลให้ฟังง่ายๆ</b> ${esc(rev ? card.rv : card.up)}</p>
+    <p><b>ในชีวิตจริงของ${name}</b> ${esc(rev ? card.exR : card.exU)}</p>
+    <p class="st-link">${STORY[R.spreadKey][i].replace("{kw}", `<b>${esc(firstKw(card, rev))}</b>`)}</p>
+    <p class="muted">${effect}</p>`;
+}
+function storySteps(R, K) {
+  const name = R.q.name ? "คุณ" + esc(R.q.name) : "";
+  const steps = [];
+  steps.push({ title: "ก่อนเริ่ม", spot: null, html: `
+    <h3>สวัสดี${name ? " " + name : ""} มานั่งฟังสบายๆ นะ</h3>
+    <p>เดี๋ยวหมอจะไล่ไพ่ให้ฟังทีละใบ ไม่ต้องรู้เรื่องไพ่มาก่อนเลย ทุกคำที่มีเส้นประใต้ แตะเพื่อดูคำอธิบายได้</p>
+    <p>ไพ่ทาโรต์มีทั้งหมด 78 ใบ แบ่งเป็น${T("major")} 22 ใบ กับ${T("minor")} 56 ใบ ${T("shuffle", "คุณสับและเลือกไพ่เอง")}ทั้งหมด ${R.n} ใบ แล้ววางแบบ “${esc(R.sp.name)}” (${T("spread")})</p>
+    <p>เคล็ดลับของการอ่านไพ่คือ${T("position")} ไพ่แต่ละใบตอบคำถามของช่องที่มันวางอยู่ แล้วเราจะเอาคำตอบทุกช่องมาร้อยเป็นเรื่องเดียวกัน</p>
+    ${R.q.text ? `<p>คำถามของ${name || "คุณ"}คือ “${esc(R.q.text)}” จำคำถามนี้ไว้ในใจระหว่างฟังนะ</p>` : ""}
+    <p>กด “ต่อไป” เพื่อเริ่มที่ใบแรก</p>` });
+  R.cards.forEach(e => steps.push({ title: `ใบที่ ${e.i + 1}`, spot: e.i, html: cardStep(R, e) }));
+  const majorTxt = R.n < 3 ? "" : R.majors / R.n >= .5 ? `${T("major")}ออกมาถึง ${R.majors} จาก ${R.n} ใบ แปลว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญ ไม่ใช่เรื่องเล็ก`
+    : R.majors === 0 ? `ไม่มี${T("major")}เลย แปลว่าเรื่องนี้เป็นเรื่องในชีวิตประจำวันที่คุณจัดการเองได้เกือบทั้งหมด`
+    : `มี${T("major")} ${R.majors} ใบ ผสมกับ${T("minor")} แปลว่าทั้งจังหวะชีวิตและการกระทำของคุณมีส่วนพอๆ กัน`;
+  const revTxt = R.n < 3 ? "" : R.revs === 0 ? `ไม่มี${T("reversed")}เลย พลังไหลตรง ไม่มีอะไรกั้น`
+    : `มี${T("reversed")} ${R.revs} ใบ ${R.revs / R.n >= .5 ? "ซึ่งเยอะ แปลว่าหลายเรื่องยังติดขัดหรือค้างอยู่ในใจ" : "แปลว่ามีบางจุดที่ยังติดขัดอยู่"}`;
+  const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
+  steps.push({ title: "ร้อยเป็นเรื่องเดียว", spot: "all", html: `
+    <h3>ทีนี้เอาทุกใบมาเล่าต่อกัน</h3>
+    <p>${K.lines.join(" ")}</p>
+    <p><b>${K.verdict}</b></p>
+    ${majorTxt ? `<p>${majorTxt}</p>` : ""}${revTxt ? `<p>${revTxt}</p>` : ""}
+    <p>ส่วน${T("element")}ที่เด่นที่สุดคือธาตุ${EL[domEl].th} ${EL[domEl].dom}</p>` });
+  steps.push({ title: "ทำไมได้คะแนนนี้", spot: "all", html: `
+    <h3>คะแนน ${R.overall} มาจากไหน</h3>
+    <p>${T("score")}ไม่ได้สุ่มขึ้นมาเฉยๆ ไพ่ทุกใบมีค่าพลังตั้งแต่ −3 (หนักมาก) ถึง +3 (ดีมาก) แล้วคูณกับความสำคัญของตำแหน่งและความเกี่ยวข้องกับแต่ละด้าน เช่น ชุดถ้วยเกี่ยวกับความรักมาก ชุดเหรียญเกี่ยวกับเงินมาก</p>
+    <ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}</b> · ${r.txt}</li>`).join("")}</ul>` });
+  steps.push({ title: "ทำอะไรต่อดี", spot: null, html: `
+    <h3>แล้วจะเอาไปใช้ยังไง</h3>
+    <div class="do-grid">
+      <div><h4 class="ok">สิ่งที่ควรทำ</h4><ol>${K.dos.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
+      <div><h4 class="ng">สิ่งที่ควรเลี่ยง</h4><ol>${K.avoids.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
+    </div>
+    <p>จำไว้นะ${name ? " " + name : ""} ไพ่บอกทิศทางลม แต่คนถือหางเสือคือคุณ ขอให้โชคดี แล้วกลับมาเปิดไพ่ใหม่ได้ทุกเมื่อ</p>` });
+  return steps;
+}
+const Story = { steps: [], i: 0, open: false };
+function openStory(R) {
+  Story.steps = storySteps(R, plainKit(R)); Story.i = 0; Story.open = true;
+  $("#story").hidden = false;
+  document.body.classList.add("story-open");
+  $("#board").classList.add("story-on");
+  showStep(0);
+  $("#st-next").focus();
+}
+function closeStory() {
+  if (!Story.open) return;
+  Story.open = false;
+  $("#story").hidden = true;
+  document.body.classList.remove("story-open");
+  $("#board").classList.remove("story-on");
+  $$("#board .card").forEach(c => c.classList.remove("spot"));
+}
+function showStep(i) {
+  Story.i = clamp(i, 0, Story.steps.length - 1);
+  const st = Story.steps[Story.i];
+  $("#st-label").textContent = `${Story.i + 1}/${Story.steps.length} · ${st.title}`;
+  $("#st-body").innerHTML = st.html;
+  $("#st-body").scrollTop = 0;
+  $("#st-dots").innerHTML = Story.steps.map((_, k) => `<i class="${k === Story.i ? "on" : k < Story.i ? "past" : ""}"></i>`).join("");
+  $("#st-prev").disabled = Story.i === 0;
+  $("#st-next").textContent = Story.i === Story.steps.length - 1 ? "จบการเล่า" : "ต่อไป";
+  const cards = $$("#board .card");
+  cards.forEach((c, k) => c.classList.toggle("spot", st.spot === k));
+  $("#board").classList.toggle("story-on", st.spot !== "all");
+  const target = typeof st.spot === "number" ? cards[st.spot] : $("#board");
+  const sheet = $("#story .story-box").getBoundingClientRect().height;
+  const r = target.getBoundingClientRect();
+  const free = innerHeight - sheet;
+  const y = scrollY + r.top + r.height / 2 - Math.max(free / 2, r.height / 2 + 12);
+  scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" });
+  if (typeof st.spot === "number") { Sound.chime(587); setTimeout(() => burstAt(cards[st.spot], 30, 3), 350 * SPEED); }
+}
+
 /* ================= RENDER READING ================= */
 function renderReading(R) {
   const el = $("#reading");
   const N = narrative(R);
+  const K = plainKit(R);
   const ord = domainOrder(R.sp);
   const ringC = 2 * Math.PI * 52, ov = R.overall;
   const ovLabel = ov >= 75 ? "ดวงรุ่ง" : ov >= 60 ? "ดวงดี" : ov >= 45 ? "ดวงกลางๆ" : ov >= 30 ? "ดวงมีแรงต้าน" : "ช่วงพายุ";
@@ -1405,6 +1786,17 @@ function renderReading(R) {
         <span class="chip">สับ <b>${R.riffles}</b> ครั้ง</span>
         <span class="chip">รหัสพิธี <b>${R.code}</b></span>
       </div>
+    </div>
+    <div class="panel plain" id="plain">
+      <h3><small>In Plain Words</small>สรุปแบบเข้าใจง่าย</h3>
+      <p class="lead">${K.verdict}</p>
+      <p>${K.lines.join(" ")}</p>
+      <div class="do-grid">
+        <div><h4 class="ok">สิ่งที่ควรทำ</h4><ol>${K.dos.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
+        <div><h4 class="ng">สิ่งที่ควรเลี่ยง</h4><ol>${K.avoids.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
+      </div>
+      <details class="why"><summary>ทำไมคะแนนดวงออกมาแบบนี้</summary><p class="muted" style="margin:8px 0 0;font-size:14px">${GLOSS.score[1]}</p><ul class="reasons">${K.reasons.map(r => `<li><b>${r.d.th} ${r.s}</b> · ${r.txt}</li>`).join("")}</ul></details>
+      <div class="btn-row"><button class="btn" type="button" id="btn-story">ให้หมอดูเล่าให้ฟังทีละใบ</button><span class="muted" style="font-size:13.5px">เดินเรื่องบนโต๊ะไพ่ ${R.n + 4} ตอน อธิบายทุกศัพท์</span></div>
     </div>
     <div class="grid-2">
       <div class="panel verdict">
@@ -1483,10 +1875,12 @@ function renderReading(R) {
   goStage("reading");
   $$("[data-modal]", el).forEach(b => b.addEventListener("click", () => openModal(+b.dataset.modal)));
   $("#btn-again").addEventListener("click", () => { goStage("ask"); renderHistory(); });
-  $("#btn-copy").addEventListener("click", () => copyReading(R, N));
+  $("#btn-copy").addEventListener("click", () => copyReading(R, N, K));
+  $("#btn-story").addEventListener("click", () => openStory(R));
+  bindTerms($("#plain"));
   setTimeout(() => el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }), 300);
 }
-function copyReading(R, N) {
+function copyReading(R, N, K) {
   const strip = s => s.replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
   const lines = [
     "หอดาราทาโรต์ · " + R.sp.name + " · " + R.date.toLocaleDateString("th-TH"),
@@ -1497,6 +1891,9 @@ function copyReading(R, N) {
     "คะแนนรวม " + R.overall + "/100 · " + DOMAINS.map(d => d.th + " " + R.scores[d.k]).join(" · "),
     "",
     ...N.paras.map(strip), strip(N.advice),
+    "", "สรุปแบบเข้าใจง่าย: " + strip(K.verdict), strip(K.lines.join(" ")),
+    "", "สิ่งที่ควรทำ", ...K.dos.map((d, i) => `${i + 1}. ${d}`),
+    "", "สิ่งที่ควรเลี่ยง", ...K.avoids.map((d, i) => `${i + 1}. ${d}`),
     "", "รหัสพิธี " + R.code
   ].filter((l, i, a) => l !== "" || a[i - 1] !== "");
   const text = lines.join("\n");
@@ -1541,7 +1938,21 @@ function openModal(i) {
 }
 function closeModal() { $("#modal").hidden = true; }
 $("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
-addEventListener("keydown", e => { if (e.key === "Escape" && !$("#modal").hidden) closeModal(); });
+addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("#modal").hidden) return closeModal();
+  if (!Story.open || !$("#modal").hidden || e.target.closest("input, textarea")) return;
+  if (e.key === "Escape") closeStory();
+  else if (e.key === "ArrowRight") $("#st-next").click();
+  else if (e.key === "ArrowLeft" && Story.i > 0) showStep(Story.i - 1);
+});
+$("#st-prev").addEventListener("click", () => showStep(Story.i - 1));
+$("#st-next").addEventListener("click", () => {
+  if (Story.i < Story.steps.length - 1) return showStep(Story.i + 1);
+  closeStory();
+  $("#plain").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+});
+$("#st-close").addEventListener("click", closeStory);
+bindTerms($("#st-body"));
 
 /* ================= HISTORY ================= */
 const HKEY = "astral-tarot-history-v1";
