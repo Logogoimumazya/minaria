@@ -15,7 +15,7 @@ git checkout claude/exciting-babbage-llebqn
 ## ตอนนี้อยู่ตรงไหน
 | ที่ | สถานะ |
 |---|---|
-| เว็บสาธารณะ | https://logogoimumazya.github.io/minaria/ ใช้งานได้ deploy อัตโนมัติเมื่อ push ไฟล์ใน `apps/astral-tarot/` |
+| เว็บสาธารณะ | **https://astral-tarot.pages.dev** (Cloudflare Pages, ย้ายมา 2026-10-28) · ลิงก์เก่า https://logogoimumazya.github.io/minaria/ ส่งต่อมาที่ใหม่อัตโนมัติ (variable `SITE_URL` ทำให้ workflow GitHub Pages build หน้า redirect แทน) · **push แล้วเว็บใหม่ไม่อัปเดตเอง** ต้อง deploy จากเครื่อง: `ORACLE_URL=https://astral-tarot-oracle.thanakthanakritmax2559.workers.dev python build_site.py <โฟลเดอร์นอก repo>/site` แล้วในโฟลเดอร์นั้น `npx wrangler@4 pages deploy site --project-name astral-tarot --branch main` (รันในโฟลเดอร์ที่ไม่มี `wrangler.toml` และห้ามใส่ `--force` อีก) |
 | claude.ai Artifact | https://claude.ai/artifact/F2zo231PiNQsMbN2ZWBn7u (เวอร์ชัน 11, capability `sample` + `downloads`) ใช้ Claude เขียนคำทำนายสด อัปเดตได้จาก session ที่มี Artifact tool เท่านั้น |
 | Gemini บนเว็บสาธารณะ | **ใช้งานจริงแล้ว** (2026-10-28) Worker: https://astral-tarot-oracle.thanakthanakritmax2559.workers.dev (บัญชี Cloudflare ของผู้ใช้ deploy จากเครื่องด้วย `npx wrangler deploy` หลัง `wrangler login`) · key อยู่ใน Worker secret + GitHub secret `GEMINI_API_KEY` · variable `ORACLE_URL` ตั้งแล้ว · ยังไม่มี `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ใน GitHub ดังนั้น workflow Worker ยังข้ามเอง แก้ `worker/` แล้วต้อง deploy จากเครื่อง |
 

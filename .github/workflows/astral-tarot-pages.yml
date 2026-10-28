@@ -30,6 +30,8 @@ jobs:
         env:
           # the Cloudflare Worker that reaches Gemini; leave the repository variable unset to use the house book only
           ORACLE_URL: ${{ vars.ORACLE_URL }}
+          # the site now lives on Cloudflare Pages; when set, GitHub Pages only forwards visitors there
+          REDIRECT_TO: ${{ vars.SITE_URL }}
         run: python3 apps/astral-tarot/build_site.py site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
