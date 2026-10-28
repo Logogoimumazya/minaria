@@ -17,7 +17,7 @@ git checkout claude/exciting-babbage-llebqn
 |---|---|
 | เว็บสาธารณะ | https://logogoimumazya.github.io/minaria/ ใช้งานได้ deploy อัตโนมัติเมื่อ push ไฟล์ใน `apps/astral-tarot/` |
 | claude.ai Artifact | https://claude.ai/artifact/F2zo231PiNQsMbN2ZWBn7u (เวอร์ชัน 11, capability `sample` + `downloads`) ใช้ Claude เขียนคำทำนายสด อัปเดตได้จาก session ที่มี Artifact tool เท่านั้น |
-| Gemini บนเว็บสาธารณะ | โค้ดเสร็จและทดสอบกับ Gemini จำลองแล้ว **ยังไม่ได้ใช้งานจริง**: รอเจ้าของ repo ทำ 5 ขั้นใน `worker/README.md` (Gemini key, Cloudflare token/account id เป็น GitHub secrets, ตั้ง variable `ORACLE_URL`) |
+| Gemini บนเว็บสาธารณะ | **ใช้งานจริงแล้ว** (2026-10-28) Worker: https://astral-tarot-oracle.thanakthanakritmax2559.workers.dev (บัญชี Cloudflare ของผู้ใช้ deploy จากเครื่องด้วย `npx wrangler deploy` หลัง `wrangler login`) · key อยู่ใน Worker secret + GitHub secret `GEMINI_API_KEY` · variable `ORACLE_URL` ตั้งแล้ว · ยังไม่มี `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ใน GitHub ดังนั้น workflow Worker ยังข้ามเอง แก้ `worker/` แล้วต้อง deploy จากเครื่อง |
 
 ## โครงไฟล์
 - `index.html` — ทั้งแอปอยู่ไฟล์เดียว (~4,700 บรรทัด) เขียนแบบ Artifact: ไม่มี `<!doctype>`/`<head>` เพราะ host ใส่ให้ อย่าเพิ่มเอง
@@ -69,9 +69,9 @@ node gemini.e2e.js                # เว็บที่ build จริงเ�
 ภาพหน้าจอจากการทดสอบอยู่ใน `tests/out/` ทุกสคริปต์ต้องจบด้วย `errors []`
 
 ## งานค้าง / ไอเดียถัดไป
-1. **ใช้ Gemini จริง** (2026-10-28 ทำต่อบนเครื่อง): key ของผู้ใช้ใช้ได้แล้ว · `gemini-2.5-flash` ปิดรับผู้ใช้ใหม่ (404) · `gemini-flash-latest` (3.8) คนใช้เยอะ ตอบ 503 หลังรอ 20–40 วิ · `gemini-3.5-flash` ตอบภาษาไทยดีใน ~6 วิ → Worker รองรับรายชื่อรุ่นสำรองแล้ว (`GEMINI_MODEL` คั่นจุลภาค ต่อรุ่นถัดไปเมื่อ 404/429/500/503) · **ยังค้าง**: ผู้ใช้ใส่ GitHub secrets 3 ตัวเอง (auto mode ไม่ให้ Claude เขียน secret) แล้ว Claude รัน workflow Worker → ตั้ง `ORACLE_URL` → deploy เว็บ → ทดสอบบนเว็บจริง
+1. ~~ใช้ Gemini จริง~~ **เสร็จ 2026-10-28**: `gemini-2.5-flash` ปิดรับผู้ใช้ใหม่ (404) · `gemini-flash-latest` (3.8) คนใช้เยอะ ตอบ 503 หลังรอ 20–40 วิ · `gemini-3.5-flash` ตอบภาษาไทยดีใน ~6 วิ → Worker ลองรายชื่อรุ่นตามลำดับ (`GEMINI_MODEL` คั่นจุลภาค ต่อรุ่นถัดไปเมื่อ 404/429/500/503) · ทดสอบเต็มรอบบนเว็บจริงผ่าน: ป้าย "Gemini เขียนคำทำนายนี้สด" 6 บท ถามต่อได้ `errors []`
    - บนเครื่องผู้ใช้: Python 3.12 อยู่ที่ `%LOCALAPPDATA%\Programs\Python\Python312\python.exe` (ไม่อยู่ใน PATH ของ bash) · Playwright ติดตั้งนอก repo ใช้ผ่าน `NODE_PATH` · ติดตั้ง plugin `cloudflare@cloudflare` ของ Claude Code แล้ว
-2. ตรวจคุณภาพคำทำนายที่ Gemini เขียนเทียบกับกติกา (ชื่อไพ่อังกฤษ, ไม่มีชื่อทฤษฎี, แท็ก `[[ANSWER|n]]` ฯลฯ ครบ) ถ้าหลุดบ่อยให้ปรับ `ORACLE_RULES`
+2. ตรวจคุณภาพคำทำนายที่ Gemini เขียน: **ตัวอย่างแรก (ใช่หรือไม่ 3 ใบ) ผ่าน** แท็กครบ 7 ชนิด ชื่อไพ่อังกฤษทั้งหมด ไม่มีชื่อทฤษฎี น้ำเสียงนักปรึกษา แยกในมือ/นอกมือ · พบคำผิด 1 จุด ("ไพร่") · ยังต้องเก็บตัวอย่างเพิ่มหลายแบบการวาง (เซลติก 10 ใบ, 12 เดือน, ผู้ถามต่ำกว่า 18 ปี) ก่อนตัดสินว่าต้องปรับ `ORACLE_RULES` ไหม
 3. merge PR #1 เข้า branch หลัก (ต้องเปิดกฎ environment `github-pages` ถ้าจะ deploy จาก branch อื่น)
 4. บนการ์ด PNG คำตอบใช้คำตอบที่ระบบคำนวณ ยังไม่ใช้บรรทัดแรกที่ AI เขียน
 5. ห้องดวงคู่: ใส่วันเกิดในฟอร์มดวงคู่ครั้งแรกแล้ว ส่วน "ไพ่ประจำชีวิตของคุณ" ด้านบนยังไม่รีเฟรชจนกว่าจะออกแล้วเข้าห้องใหม่
