@@ -582,8 +582,10 @@ html { overflow-x: clip; }
 .lk-type { font-size: 12.5px; }
 .combos { display: grid; gap: 10px; }
 .combo { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-strong); background: linear-gradient(100deg, rgba(232,196,106,.10), transparent 60%); position: relative; overflow: hidden; }
-.combo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,240,200,.14) 50%, transparent 60%); background-size: 250% 100%; animation: shine 4s ease-in-out infinite; pointer-events: none; }
-@keyframes shine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+/* the sheen is a band 2.5 times the card's width slid across with transform, which the compositor runs on its own;
+   translateX(-78% → 18%) of that width is the same travel as background-position 130% → -30% */
+.combo::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 250%; background: linear-gradient(105deg, transparent 40%, rgba(255,240,200,.14) 50%, transparent 60%); animation: shine 4s ease-in-out infinite; pointer-events: none; }
+@keyframes shine { from { transform: translateX(-78%); } to { transform: translateX(18%); } }
 .combo.s-1 { border-color: rgba(240,138,155,.45); background: linear-gradient(100deg, rgba(240,138,155,.10), transparent 60%); }
 .combo-glyph { display: flex; align-items: center; gap: 4px; }
 .combo-glyph span { width: 30px; height: 44px; display: grid; place-items: center; border-radius: 5px; border: 1px solid var(--gold); font-family: var(--f-latin); font-size: 11px; color: var(--gold-hi); background: rgba(16,20,58,.9); box-shadow: 0 0 10px rgba(232,196,106,.3); }
@@ -1878,17 +1880,22 @@ const Sky = (() => {
     W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const n = Math.round(W * H / 4200);
     stars = Array.from({ length: n }, (_, i) => { const d = [.25, .55, 1][i % 3]; return { x: Math.random() * W, y: Math.random() * H, d, r: (Math.random() * .9 + .3) * (.6 + d * .7), p: Math.random() * 6.28, s: Math.random() * 1.5 + .3, gold: Math.random() < .18 }; });
+    /* grouped by colour so a frame sets the fill twice and varies only globalAlpha, instead of parsing an rgba() string per star */
+    stars.sort((a, b) => a.gold - b.gold);
     if (REDUCED) draw(0);
   }
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
     const ox = -Ptr.px * 26, oy = -Ptr.py * 18, drift = t * .004;
+    let gold = null;
     for (const s of stars) {
       const a = .35 + .65 * (0.5 + 0.5 * Math.sin(s.p + t * .001 * s.s));
-      ctx.fillStyle = s.gold ? `rgba(255,226,150,${a})` : `rgba(220,226,255,${a * .85})`;
+      if (s.gold !== gold) { gold = s.gold; ctx.fillStyle = gold ? "rgb(255,226,150)" : "rgb(220,226,255)"; }
+      ctx.globalAlpha = gold ? a : a * .85;
       const x = ((s.x + ox * s.d + drift * s.d) % W + W) % W, y = s.y + oy * s.d;
       ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.283); ctx.fill();
     }
+    ctx.globalAlpha = 1;
     if (shoot) {
       shoot.x += shoot.vx; shoot.y += shoot.vy; shoot.life -= 1;
       const g = ctx.createLinearGradient(shoot.x, shoot.y, shoot.x - shoot.vx * 14, shoot.y - shoot.vy * 14);
@@ -1975,15 +1982,27 @@ addEventListener("pointermove", e => {
 addEventListener("pointerup", e => { if (e.pointerType !== "mouse") resetTilt(); }, { passive: true });
 addEventListener("pointerdown", e => { if (!REDUCED) FX.burst(e.clientX, e.clientY, 10, 2, ["#fff0c2", "#c9b8ff", "#e8c46a"]); }, { passive: true });
 document.documentElement.addEventListener("pointerleave", () => halo.classList.remove("on"));
-/* smoothed pointer drives the parallax layers through --px / --py */
+/* smoothed pointer drives the parallax layers. Each layer gets its own inline translate, the same values the CSS
+   rules work out from --px / --py: writing those variables on :root restyled the whole page every frame
+   (about 300 ms of every second, the library dropped to 20 fps), this restyles only the handful of layers.
+   [selector, px per unit x, px per unit y, base offset, scaled by the layer's --d depth] */
+const PARALLAX = [[".circle", 18, 14], [".hero h1", -7, -5], [".altar", 12, 9], [".fan", -14, 0], [".astrolabe", -34, -24, "-50%"], [".floater", -60, -40, "", true]];
+let parEls = null;
+new MutationObserver(() => { parEls = null; }).observe(document.body, { childList: true, subtree: true });
+function applyParallax(force) {
+  if (!parEls) { force = true; parEls = PARALLAX.flatMap(([sel, kx, ky, base, deep]) => [...document.querySelectorAll(sel)].map(el => { const d = deep ? parseFloat(el.style.getPropertyValue("--d")) || 0 : 1; return [el, kx * d, ky * d, base]; })); }
+  if (!force) return;
+  for (const [el, kx, ky, base] of parEls) {
+    const x = (Ptr.px * kx).toFixed(2), y = (Ptr.py * ky).toFixed(2);
+    el.style.translate = base ? `calc(${base} + ${x}px) calc(${base} + ${y}px)` : `${x}px ${y}px`;
+  }
+}
 (function motionLoop() {
   if (!REDUCED) {
     const nx = Ptr.px + (Ptr.tx - Ptr.px) * .05, ny = Ptr.py + (Ptr.ty - Ptr.py) * .05;
-    if (Math.abs(nx - Ptr.px) + Math.abs(ny - Ptr.py) > .0004) {
-      Ptr.px = nx; Ptr.py = ny;
-      document.documentElement.style.setProperty("--px", nx.toFixed(4));
-      document.documentElement.style.setProperty("--py", ny.toFixed(4));
-    }
+    const moved = Math.abs(nx - Ptr.px) + Math.abs(ny - Ptr.py) > .0004;
+    if (moved) { Ptr.px = nx; Ptr.py = ny; }
+    applyParallax(moved);
   }
   Ptr.hx += (Ptr.x - Ptr.hx) * .2; Ptr.hy += (Ptr.y - Ptr.hy) * .2;
   halo.style.transform = `translate3d(${Ptr.hx.toFixed(1)}px, ${Ptr.hy.toFixed(1)}px, 0)`;
@@ -3578,23 +3597,42 @@ const Chron = {
   go(i) { this.follow = false; this.cur = clamp(i, 0, this.chapters.length - 1); this.render(true); },
   render(anim) {
     const c = this.chapters[this.cur]; if (!c) return;
-    $("#chron-tabs").innerHTML = this.chapters.map((ch, i) => `<button type="button" class="ctab${i === this.cur ? " on" : ""}" data-ci="${i}"><b>${ROMAN[i + 1] || i + 1}</b>${CHAPTERS[ch.key][0]}</button>`).join("");
+    const st = $("#chron-stage"), isLast = this.cur === this.chapters.length - 1;
+    const caret = this.live && isLast ? '<span class="caret"></span>' : "";
+    /* while a chapter types out (about 40 times a second) only its paragraphs change, so only they are rewritten;
+       rebuilding the tabs, the card faces and the board glow on every tick took most of a frame on slower phones */
+    const bodyEl = !anim && st.dataset.ci === String(this.cur) && st.dataset.key === c.key && st.querySelector(".ch-body");
+    if (bodyEl) {
+      /* the chapter used to be rebuilt without its entrance class on the next tick, so it never faded in mid-stream */
+      bodyEl.parentNode.classList.remove("enter");
+      bodyEl.innerHTML = this.bodyHTML(c) + caret;
+      if (this.tabsKey !== this.chapters.length + "|" + this.cur) this.tabs();
+      this.navState(isLast);
+      return;
+    }
+    this.tabs();
     const minis = c.cards.filter(n => this.R.cards[n - 1]).map(n => { const e = this.R.cards[n - 1]; return `<button type="button" class="cmini${e.rev ? " rev" : ""}" data-modal="${n - 1}" title="${esc(e.card.th)}">${cardFront(e.card)}</button>`; }).join("");
     const shadowMini = c.key === "SHADOW" && this.R.shadow ? `<button type="button" class="cmini shadow${this.R.shadow.rev ? " rev" : ""}" data-modal="shadow">${cardFront(this.R.shadow.card)}</button>` : "";
-    const body = esc(c.body).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-    const html = c.key === "POEM" ? `<div class="poem">${body.split(/\n+/).filter(Boolean).map(l => `<span>${l}</span>`).join("")}</div>` : body.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
-    const isLast = this.cur === this.chapters.length - 1;
-    const st = $("#chron-stage");
     const same = st.dataset.ci === String(this.cur);
-    st.dataset.ci = this.cur;
+    st.dataset.ci = this.cur; st.dataset.key = c.key;
     st.innerHTML = `<div class="chapter${same && !anim ? "" : " enter"}">
       <div class="ch-head"><span class="ch-num">${ROMAN[this.cur + 1] || ""}</span><div><div class="eyebrow">${CHAPTERS[c.key][1]}</div><h3>${CHAPTERS[c.key][0]}</h3></div>${minis || shadowMini ? `<div class="ch-cards">${minis}${shadowMini}</div>` : ""}</div>
-      <div class="ch-body">${html}${this.live && isLast ? '<span class="caret"></span>' : ""}</div></div>`;
-    const nav = $("#chron-nav");
-    nav.hidden = this.live && this.chapters.length < 2;
+      <div class="ch-body">${this.bodyHTML(c)}${caret}</div></div>`;
+    this.navState(isLast);
+    $$("#board .card").forEach((b, k) => b.classList.toggle("chron-glow", c.cards.includes(k + 1)));
+  },
+  bodyHTML(c) {
+    const body = esc(c.body).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    return c.key === "POEM" ? `<div class="poem">${body.split(/\n+/).filter(Boolean).map(l => `<span>${l}</span>`).join("")}</div>` : body.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+  },
+  tabs() {
+    this.tabsKey = this.chapters.length + "|" + this.cur;
+    $("#chron-tabs").innerHTML = this.chapters.map((ch, i) => `<button type="button" class="ctab${i === this.cur ? " on" : ""}" data-ci="${i}"><b>${ROMAN[i + 1] || i + 1}</b>${CHAPTERS[ch.key][0]}</button>`).join("");
+  },
+  navState(isLast) {
+    $("#chron-nav").hidden = this.live && this.chapters.length < 2;
     $("#chron-prev").disabled = this.cur === 0;
     $("#chron-next").disabled = isLast;
-    $$("#board .card").forEach((b, k) => b.classList.toggle("chron-glow", c.cards.includes(k + 1)));
   },
   /* the house book is played out like a stream so both sources feel the same */
   play(text, src, extra) {
@@ -4997,12 +5035,14 @@ const CONSTELLATIONS = [
 ];
 const Const = (() => {
   const cv = $("#const"), ctx = cv.getContext("2d");
-  let W = 0, H = 0, act = [], last = 0, nextAt = 0, rgb = [232, 196, 106];
+  let W = 0, H = 0, act = [], last = 0, nextAt = 0, rgb = [232, 196, 106], col = "rgb(232,196,106)", glow = "rgba(232,196,106,.9)";
   const IN = 3200, HOLD = 7500, OUT = 2600;
   const max = () => QUALITY === "low" || innerWidth < 760 ? 1 : QUALITY === "high" ? 3 : 2;
   function resize() {
     const dpr = Math.min(2, devicePixelRatio || 1);
     W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    /* resizing a canvas resets its state, so the label font is set here rather than every frame */
+    ctx.font = '600 11px "Cinzel", serif'; if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
     if (REDUCED) { act = []; for (let i = 0; i < max(); i++) spawn(0); draw(0); }
   }
   function spawn(t) {
@@ -5018,13 +5058,12 @@ const Const = (() => {
   }
   function draw(t) {
     ctx.clearRect(0, 0, W, H);
-    const [r, g, b] = rgb;
     act = act.filter(a => REDUCED || t - a.t0 < IN + HOLD + OUT);
     for (const a of act) {
       const age = REDUCED ? IN : t - a.t0, p = Math.min(1, age / IN), fade = age < IN + HOLD ? Math.min(1, age / 600) : 1 - (age - IN - HOLD) / OUT;
       const pts = a.c.s.map(([u, v]) => [a.x + u * a.size, a.y + v * a.size]);
       const near = clamp(1 - Math.hypot(Ptr.x - (a.x + a.size / 2), Ptr.y - (a.y + a.size / 2)) / (a.size * 1.1), 0, 1);
-      ctx.lineWidth = 1 + near * .8; ctx.strokeStyle = `rgba(${r},${g},${b},${((.2 + .5 * near) * fade).toFixed(3)})`;
+      ctx.lineWidth = 1 + near * .8; ctx.strokeStyle = col; ctx.globalAlpha = Math.max(0, (.2 + .5 * near) * fade);
       ctx.beginPath();
       a.c.e.forEach(([i, j], k) => {
         const q = clamp(p * a.c.e.length - k, 0, 1); if (!q) return;
@@ -5032,25 +5071,25 @@ const Const = (() => {
         ctx.moveTo(x1, y1); ctx.lineTo(x1 + (x2 - x1) * q, y1 + (y2 - y1) * q);
       });
       ctx.stroke();
-      ctx.shadowColor = `rgba(${r},${g},${b},.9)`; ctx.shadowBlur = 6 + near * 12;
+      ctx.shadowColor = glow; ctx.shadowBlur = 6 + near * 12; ctx.fillStyle = "rgb(255,248,225)";
       pts.forEach(([x, y], i) => {
         const tw = REDUCED ? 1 : .7 + .3 * Math.sin(t * .003 + a.tw[i]);
-        ctx.fillStyle = `rgba(255,248,225,${((.55 + .45 * near) * fade * tw).toFixed(3)})`;
+        ctx.globalAlpha = Math.max(0, (.55 + .45 * near) * fade * tw);
         ctx.beginPath(); ctx.arc(x, y, 1.6 + near * 1.2 + (i % 3 === 0 ? .6 : 0), 0, 6.283); ctx.fill();
       });
       ctx.shadowBlur = 0;
       if (p > .6) {
-        ctx.font = '600 11px "Cinzel", serif'; ctx.fillStyle = `rgba(${r},${g},${b},${((.3 + .5 * near) * fade * (p - .6) / .4).toFixed(3)})`;
-        if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
+        ctx.fillStyle = col; ctx.globalAlpha = Math.max(0, (.3 + .5 * near) * fade * (p - .6) / .4);
         const [lx, ly] = pts[pts.length - 1]; ctx.fillText(a.c.n, lx + 10, ly + 18);
       }
     }
+    ctx.globalAlpha = 1;
     if (!REDUCED && act.length < max() && t > nextAt) { spawn(t); nextAt = t + 2400 + Math.random() * 3200; }
   }
   function loop(t) { requestAnimationFrame(loop); if (document.hidden || t - last < 33) return; last = t; draw(t); }
   addEventListener("resize", resize); resize();
   if (!REDUCED) requestAnimationFrame(loop);
-  return { color(hex) { rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); if (REDUCED) draw(0); } };
+  return { color(hex) { rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); col = `rgb(${rgb})`; glow = `rgba(${rgb},.9)`; if (REDUCED) draw(0); } };
 })();
 /* tarot cards drifting in the empty margins of a wide screen, at three depths */
 (() => {
