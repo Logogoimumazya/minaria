@@ -628,10 +628,6 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
   .facts { grid-template-columns: repeat(3, minmax(0,1fr)); }
   .dom-row { grid-template-columns: 64px 1fr 52px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .spin, .spin-rev { animation: none; }
-  .stage, .modal { animation: none; }
-}
 /* ---------- rooms of the observatory ---------- */
 .rooms { display: flex; gap: 4px; flex-wrap: wrap; }
 .rooms button {
@@ -758,7 +754,7 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
 .lib-card svg { width: 100%; height: auto; display: block; border-radius: 8px; transition: transform .2s, box-shadow .2s; }
 .lib-card:hover svg { transform: translateY(-3px); box-shadow: 0 0 20px rgba(232,196,106,.35); }
 .lib-card span { font-family: var(--f-latin); font-size: 11.5px; line-height: 1.3; color: var(--gold-hi); }
-.astro { color: var(--gold); }
+.en.astro { color: var(--gold); }
 .ex { font-size: 14px; color: var(--mist); border-left: 2px solid var(--line-strong); padding-left: 10px; }
 .quiz { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr); gap: 18px; align-items: start; }
 .q-title b { font-size: 20px; color: var(--gold-hi); display: block; line-height: 1.4; }
@@ -838,14 +834,116 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
   .modal-box.share { grid-template-columns: 1fr; }
   .share-prev { width: min(240px, 80%); margin: 0 auto; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .moon.big, .charge-card.charging > svg.back, .flip-in .mini-card { animation: none; }
+/* ---------- backdrop art: aurora, light rays, the astrolabe, constellations and drifting cards ---------- */
+@property --acol { syntax: "<color>"; inherits: true; initial-value: #e8c46a; }
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.art { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --acol: #e8c46a; transition: --acol 1.6s ease; }
+.aurora { position: absolute; left: -15%; right: -15%; top: -18%; height: 72vh; filter: blur(46px); opacity: .32; mix-blend-mode: screen; }
+.aurora i {
+  position: absolute; inset: 0; opacity: .55; transform-origin: 50% 0;
+  background: linear-gradient(100deg, transparent 8%, var(--acol) 28%, transparent 44%, color-mix(in srgb, var(--acol) 55%, #6fa8ff) 62%, transparent 82%);
+  -webkit-mask: radial-gradient(ellipse 70% 62% at 50% 18%, #000, transparent 74%); mask: radial-gradient(ellipse 70% 62% at 50% 18%, #000, transparent 74%);
+  animation: art-aur 26s ease-in-out infinite alternate;
+}
+.aurora i:nth-child(2) { opacity: .38; animation-duration: 37s; animation-direction: alternate-reverse; background: linear-gradient(80deg, transparent 20%, color-mix(in srgb, var(--acol) 50%, #b07cff) 40%, transparent 58%, var(--acol) 74%, transparent 90%); }
+@keyframes art-aur { from { transform: translateX(-9%) skewX(9deg) scaleY(.88); } to { transform: translateX(9%) skewX(-11deg) scaleY(1.16); } }
+.rays {
+  position: absolute; inset: -30%; opacity: .55; mix-blend-mode: screen; transform-origin: 30% 10%;
+  background: repeating-conic-gradient(from 196deg at 30% 10%, transparent 0deg 6deg, color-mix(in srgb, var(--acol) 16%, transparent) 7deg 8.5deg, transparent 9.5deg 15deg);
+  -webkit-mask: radial-gradient(ellipse 48% 46% at 30% 10%, #000, transparent 72%); mask: radial-gradient(ellipse 48% 46% at 30% 10%, #000, transparent 72%);
+  animation: art-rays 44s ease-in-out infinite alternate;
+}
+@keyframes art-rays { to { transform: rotate(7deg); } }
+.astrolabe {
+  position: absolute; left: 50%; top: 46%; width: min(128vmax, 1750px); aspect-ratio: 1; opacity: .17; color: var(--acol);
+  translate: calc(-50% + var(--px, 0) * -34px) calc(-50% + var(--py, 0) * -24px);
+}
+.astrolabe svg { width: 100%; height: 100%; display: block; overflow: visible; }
+/* with transform-box: view-box the origin is the viewBox origin (0, 0), which is the centre of these drawings */
+.astrolabe g.ring { transform-box: view-box; transform-origin: 0 0; animation: art-rot linear infinite; }
+.astrolabe .r1 { animation-duration: 260s; }
+.astrolabe .r2 { animation-duration: 190s; animation-direction: reverse; }
+.astrolabe .r3 { animation-duration: 130s; }
+.astrolabe .r4 { animation-duration: 320s; animation-direction: reverse; }
+@keyframes art-rot { to { transform: rotate(360deg); } }
+#const { position: absolute; inset: 0; width: 100%; height: 100%; }
+.floaters { position: absolute; inset: 0; }
+.floater { position: absolute; translate: calc(var(--px, 0) * var(--d) * -60px) calc(var(--py, 0) * var(--d) * -40px); }
+.floater > div { animation: art-float var(--dur) ease-in-out infinite alternate; animation-delay: var(--delay); rotate: var(--r0); }
+.floater svg { width: 100%; height: auto; display: block; border-radius: 8px; box-shadow: 0 0 30px rgba(232,196,106,.18); }
+@keyframes art-float { from { transform: translateY(-22px) rotate(-5deg); } to { transform: translateY(22px) rotate(6deg); } }
+/* ---------- gold frame and light running round the panels ---------- */
+.panel { position: relative; }
+.panel::before {
+  content: ""; position: absolute; inset: 5px; pointer-events: none; opacity: .8;
+  background: var(--cTL) top left / 34px no-repeat, var(--cTR) top right / 34px no-repeat, var(--cBL) bottom left / 34px no-repeat, var(--cBR) bottom right / 34px no-repeat;
+}
+.panel::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 0 68%, rgba(255,240,194,.0) 70%, rgba(255,240,194,.8) 79%, transparent 88%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: art-shimmer 11s linear infinite;
+}
+.panel:nth-of-type(2n)::after { animation-delay: -4s; }
+.panel:nth-of-type(3n)::after { animation-delay: -7.5s; }
+@keyframes art-shimmer { to { --ang: 360deg; } }
+/* ---------- opening scene ---------- */
+.intro-scene { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; cursor: pointer; }
+.intro-scene .door {
+  position: absolute; top: 0; bottom: 0; width: 50.5%; transition: transform 1.5s cubic-bezier(.7,0,.2,1);
+  background:
+    repeating-linear-gradient(45deg, rgba(232,196,106,.07) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-45deg, rgba(232,196,106,.07) 0 1px, transparent 1px 22px),
+    radial-gradient(ellipse 120% 80% at var(--dx) 50%, #1a1846, #07081a 70%);
+}
+.intro-scene .door.l { left: 0; --dx: 100%; border-right: 2px solid rgba(232,196,106,.7); box-shadow: inset -30px 0 60px rgba(232,196,106,.12); }
+.intro-scene .door.r { right: 0; --dx: 0%; border-left: 2px solid rgba(232,196,106,.7); box-shadow: inset 30px 0 60px rgba(232,196,106,.12); }
+.intro-scene .door::after { content: ""; position: absolute; top: 82%; width: 22px; height: 120px; margin-top: -60px; border: 1.5px solid rgba(232,196,106,.7); border-radius: 12px; }
+.intro-scene .door.l::after { right: 18px; } .intro-scene .door.r::after { left: 18px; }
+.intro-core { position: relative; z-index: 1; display: grid; justify-items: center; gap: 6px; text-align: center; transition: transform 1.6s cubic-bezier(.6,0,.2,1), opacity 1.2s ease; opacity: 0; transform: scale(.86); }
+.intro-core svg { width: min(300px, 64vw); color: #e8c46a; filter: drop-shadow(0 0 22px rgba(232,196,106,.45)); }
+.intro-core svg g.ring { transform-box: view-box; transform-origin: 0 0; animation: art-rot 14s linear infinite; }
+.intro-core svg g.r2 { animation-direction: reverse; animation-duration: 10s; }
+.intro-core h1 { font-family: var(--f-title); font-size: clamp(40px, 7vw, 68px); color: var(--gold-hi); text-shadow: 0 0 30px rgba(232,196,106,.5); margin-top: -8px; }
+.intro-core p { margin: 0; font-family: var(--f-latin); letter-spacing: .4em; color: var(--gold); font-size: 13px; }
+.intro-scene.show .intro-core { opacity: 1; transform: none; }
+.intro-scene.open .door.l { transform: translateX(-102%); }
+.intro-scene.open .door.r { transform: translateX(102%); }
+.intro-scene.open .intro-core { opacity: 0; transform: scale(1.5); }
+.intro-scene.gone { opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+.intro-skip { position: absolute; z-index: 2; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+/* ---------- graphics menu, motion prompt and debug readout ---------- */
+.panel.gfx-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 75; width: min(340px, calc(100vw - 32px)); background: var(--panel-solid); display: grid; gap: 12px; }
+.gfx-pop .legend { display: block; margin-bottom: 6px; }
+.gfx-pop p { margin: 0; font-size: 12.5px; color: var(--mist); }
+.tools { position: relative; }
+.motion-ask {
+  position: fixed; z-index: 85; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px)); background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 18px; padding: 14px 16px;
+  display: grid; gap: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+.motion-ask p { margin: 0; font-size: 14.5px; }
+.motion-ask .btn { padding: 8px 18px; font-size: 14.5px; }
+.debug { position: fixed; z-index: 95; left: 8px; top: 8px; background: rgba(0,0,0,.82); color: #9f9; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; padding: 8px 10px; border-radius: 8px; white-space: pre; pointer-events: none; max-width: calc(100vw - 16px); overflow: hidden; }
+/* reduced motion is a class so the viewer's own choice can override the system setting */
+.reduce-motion .spin, .reduce-motion .spin-rev, .reduce-motion .stage, .reduce-motion .modal,
+.reduce-motion .moon.big, .reduce-motion .charge-card.charging > svg.back, .reduce-motion .flip-in .mini-card,
+.reduce-motion .aurora i, .reduce-motion .rays, .reduce-motion .astrolabe g.ring, .reduce-motion .floater > div, .reduce-motion .intro-core svg g.ring { animation: none; }
+.reduce-motion .panel::after { display: none; }
+html[data-q="low"] .panel::after, html[data-q="low"] .floaters, html[data-q="low"] .rays { display: none; }
+html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: none; }
+@media (max-width: 760px) {
+  .astrolabe { width: 170vmax; opacity: .13; }
+  .aurora { height: 55vh; }
+  .motion-ask { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
 }
 </style>
 
 <div class="nebula"></div>
 <canvas id="neb" aria-hidden="true"></canvas>
 <canvas id="sky"></canvas>
+<div class="art" id="art" aria-hidden="true"><div class="aurora"><i></i><i></i></div><div class="rays"></div><div class="astrolabe" id="astro"></div><canvas id="const"></canvas><div class="floaters" id="floaters"></div></div>
 <canvas id="fx"></canvas>
 <div class="keylight" id="keylight" aria-hidden="true"></div>
 <div class="grade-tint" id="grade-tint" aria-hidden="true"></div>
@@ -877,8 +975,10 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
       <li data-s="reading"><b>V</b>คำทำนาย</li>
     </ol>
     <div class="tools">
+      <button class="icon-btn" id="gfx-btn" type="button" aria-expanded="false" aria-controls="gfx-pop">ภาพ</button>
       <button class="icon-btn" id="music-btn" type="button" aria-pressed="false">ดนตรี: ปิด</button>
       <button class="icon-btn" id="sound-btn" type="button" aria-pressed="true">เสียง: เปิด</button>
+      <div class="panel gfx-pop" id="gfx-pop" hidden></div>
     </div>
   </header>
 
@@ -1404,7 +1504,13 @@ Object.entries(THAI_NUM).forEach(([n, s]) => [...s].forEach(ch => LETTER_VAL[ch]
 /* ================= UTIL ================= */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* motion and quality: the system's reduced-motion setting is only the default, a choice saved by the viewer wins */
+const MOTION_OS = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOTION_PREF = (p => p === "full" || p === "reduced" ? p : null)(store("astral-tarot-motion"));
+const REDUCED = MOTION_PREF ? MOTION_PREF === "reduced" : MOTION_OS;
+const QUALITY = (q => ["high", "auto", "low"].includes(q) ? q : "auto")(store("astral-tarot-quality"));
+document.documentElement.classList.toggle("reduce-motion", REDUCED);
+document.documentElement.dataset.q = QUALITY;
 const SPEED = REDUCED ? 0.3 : 1;
 const wait = ms => new Promise(r => setTimeout(r, ms * SPEED));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
@@ -1830,7 +1936,7 @@ const Neb = (() => {
   const cv = $("#neb");
   const fail = () => { cv.remove(); return { ok: false }; };
   let gl = null;
-  try { gl = cv.getContext("webgl", { alpha: false, antialias: false, depth: false, powerPreference: "low-power" }); } catch (e) { }
+  try { gl = cv.getContext("webgl", { alpha: false, antialias: false, depth: false, powerPreference: QUALITY === "high" ? "high-performance" : "low-power" }); } catch (e) { }
   if (!gl) return fail();
   const VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
   const FS = `precision mediump float;
@@ -1865,7 +1971,7 @@ gl_FragColor=vec4(col,1.);}`;
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = {}; ["uRes", "uTime", "uPar", "uC1", "uC2", "uC3", "uAcc", "uAccAmt", "uGlow"].forEach(n => U[n] = gl.getUniformLocation(pr, n));
-  let scale = innerWidth < 700 ? .35 : .5, last = 0, slow = 0, frames = 0;
+  let scale = QUALITY === "high" ? .75 : QUALITY === "low" ? .3 : innerWidth < 700 ? .35 : .5, last = 0, slow = 0, frames = 0;
   function resize() { cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height); }
   addEventListener("resize", resize); resize();
   const t0 = performance.now();
@@ -1886,12 +1992,13 @@ gl_FragColor=vec4(col,1.);}`;
     if (dt < (REDUCED ? 400 : 30)) return;
     last = t;
     /* drop resolution on devices that cannot keep up */
-    if (!REDUCED) { frames++; if (dt > 60) slow++; if (frames >= 90) { if (slow > 30 && scale > .26) { scale -= .08; resize(); } frames = slow = 0; } }
+    if (!REDUCED && QUALITY === "auto") { frames++; if (dt > 60) slow++; if (frames >= 90) { if (slow > 30 && scale > .26) { scale -= .08; resize(); } frames = slow = 0; } }
     draw(t);
   }
   draw(performance.now());
   requestAnimationFrame(loop);
-  return { ok: true };
+  let gpu = ""; try { const ext = gl.getExtension("WEBGL_debug_renderer_info"); gpu = gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER); } catch (e) { }
+  return { ok: true, gpu, scale: () => scale };
 })();
 
 /* virtual camera: each stage's stage-area gets dolly, pan, tilt and dutch-angle moves */
@@ -1968,7 +2075,7 @@ const Director = {
       const slot = $("#shadow-slot");
       buildShadowSlot(false);
       slot.hidden = false;
-      Grade.set("shadow"); Cam.letterbox(true); Music.setMood("shadow");
+      Grade.set("shadow"); Cam.letterbox(true); Music.setMood("shadow"); Art.tint("shadow");
       slot.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
       slot.classList.add("rising");
       setTimeout(() => {
@@ -2041,6 +2148,7 @@ function goStage(name) {
   $$("#steps li").forEach((li, i) => { li.classList.toggle("on", i === idx); li.classList.toggle("done", i < idx); });
   syncRooms(name);
   Music.setMood(name === "reading" && S.reading ? readingElement(S.reading) : name);
+  Art.tint(name === "reading" && S.reading ? readingElement(S.reading) : name);
   if (name !== "reading") scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
 }
 
@@ -3865,7 +3973,7 @@ function holdCharge(el, ms, done) {
   let p = 0, held = false, last = 0, raf = 0, hum = null, fired = false;
   const stopHum = () => { if (hum) { hum.stop(); hum = null; } };
   const step = t => {
-    const dt = last ? Math.min(64, t - last) : 16; last = t;
+    const dt = last ? Math.min(250, t - last) : 16; last = t;
     p = clamp(p + (held ? dt / ms : -dt / (ms * .5)), 0, 1);
     el.style.setProperty("--p", p.toFixed(3));
     if (hum) hum.set(p);
@@ -4690,6 +4798,208 @@ function initChargeShuffle() {
   b.addEventListener("contextmenu", e => e.preventDefault());
 }
 
+/* ================= ART DIRECTION: backdrop, constellations, drifting cards, gold frames, opening scene, graphics menu ================= */
+const ART_TINT = {
+  hub: "#c8d2ff", ask: "#e8c46a", shuffle: "#c88cff", pick: "#968cff", reveal: "#ffd78c", shadow: "#9a78e0", reading: "#ffb48c",
+  journal: "#ffc88c", library: "#be96ff", bond: "#ff96be", fire: "#ff8c50", water: "#6eaaff", air: "#dce6ff", earth: "#82dc8c"
+};
+/* a brass astrolabe: degree scale and the twelve signs, roman hours, lunar mansions with a twelve-point star, then the seven classical planets */
+function astrolabeSVG(small) {
+  const P = (r, deg) => { const a = deg * Math.PI / 180; return [(r * Math.sin(a)).toFixed(1), (-r * Math.cos(a)).toFixed(1)]; };
+  const line = (r1, r2, deg) => { const [x1, y1] = P(r1, deg), [x2, y2] = P(r2, deg); return `M${x1} ${y1}L${x2} ${y2}`; };
+  const label = (r, deg, txt, rot = true) => { const [x, y] = P(r, deg); return `<text x="${x}" y="${y}"${rot ? ` transform="rotate(${deg} ${x} ${y})"` : ""}>${txt}</text>`; };
+  let ticks = "", sep = "", zod = "", rom = "", lun = "", star = "", pl = "";
+  for (let d = 0; d < 360; d += small ? 10 : 2) ticks += line(478, 478 - (d % 30 === 0 ? 22 : d % 10 === 0 ? 12 : 6), d);
+  const ZOD = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+  for (let i = 0; i < 12; i++) {
+    sep += line(448, 388, i * 30);
+    zod += label(418, i * 30 + 15, ZOD[i] + "&#xFE0E;");
+    rom += label(345, i * 30 + 15, ROMAN[i + 1]);
+  }
+  for (let i = 0; i < 28; i++) lun += line(300, i % 7 === 0 ? 280 : 290, i * 360 / 28);
+  for (let i = 0; i <= 12; i++) { const [x, y] = P(270, (i * 5 % 12) * 30); star += (i ? "L" : "M") + x + " " + y; }
+  ["☉", "☽", "☿", "♀", "♂", "♃", "♄"].forEach((g, i) => pl += label(172, i * 360 / 7, g + "&#xFE0E;", false));
+  let core = ""; for (let i = 0; i < 8; i++) { const [x, y] = P(i % 2 ? 22 : 62, i * 45); core += (i ? "L" : "M") + x + " " + y; }
+  const sym = `fill="currentColor" stroke="none" text-anchor="middle" dominant-baseline="central"`;
+  return `<svg viewBox="-500 -500 1000 1000" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+    <g class="ring r1"><circle r="490"/><circle r="478"/><path d="${ticks}"/><circle r="448"/><circle r="388"/><path d="${sep}"/><g ${sym} font-size="34" font-family="Noto Sans Symbols, Segoe UI Symbol, serif">${zod}</g></g>
+    <g class="ring r2"><circle r="372"/><circle r="318"/><g ${sym} font-size="24" font-family="Cinzel, serif">${rom}</g></g>
+    <g class="ring r3"><path d="${lun}"/><path d="${star}Z" stroke-opacity=".7"/><circle r="240" stroke-dasharray="4 10"/></g>
+    <g class="ring r4"><circle r="205"/><circle r="140"/><g ${sym} font-size="30" font-family="Noto Sans Symbols, Segoe UI Symbol, serif">${pl}</g><path d="${core}Z" fill="currentColor" fill-opacity=".25"/><circle r="8" fill="currentColor"/></g>
+  </svg>`;
+}
+/* constellations in unit boxes: s = stars (x, y in 0..1), e = edges between star indexes */
+const CONSTELLATIONS = [
+  { n: "ORION", s: [[.22, .08], [.74, .14], [.4, .46], [.5, .49], [.6, .52], [.26, .9], [.8, .86], [.5, .7]], e: [[0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6], [3, 7], [0, 1]] },
+  { n: "URSA MAJOR", s: [[0, .3], [.18, .33], [.32, .42], [.46, .5], [.5, .76], [.8, .8], [.83, .52]], e: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 3]] },
+  { n: "CASSIOPEIA", s: [[0, .22], [.25, .68], [.5, .36], [.75, .8], [1, .3]], e: [[0, 1], [1, 2], [2, 3], [3, 4]] },
+  { n: "CYGNUS", s: [[.5, 0], [.5, .36], [.5, .66], [.5, 1], [.08, .28], [.92, .42]], e: [[0, 1], [1, 2], [2, 3], [4, 1], [1, 5]] },
+  { n: "LEO", s: [[.08, .62], [.3, .42], [.34, .2], [.5, .14], [.6, .3], [.55, .5], [.9, .56], [.8, .84]], e: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 1], [5, 6], [6, 7], [7, 0]] },
+  { n: "SCORPIUS", s: [[.1, .08], [.2, .2], [.3, .35], [.38, .5], [.42, .65], [.5, .8], [.65, .9], [.8, .84], [.86, .7]], e: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8]] },
+  { n: "LYRA", s: [[.5, 0], [.34, .38], [.66, .44], [.3, .96], [.62, 1]], e: [[0, 1], [0, 2], [1, 2], [1, 3], [2, 4], [3, 4]] }
+];
+const Const = (() => {
+  const cv = $("#const"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, act = [], last = 0, nextAt = 0, rgb = [232, 196, 106];
+  const IN = 3200, HOLD = 7500, OUT = 2600;
+  const max = () => QUALITY === "low" || innerWidth < 760 ? 1 : QUALITY === "high" ? 3 : 2;
+  function resize() {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (REDUCED) { act = []; for (let i = 0; i < max(); i++) spawn(0); draw(0); }
+  }
+  function spawn(t) {
+    const used = act.map(a => a.c), pool = CONSTELLATIONS.filter(c => !used.includes(c)), c = pool[Math.floor(Math.random() * pool.length)];
+    const size = clamp(Math.min(W, H) * (.22 + Math.random() * .12), 150, 320);
+    let x, y, n = 0;
+    do {
+      const right = Math.random() < .5;
+      x = W > 1000 ? (right ? W * .76 + Math.random() * Math.max(0, W * .24 - size) : Math.random() * Math.max(0, W * .24 - size * .4)) : Math.random() * Math.max(0, W - size);
+      y = 70 + Math.random() * Math.max(0, H - size - 140);
+    } while (++n < 14 && act.some(a => Math.abs(a.x - x) < size && Math.abs(a.y - y) < size));
+    act.push({ c, x, y, size, t0: t, tw: c.s.map(() => Math.random() * 6.28) });
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    const [r, g, b] = rgb;
+    act = act.filter(a => REDUCED || t - a.t0 < IN + HOLD + OUT);
+    for (const a of act) {
+      const age = REDUCED ? IN : t - a.t0, p = Math.min(1, age / IN), fade = age < IN + HOLD ? Math.min(1, age / 600) : 1 - (age - IN - HOLD) / OUT;
+      const pts = a.c.s.map(([u, v]) => [a.x + u * a.size, a.y + v * a.size]);
+      const near = clamp(1 - Math.hypot(Ptr.x - (a.x + a.size / 2), Ptr.y - (a.y + a.size / 2)) / (a.size * 1.1), 0, 1);
+      ctx.lineWidth = 1 + near * .8; ctx.strokeStyle = `rgba(${r},${g},${b},${((.2 + .5 * near) * fade).toFixed(3)})`;
+      ctx.beginPath();
+      a.c.e.forEach(([i, j], k) => {
+        const q = clamp(p * a.c.e.length - k, 0, 1); if (!q) return;
+        const [x1, y1] = pts[i], [x2, y2] = pts[j];
+        ctx.moveTo(x1, y1); ctx.lineTo(x1 + (x2 - x1) * q, y1 + (y2 - y1) * q);
+      });
+      ctx.stroke();
+      ctx.shadowColor = `rgba(${r},${g},${b},.9)`; ctx.shadowBlur = 6 + near * 12;
+      pts.forEach(([x, y], i) => {
+        const tw = REDUCED ? 1 : .7 + .3 * Math.sin(t * .003 + a.tw[i]);
+        ctx.fillStyle = `rgba(255,248,225,${((.55 + .45 * near) * fade * tw).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(x, y, 1.6 + near * 1.2 + (i % 3 === 0 ? .6 : 0), 0, 6.283); ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+      if (p > .6) {
+        ctx.font = '600 11px "Cinzel", serif'; ctx.fillStyle = `rgba(${r},${g},${b},${((.3 + .5 * near) * fade * (p - .6) / .4).toFixed(3)})`;
+        if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
+        const [lx, ly] = pts[pts.length - 1]; ctx.fillText(a.c.n, lx + 10, ly + 18);
+      }
+    }
+    if (!REDUCED && act.length < max() && t > nextAt) { spawn(t); nextAt = t + 2400 + Math.random() * 3200; }
+  }
+  function loop(t) { requestAnimationFrame(loop); if (document.hidden || t - last < 33) return; last = t; draw(t); }
+  addEventListener("resize", resize); resize();
+  if (!REDUCED) requestAnimationFrame(loop);
+  return { color(hex) { rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); if (REDUCED) draw(0); } };
+})();
+/* tarot cards drifting in the empty margins of a wide screen, at three depths */
+(() => {
+  const box = $("#floaters");
+  function make() {
+    box.innerHTML = "";
+    const gutter = (innerWidth - Math.min(1180, innerWidth)) / 2;
+    if (QUALITY === "low" || gutter < 70) return;
+    const r = mulberry(hashStr("floaters|" + dayKey())), out = [];
+    [0, 1].forEach(side => [0, 1, 2].forEach(k => {
+      const d = [.45, .7, 1][(k + side) % 3], w = Math.min(150, gutter * .85) * (.55 + d * .45);
+      const x = side ? innerWidth - gutter + (gutter - w) * r() : (gutter - w) * r();
+      const y = innerHeight * (.06 + k * .31) + r() * innerHeight * .1, card = DECK[Math.floor(r() * 22)];
+      out.push(`<div class="floater" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;width:${w.toFixed(0)}px;--d:${d};opacity:${(.2 + d * .34).toFixed(2)};filter:blur(${((1 - d) * 2.6).toFixed(1)}px)">
+        <div style="--dur:${(9 + r() * 7).toFixed(1)}s;--delay:${(-r() * 8).toFixed(1)}s;--r0:${((r() - .5) * 28).toFixed(0)}deg">${(k + side) % 2 ? backSVG() : cardFront(card)}</div></div>`);
+    }));
+    box.innerHTML = out.join("");
+  }
+  let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(make, 250); });
+  make();
+})();
+const Art = {
+  tint(key) { const c = ART_TINT[key] || ART_TINT.ask; $("#art").style.setProperty("--acol", c); Const.color(c); }
+};
+$("#astro").innerHTML = astrolabeSVG(false);
+/* gold corner flourishes for every panel, drawn once and shared through CSS variables */
+(() => {
+  const body = `<path d="M1 39V11Q1 1 11 1H39"/><path d="M6 30V13Q6 6 13 6H30" stroke-opacity=".5"/><path d="M16 6q4 5 8 0M6 16q5 4 0 8" stroke-opacity=".7"/><circle cx="11" cy="11" r="2" fill="#e8c46a" stroke="none"/>`;
+  const set = (k, tr) => document.documentElement.style.setProperty(k, `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" stroke="#e8c46a" stroke-width="1.2"><g transform="${tr}">${body}</g></svg>`)}")`);
+  set("--cTL", ""); set("--cTR", "translate(40 0) scale(-1 1)"); set("--cBL", "translate(0 40) scale(1 -1)"); set("--cBR", "translate(40 40) scale(-1 -1)");
+})();
+
+/* ---------- opening scene: the observatory doors part, once per visit ---------- */
+function playIntro() {
+  let seen = false; try { seen = sessionStorage.getItem("astral-tarot-intro") === "1"; sessionStorage.setItem("astral-tarot-intro", "1"); } catch (e) { }
+  if (seen || store("astral-tarot-intro-off") === true) return;
+  const el = document.createElement("div");
+  el.className = "intro-scene"; el.setAttribute("role", "presentation");
+  el.innerHTML = `<div class="door l"></div><div class="door r"></div><div class="intro-core">${astrolabeSVG(true)}<h1>หอดาราทาโรต์</h1><p>ASTRAL ORACLE</p></div><button type="button" class="icon-btn intro-skip">ข้าม</button>`;
+  document.body.appendChild(el);
+  let done = false; const timers = [];
+  const finish = fast => {
+    if (done) return; done = true; timers.forEach(clearTimeout);
+    el.classList.add("open");
+    if (!REDUCED) setTimeout(() => FX.burst(innerWidth / 2, innerHeight / 2, 90, 6), fast ? 0 : 250);
+    setTimeout(() => el.classList.add("gone"), fast ? 350 : 1100);
+    setTimeout(() => el.remove(), fast ? 900 : 1700);
+  };
+  el.addEventListener("click", () => finish(true));
+  requestAnimationFrame(() => el.classList.add("show"));
+  timers.push(setTimeout(() => finish(REDUCED), REDUCED ? 900 : 1900));
+}
+
+/* ---------- motion: the system setting is the default, the viewer's own choice wins ---------- */
+function askMotion() {
+  if (!MOTION_OS || MOTION_PREF) return;
+  const d = document.createElement("div");
+  d.className = "motion-ask"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "การเคลื่อนไหวของภาพ");
+  d.innerHTML = `<p>เครื่องนี้ตั้งค่าให้ <b>ลดการเคลื่อนไหว</b> ไว้ หอดาราจึงหยุดพื้นหลัง ดวงดาว และมุมกล้องทั้งหมด อยากเปิดภาพเคลื่อนไหวเต็มไหม</p>
+    <div class="btn-row"><button class="btn" type="button" data-m="full">เปิดภาพเคลื่อนไหวเต็ม</button><button class="btn ghost" type="button" data-m="reduced">คงไว้แบบนี้</button></div>`;
+  document.body.appendChild(d);
+  d.addEventListener("click", e => {
+    const b = e.target.closest("[data-m]"); if (!b) return;
+    store("astral-tarot-motion", b.dataset.m);
+    if (b.dataset.m === "full") location.reload(); else d.remove();
+  });
+}
+function initGfx() {
+  const b = $("#gfx-btn"), pop = $("#gfx-pop");
+  const chips = (attr, list, cur) => `<div class="filters">${list.map(([k, l]) => `<button type="button" class="role" ${attr}="${k}" aria-pressed="${k === cur}">${l}</button>`).join("")}</div>`;
+  pop.innerHTML = `
+    <div><span class="legend">คุณภาพภาพ</span>${chips("data-gq", [["high", "สูงสุด"], ["auto", "อัตโนมัติ"], ["low", "ประหยัด"]], QUALITY)}
+      <p>สูงสุดเหมาะกับคอมที่มีการ์ดจอ อัตโนมัติจะลดความละเอียดเองเมื่อเครื่องทำไม่ทัน ประหยัดเหมาะกับเครื่องที่ร้อนหรือแบตใกล้หมด</p></div>
+    <div><span class="legend">การเคลื่อนไหว</span>${chips("data-gm", [["full", "เต็ม"], ["reduced", "ลด"]], REDUCED ? "reduced" : "full")}
+      ${MOTION_OS ? "<p>เครื่องนี้ตั้งค่าให้ลดการเคลื่อนไหวไว้ เลือกเต็มเพื่อเปิดภาพเคลื่อนไหวทั้งหมด</p>" : ""}</div>
+    <div><span class="legend">ฉากเปิดตอนเข้าเว็บ</span>${chips("data-gi", [["on", "เปิด"], ["off", "ปิด"]], store("astral-tarot-intro-off") === true ? "off" : "on")}</div>
+    <p>เปลี่ยนคุณภาพหรือการเคลื่อนไหวแล้ว หน้าจะโหลดใหม่ทันที</p>`;
+  b.addEventListener("click", () => { pop.hidden = !pop.hidden; b.setAttribute("aria-expanded", !pop.hidden); });
+  pop.addEventListener("click", e => {
+    const q = e.target.closest("[data-gq]"), m = e.target.closest("[data-gm]"), i = e.target.closest("[data-gi]");
+    if (q && q.dataset.gq !== QUALITY) { store("astral-tarot-quality", q.dataset.gq); location.reload(); }
+    if (m && (m.dataset.gm === "reduced") !== REDUCED) { store("astral-tarot-motion", m.dataset.gm); location.reload(); }
+    if (i) { store("astral-tarot-intro-off", i.dataset.gi === "off"); $$("[data-gi]", pop).forEach(x => x.setAttribute("aria-pressed", x === i)); }
+  });
+  document.addEventListener("click", e => { if (!pop.hidden && !e.target.closest(".tools")) { pop.hidden = true; b.setAttribute("aria-expanded", "false"); } });
+}
+/* ?debug (or #debug) shows what the renderer is actually doing on this machine */
+function initDebug() {
+  let on = false; try { on = new URLSearchParams(location.search).has("debug") || location.hash === "#debug"; } catch (e) { }
+  if (!on) return;
+  const d = document.createElement("div"); d.className = "debug"; document.body.appendChild(d);
+  let frames = 0, t0 = performance.now();
+  (function tick(t) {
+    frames++;
+    if (t - t0 >= 1000) {
+      const fps = Math.round(frames * 1000 / (t - t0)); frames = 0; t0 = t;
+      d.textContent = [
+        `FPS ${fps}`, `motion ${REDUCED ? "reduced" : "full"} · OS ${MOTION_OS ? "reduce" : "normal"} · saved ${MOTION_PREF || "-"}`,
+        `quality ${QUALITY}`, `webgl ${Neb.ok ? "on · scale " + Neb.scale().toFixed(2) : "off"}`, `gpu ${Neb.gpu || "-"}`,
+        `viewport ${innerWidth}×${innerHeight} @${devicePixelRatio}x · cores ${navigator.hardwareConcurrency || "?"}`
+      ].join("\n");
+    }
+    requestAnimationFrame(tick);
+  })(t0);
+}
+
 /* ================= WIRING ================= */
 $("#defs-host").innerHTML = DEFS;
 initAsk();
@@ -4719,6 +5029,8 @@ $("#music-btn").addEventListener("click", () => setMusic(!Music.nodes));
   const go = () => { removeEventListener("pointerdown", go, true); if (store("astral-tarot-music") === true) Music.start(); };
   addEventListener("pointerdown", go, true);
 })();
+initGfx(); initDebug();
 goRoom("hub");
+playIntro(); askMotion();
 getSample();
 </script>
