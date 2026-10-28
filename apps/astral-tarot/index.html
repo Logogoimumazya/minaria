@@ -436,7 +436,6 @@ body.story-open .wrap { padding-bottom: 56vh; }
 .board .card.spot .front { box-shadow: 0 0 0 2px var(--gold-hi), 0 0 44px rgba(232,196,106,.75); }
 .board .card .card-inner { transition: transform 1s cubic-bezier(.2,.75,.2,1), translate .25s ease; }
 /* ---------- motion: nebula, light, camera, pointer ---------- */
-@property --vig { syntax: "<number>"; inherits: false; initial-value: .45; }
 #neb { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; transition: filter .9s ease; }
 #sky { transition: filter .9s ease; }
 body.dof #neb { filter: blur(6px) brightness(.72); }
@@ -445,10 +444,14 @@ body.dof #sky { filter: blur(2.5px) brightness(.65); }
   position: fixed; left: 0; top: 0; width: 130vmax; height: 130vmax; margin: -65vmax 0 0 -65vmax; border-radius: 50%;
   pointer-events: none; z-index: 2; color: rgba(140,190,255,.10); mix-blend-mode: screen;
   background: radial-gradient(circle, currentColor 0%, transparent 55%);
-  transform: translate(78vw, 16vh); transition: transform 1.8s cubic-bezier(.22,.7,.2,1), color 1.4s ease;
+  transform: translate(78vw, 16vh); transition: transform 1.8s cubic-bezier(.22,.7,.2,1), color 1.4s steps(5);
 }
-.grade-tint { position: fixed; inset: 0; pointer-events: none; z-index: 2; mix-blend-mode: soft-light; opacity: .3; background-color: rgb(40,70,150); transition: background-color 1.4s ease; }
-.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; --vig: .45; transition: --vig 1.4s ease; background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgb(2 2 10 / var(--vig)) 100%); }
+/* colour changes on these full-screen layers go in a few steps: a smooth colour fade repaints the whole layer every
+   frame (the astrolabe is three screens big), and on a phone that queue left the room's own content blank for
+   seconds after each room change. The layers are faint enough that the steps do not show. The vignette fades by
+   opacity, which the compositor does without repainting */
+.grade-tint { position: fixed; inset: 0; pointer-events: none; z-index: 2; mix-blend-mode: soft-light; opacity: .3; background-color: rgb(40,70,150); transition: background-color 1.4s steps(8); }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: .45; transition: opacity 1.4s ease; background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgb(2 2 10) 100%); }
 .letterbox::before, .letterbox::after { content: ""; position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 50; pointer-events: none; transition: height .9s cubic-bezier(.22,.7,.2,1); }
 .letterbox::before { top: 0; }
 .letterbox::after { bottom: 0; }
@@ -861,7 +864,7 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
 /* ---------- backdrop art: aurora, light rays, the astrolabe, constellations and drifting cards ---------- */
 @property --acol { syntax: "<color>"; inherits: true; initial-value: #e8c46a; }
 @property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-.art { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --acol: #e8c46a; transition: --acol 1.6s ease; }
+.art { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --acol: #e8c46a; transition: --acol 1.6s steps(5); }
 /* the full-screen backdrop layers are as tall as the screen with the address bar hidden (lvh) and do not follow it:
    on Android the bar slides in and out while scrolling and every step resized them, wiping the canvases blank and
    redrawing the blurred layers, which is the flicker that showed even on fast phones. The canvases size themselves
@@ -2085,7 +2088,7 @@ const Grade = {
     $("#keylight").style.color = g.keyC;
     this.light(g.key[0], g.key[1]);
     $("#grade-tint").style.backgroundColor = g.tint;
-    $("#vignette").style.setProperty("--vig", g.vig);
+    $("#vignette").style.opacity = g.vig;
   },
   light(x, y) { $("#keylight").style.transform = `translate(${(x * 100).toFixed(1)}vw, ${(y * 100).toFixed(1)}vh)`; },
   /* the room takes on the colour of the element just revealed, then settles back */
