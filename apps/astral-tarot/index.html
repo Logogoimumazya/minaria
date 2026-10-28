@@ -938,6 +938,60 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
   .aurora { height: 55vh; }
   .motion-ask { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
 }
+/* ---------- birth-date field and the three-wheel picker ---------- */
+.dob-field {
+  font: inherit; font-size: 15px; width: 100%; min-height: 42px; text-align: left; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  color: var(--ivory); background: rgba(7, 8, 20, .55); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px;
+}
+.dob-field:hover, .dob-field:focus-visible { border-color: var(--gold); }
+.dob-field .ph { color: rgba(174,168,204,.7); }
+.dob-field i { font-style: normal; font-family: var(--f-sym); color: var(--gold); }
+.mini-dob .dob-field { margin-top: 2px; }
+.dob-sheet { position: fixed; inset: 0; z-index: 72; display: grid; place-items: center; padding: 16px; background: rgba(4,5,14,.74); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.dob-box {
+  width: min(440px, 100%); display: grid; gap: 14px; padding: 18px;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(232,196,106,.12); animation: rise .3s ease both;
+}
+.dob-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.dob-head b { font-size: 18px; color: var(--gold-hi); }
+.dob-head .filters { margin: 0; }
+.wheels { position: relative; display: grid; grid-template-columns: .8fr 1.6fr 1.15fr; gap: 6px; height: 200px; }
+.wheels::before { content: ""; position: absolute; left: 0; right: 0; top: 80px; height: 40px; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); background: rgba(232,196,106,.08); border-radius: 10px; pointer-events: none; }
+.wheels::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(var(--panel-solid), transparent 34%, transparent 66%, var(--panel-solid)); }
+.wheel {
+  height: 200px; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain;
+  outline: none; border-radius: 10px; cursor: grab; perspective: 500px; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+}
+.wheel::-webkit-scrollbar { display: none; }
+.wheel:focus-visible { box-shadow: inset 0 0 0 1px var(--gold); }
+.wheel.dragging { cursor: grabbing; scroll-snap-type: none; }
+.w-pad { height: 80px; }
+.w-item { height: 40px; display: grid; place-items: center; scroll-snap-align: center; font-size: 18px; color: var(--ivory); white-space: nowrap; }
+.w-item span { display: block; transform-origin: 50% 50% -70px; }
+.w-item[aria-selected="true"] { color: var(--gold-hi); font-weight: 700; }
+.w-item.off { color: rgba(174,168,204,.28); }
+.dob-pre { margin: 0; text-align: center; font-size: 14px; color: var(--mist); min-height: 3.2em; }
+.dob-pre b { color: var(--gold-hi); font-weight: 500; }
+.dob-pre .warn { color: var(--warn); }
+.dob-box .btn-row { justify-content: flex-end; }
+@media (max-width: 560px) {
+  .dob-sheet { place-items: end stretch; padding: 0; }
+  .dob-box { border-radius: 22px 22px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+}
+/* ---------- the sky strip on the ask page ---------- */
+.sky-strip {
+  font: inherit; font-size: 14px; color: var(--mist); text-align: left; cursor: pointer; width: 100%; margin: 0 0 16px;
+  display: flex; align-items: center; gap: 12px; padding: 7px 16px 7px 10px;
+  background: rgba(17,21,52,.62); border: 1px solid var(--line); border-radius: 99px; transition: border-color .2s, box-shadow .3s;
+}
+.sky-strip:hover { border-color: var(--line-strong); box-shadow: 0 0 22px rgba(232,196,106,.15); }
+.sky-strip .moon { width: 28px; flex: none; }
+.sky-strip .s-moon { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sky-strip b { color: var(--gold-hi); font-weight: 500; }
+.sky-strip .go { margin-left: auto; color: var(--gold); white-space: nowrap; }
+@media (max-width: 560px) { .sky-strip { font-size: 13px; gap: 8px; } .sky-strip .s-lunar { display: none; } }
 </style>
 
 <div class="nebula"></div>
@@ -961,8 +1015,8 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
       ASTRAL ORACLE
     </div>
     <nav class="rooms" id="rooms" aria-label="ห้องในหอดารา">
-      <button type="button" data-room="hub"><i aria-hidden="true">✦&#xFE0E;</i>หอดารา</button>
       <button type="button" data-room="ask"><i aria-hidden="true">☉&#xFE0E;</i>ถามไพ่</button>
+      <button type="button" data-room="hub"><i aria-hidden="true">✦&#xFE0E;</i>หอดารา</button>
       <button type="button" data-room="journal"><i aria-hidden="true">☾&#xFE0E;</i>สมุดดวง</button>
       <button type="button" data-room="library"><i aria-hidden="true">✶&#xFE0E;</i>คลังไพ่</button>
       <button type="button" data-room="bond"><i aria-hidden="true">☍&#xFE0E;</i>ดวงคู่</button>
@@ -987,6 +1041,7 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
 
   <!-- STAGE 1 -->
   <section class="stage" id="stage-ask">
+    <div id="sky-strip"></div>
     <div class="intro">
       <div class="hero">
         <h1>หอดาราทาโรต์</h1>
@@ -1006,8 +1061,8 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
               <input type="text" id="q-name" placeholder="เช่น อรุณี" autocomplete="given-name">
             </div>
             <div class="field">
-              <label for="q-dob">วันเกิด</label>
-              <input type="date" id="q-dob" min="1900-01-01" max="2026-12-31">
+              <label for="q-dob-btn">วันเกิด</label>
+              <input type="hidden" id="q-dob" data-dob>
             </div>
           </div>
           <div class="field">
@@ -1117,6 +1172,19 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
       <button class="btn ghost" type="button" id="st-prev">ย้อนกลับ</button>
       <button class="btn" type="button" id="st-next">ต่อไป</button>
     </div>
+  </div>
+</div>
+<div class="dob-sheet" id="dob-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="dob-title">
+  <div class="dob-box">
+    <div class="dob-head"><b id="dob-title">วันเกิด</b>
+      <div class="filters" role="group" aria-label="ศักราช"><button type="button" class="role" data-era="be" aria-pressed="true">พ.ศ.</button><button type="button" class="role" data-era="ce" aria-pressed="false">ค.ศ.</button></div></div>
+    <div class="wheels">
+      <div class="wheel" id="w-d" tabindex="0" role="listbox" aria-label="วันที่"></div>
+      <div class="wheel" id="w-m" tabindex="0" role="listbox" aria-label="เดือน"></div>
+      <div class="wheel" id="w-y" tabindex="0" role="listbox" aria-label="ปี"></div>
+    </div>
+    <p class="dob-pre" id="dob-pre" aria-live="polite"></p>
+    <div class="btn-row"><button type="button" class="btn ghost" id="dob-clear">ล้าง</button><button type="button" class="btn" id="dob-ok">ตกลง</button></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -4026,7 +4094,7 @@ function holdCharge(el, ms, done) {
 const ROOMS = ["hub", "ask", "journal", "library", "bond"];
 const RITUAL = ["ask", "shuffle", "pick", "reveal", "reading"];
 function goRoom(name) {
-  if (name === "ask") { prefillAsk(); if (S.stage !== "ask") renderHistory(); }
+  if (name === "ask") { prefillAsk(); renderSkyStrip(); if (S.stage !== "ask") renderHistory(); }
   goStage(name);
   ({ hub: renderHub, journal: renderJournal, library: renderLibrary, bond: renderBond })[name]?.();
 }
@@ -4082,7 +4150,7 @@ function renderHubDaily(justOpened) {
           <svg class="back" viewBox="0 0 200 340" aria-hidden="true"><use href="#cardBack"/></svg>
         </button>
         <p class="muted" style="margin:0">กดค้างที่ไพ่จนวงแสงเต็ม เพื่อชาร์จพลังแล้วเปิดไพ่ของวันนี้</p>
-        ${p.dob ? "" : `<label class="mini-dob">ใส่วันเกิดไว้ ไพ่ประจำวันจะเป็นของคุณโดยเฉพาะ<input type="date" id="hub-dob" min="1900-01-01" max="${dk}"></label>`}
+        ${p.dob ? "" : `<label class="mini-dob">ใส่วันเกิดไว้ ไพ่ประจำวันจะเป็นของคุณโดยเฉพาะ<input type="hidden" id="hub-dob" data-dob></label>`}
       </div>
       ${streak ? `<div class="streak">เปิดไพ่ประจำวันต่อเนื่อง <b>${streak}</b> วัน</div>` : ""}`;
     holdCharge($("#daily-card"), REDUCED ? 700 : 1500, () => {
@@ -4092,6 +4160,7 @@ function renderHubDaily(justOpened) {
       Sound.chime(DECK[d.id].major ? 523 : 659); Grade.flash(DECK[d.id].el, .9);
       renderHubDaily(true);
     });
+    mountDob(box);
     const dob = $("#hub-dob");
     if (dob) dob.addEventListener("change", () => { if (dob.value) { saveProfile({ dob: dob.value }); renderHubDaily(false); } });
     return;
@@ -4539,14 +4608,14 @@ function renderBond() {
         ${soul !== null ? tile(soul, "ไพ่ประจำวิญญาณ · สิ่งที่ใจลึกๆ ตามหา", esc(DECK[soul].adv)) : ""}
         ${tile(me.yearCards[0], `ไพ่ประจำปี ${me.year} · ธีมของปีนี้`, esc(DECK[me.yearCards[0]].up))}
         <div class="bc" style="grid-template-columns:1fr"><div><span class="lbl">เลขเส้นทางชีวิต ${me.lp}</span><h4 style="font-family:var(--f-body)">${LIFE_PATH[me.lp][0]}</h4><p>${LIFE_PATH[me.lp][1]}</p><p class="muted">เกิดวัน${me.day.th} · ${me.day.planet} · สี${me.day.color}</p></div></div>
-      </div>` : `<label class="mini-dob">ใส่วันเกิดของคุณเพื่อดูไพ่ประจำชีวิต<input type="date" id="bond-mydob" min="1900-01-01" max="${dayKey()}"></label>`}
+      </div>` : `<label class="mini-dob">ใส่วันเกิดของคุณเพื่อดูไพ่ประจำชีวิต<input type="hidden" id="bond-mydob" data-dob></label>`}
     </div>
     <div class="panel" style="margin-top:18px">
       <h3><small>The Bond</small>ดวงคู่จากวันเกิด</h3>
       <form class="bond-form" id="bond-form" novalidate>
         <div class="two">
-          <div class="field"><label for="bond-a">วันเกิดของคุณ</label><input type="date" id="bond-a" min="1900-01-01" max="${dayKey()}" value="${esc(p.dob || "")}"></div>
-          <div class="field"><label for="bond-b">วันเกิดของอีกคน</label><input type="date" id="bond-b" min="1900-01-01" max="${dayKey()}"></div>
+          <div class="field"><label for="bond-a-btn">วันเกิดของคุณ</label><input type="hidden" id="bond-a" data-dob value="${esc(p.dob || "")}"></div>
+          <div class="field"><label for="bond-b-btn">วันเกิดของอีกคน</label><input type="hidden" id="bond-b" data-dob></div>
         </div>
         <div class="field"><label for="bond-w">เรียกเขาว่า</label><input type="text" id="bond-w" maxlength="24" placeholder="เช่น แฟน แม่ เพื่อนสนิท หุ้นส่วน"></div>
         <div class="field"><span class="legend" id="rel-legend">ความสัมพันธ์แบบไหน</span>
@@ -4555,6 +4624,7 @@ function renderBond() {
       </form>
       <div id="bond-out"></div>
     </div>`;
+  mountDob($("#stage-bond"));
   const md = $("#bond-mydob");
   if (md) md.addEventListener("change", () => { if (md.value) { saveProfile({ dob: md.value }); renderBond(); } });
 }
@@ -5028,6 +5098,162 @@ function initDebug() {
   })(t0);
 }
 
+/* ================= BIRTH-DATE WHEEL ================= */
+/* each birthday field is a hidden input holding the ISO date, plus a button that opens the picker.
+   The input's value setter repaints the button, so code that reads or writes .value works unchanged. */
+const ITEM_H = 40;
+const DOB = { era: store("astral-tarot-era") === "ce" ? "ce" : "be", inp: null, years: [], d: null, m: null, y: null };
+const eraYear = y => DOB.era === "be" ? `พ.ศ. ${y + 543}` : `ค.ศ. ${y}`;
+const daysIn = (y, m) => new Date(y, m, 0).getDate();
+function dobLabel(v) { const [y, m, d] = v.split("-").map(Number); return `${d} ${TH_MONTH[m - 1]} ${eraYear(y)}`; }
+function mountDob(root = document) {
+  const proto = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+  $$("input[data-dob]:not([data-mounted])", root).forEach(inp => {
+    inp.dataset.mounted = "1";
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "dob-field"; btn.id = inp.id + "-btn"; btn.setAttribute("aria-haspopup", "dialog");
+    inp.after(btn);
+    inp._paint = () => {
+      const v = proto.get.call(inp);
+      btn.innerHTML = `${v ? `<span>${dobLabel(v)}</span>` : `<span class="ph">แตะเพื่อเลือกวันเกิด</span>`}<i aria-hidden="true">☽&#xFE0E;</i>`;
+    };
+    Object.defineProperty(inp, "value", { get() { return proto.get.call(this); }, set(v) { proto.set.call(this, v); this._paint(); } });
+    inp._paint();
+    btn.addEventListener("click", () => openDob(inp));
+  });
+}
+function Wheel(el, onChange) {
+  let items = [], idx = 0, settleT = 0, acc = 0, drag = null, lastDrag = 0, lastPick = 0;
+  /* which row sits under a screen y; pointer capture retargets clicks to the wheel itself, so rows are found by position */
+  const rowAt = y => Math.floor((y - el.getBoundingClientRect().top + el.scrollTop - 80) / ITEM_H);
+  const pick = y => { const r = rowAt(y); if (r >= 0 && r < items.length) api.go(r); };
+  const nodes = () => el.children;
+  const mark = () => [...nodes()].forEach(n => n.dataset.i && n.setAttribute("aria-selected", +n.dataset.i === idx));
+  const paint = () => {
+    const c = el.scrollTop / ITEM_H;
+    [...nodes()].forEach(n => {
+      if (!n.dataset.i) return;
+      const d = +n.dataset.i - c;
+      if (Math.abs(d) > 4) { n.style.opacity = 0; return; }
+      /* only the label turns: transforming the row itself would move its scroll-snap position */
+      n.firstChild.style.transform = `rotateX(${(-d * 21).toFixed(1)}deg)`;
+      n.style.opacity = (1 - Math.min(1, Math.abs(d) * .3)).toFixed(2);
+    });
+  };
+  const api = {
+    get i() { return idx; },
+    set(list, i) {
+      items = list;
+      el.innerHTML = `<div class="w-pad"></div>${list.map((x, k) => `<div class="w-item${x.off ? " off" : ""}" role="option" data-i="${k}"><span>${x.t}</span></div>`).join("")}<div class="w-pad"></div>`;
+      idx = clamp(i, 0, list.length - 1); el.scrollTop = idx * ITEM_H; mark(); paint();
+    },
+    relabel(list) { items = list; [...nodes()].forEach(n => { if (!n.dataset.i) return; const x = list[+n.dataset.i]; n.firstChild.textContent = x.t; n.classList.toggle("off", !!x.off); }); },
+    go(i, quiet) {
+      const j = clamp(i, 0, items.length - 1), moved = j !== idx;
+      idx = j; el.scrollTo({ top: idx * ITEM_H, behavior: REDUCED ? "auto" : "smooth" }); mark();
+      if (moved) { Sound.tick(); if (!quiet) onChange(idx); }
+    }
+  };
+  el.addEventListener("scroll", () => {
+    requestAnimationFrame(paint);
+    clearTimeout(settleT);
+    settleT = setTimeout(() => { if (drag) return; const i = Math.round(el.scrollTop / ITEM_H); if (i !== idx) { idx = clamp(i, 0, items.length - 1); mark(); Sound.tick(); onChange(idx); } }, 120);
+  }, { passive: true });
+  /* a mouse wheel moves exactly one row per notch; trackpads add up small deltas into rows */
+  el.addEventListener("wheel", e => {
+    e.preventDefault();
+    acc += e.deltaMode === 1 ? e.deltaY * ITEM_H : e.deltaY;
+    if (Math.abs(acc) >= 30) { api.go(idx + Math.sign(acc)); acc = 0; }
+  }, { passive: false });
+  el.addEventListener("pointerdown", e => {
+    if (e.pointerType !== "mouse" || e.button) return;
+    drag = { y: e.clientY, top: el.scrollTop, moved: false };
+    el.setPointerCapture(e.pointerId); el.classList.add("dragging");
+  });
+  el.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const dy = e.clientY - drag.y; if (Math.abs(dy) > 4) drag.moved = true;
+    el.scrollTop = drag.top - dy;
+  });
+  const end = e => {
+    if (!drag) return;
+    const moved = drag.moved; drag = null; el.classList.remove("dragging");
+    if (moved) { lastDrag = Date.now(); api.go(Math.round(el.scrollTop / ITEM_H)); }
+    else if (e.type === "pointerup") { lastPick = Date.now(); pick(e.clientY); }
+  };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("click", e => { if (Date.now() - lastDrag > 200 && Date.now() - lastPick > 300) pick(e.clientY); });
+  el.addEventListener("keydown", e => {
+    const step = { ArrowUp: -1, ArrowDown: 1, PageUp: -5, PageDown: 5 }[e.key];
+    if (step) { e.preventDefault(); api.go(idx + step); }
+    else if (e.key === "Home") { e.preventDefault(); api.go(0); }
+    else if (e.key === "End") { e.preventDefault(); api.go(items.length - 1); }
+  });
+  return api;
+}
+const dobParts = () => ({ d: DOB.d.i + 1, m: DOB.m.i + 1, y: DOB.years[DOB.y.i] });
+const dayItems = (y, m) => Array.from({ length: 31 }, (_, k) => ({ t: k + 1, off: k + 1 > daysIn(y, m) }));
+const yearItems = () => DOB.years.map(y => ({ t: DOB.era === "be" ? y + 543 : y }));
+function dobFix() {
+  const { y, m } = dobParts(), max = daysIn(y, m);
+  DOB.d.relabel(dayItems(y, m));
+  if (DOB.d.i + 1 > max) DOB.d.go(max - 1, true);
+  dobPreview();
+}
+function dobPreview() {
+  const { d, m, y } = dobParts(), iso = `${y}-${String(m).padStart(2, "0")}-${String(Math.min(d, daysIn(y, m))).padStart(2, "0")}`;
+  const future = new Date(y, m - 1, d) > new Date();
+  const num = numerology({ dob: iso });
+  $("#dob-pre").innerHTML = future ? `<span class="warn">วันนี้ยังมาไม่ถึง เลือกวันเกิดที่ผ่านมาแล้ว</span>`
+    : `เกิดวัน<b>${num.day.th}</b> · ${d} ${TH_MONTH[m - 1]} ${eraYear(y)}<br>ไพ่ประจำตัว <b>${esc(DECK[num.birth[0]].en)}</b> · เลขเส้นทางชีวิต <b>${num.lp}</b>`;
+  $("#dob-ok").disabled = future;
+  return iso;
+}
+function openDob(inp) {
+  DOB.inp = inp;
+  const now = new Date(), top = now.getFullYear();
+  DOB.years = Array.from({ length: top - 1900 + 1 }, (_, k) => top - k);
+  const [y, m, d] = inp.value ? inp.value.split("-").map(Number) : [top - 25, 1, 1];
+  $$("#dob-sheet [data-era]").forEach(b => b.setAttribute("aria-pressed", b.dataset.era === DOB.era));
+  $("#dob-sheet").hidden = false;
+  DOB.m.set(TH_MONTH.map(t => ({ t })), m - 1);
+  DOB.y.set(yearItems(), Math.max(0, DOB.years.indexOf(y)));
+  DOB.d.set(dayItems(y, m), d - 1);
+  dobPreview();
+  $("#w-d").focus();
+}
+function closeDob(iso) {
+  $("#dob-sheet").hidden = true;
+  const inp = DOB.inp; if (!inp) return;
+  if (iso !== undefined && iso !== inp.value) {
+    inp.value = iso;
+    inp.dispatchEvent(new Event("input", { bubbles: true }));
+    inp.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  const btn = $("#" + inp.id + "-btn"); if (btn) btn.focus();
+}
+function initDob() {
+  DOB.d = Wheel($("#w-d"), dobPreview);
+  DOB.m = Wheel($("#w-m"), dobFix);
+  DOB.y = Wheel($("#w-y"), dobFix);
+  $("#dob-ok").addEventListener("click", () => closeDob(dobPreview()));
+  $("#dob-clear").addEventListener("click", () => closeDob(""));
+  $("#dob-sheet").addEventListener("click", e => {
+    if (e.target.id === "dob-sheet") return closeDob();
+    const b = e.target.closest("[data-era]"); if (!b || b.dataset.era === DOB.era) return;
+    DOB.era = b.dataset.era; store("astral-tarot-era", DOB.era);
+    $$("#dob-sheet [data-era]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    DOB.y.relabel(yearItems()); dobPreview();
+    $$("input[data-dob][data-mounted]").forEach(i => i._paint());
+  });
+  $("#dob-sheet").addEventListener("keydown", e => { if (e.key === "Escape") { e.stopPropagation(); closeDob(); } });
+  mountDob();
+}
+function renderSkyStrip() {
+  const m = moonAt(), d = dailyCard();
+  $("#sky-strip").innerHTML = `<button type="button" class="sky-strip" data-room="hub">${moonSVG(m.frac)}<span class="s-moon"><b>${m.ph.th}</b><span class="s-lunar"> · ${m.lunar}</span></span><span class="go">${d.drawn ? `ไพ่วันนี้ ${esc(DECK[d.id].en)} ›` : "เปิดไพ่ประจำวัน ›"}</span></button>`;
+}
+
 /* ================= WIRING ================= */
 $("#defs-host").innerHTML = DEFS;
 initAsk();
@@ -5057,8 +5283,9 @@ $("#music-btn").addEventListener("click", () => setMusic(!Music.nodes));
   const go = () => { removeEventListener("pointerdown", go, true); if (store("astral-tarot-music") === true) Music.start(); };
   addEventListener("pointerdown", go, true);
 })();
-initGfx(); initDebug();
-goRoom("hub");
+initGfx(); initDebug(); initDob();
+$("#sky-strip").addEventListener("click", e => { const b = e.target.closest("[data-room]"); if (b) goRoom(b.dataset.room); });
+goRoom("ask");
 playIntro(); askMotion();
 getSample();
 </script>

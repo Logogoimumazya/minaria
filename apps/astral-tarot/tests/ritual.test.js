@@ -45,7 +45,7 @@ const init = ({ mode, FAKE }) => {
     const errs = []; p.on('pageerror', e => errs.push(e.stack)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
     await p.addInitScript(() => sessionStorage.setItem('astral-tarot-intro', '1'));
     await p.goto('file://' + __dirname + '/test.html'); await p.waitForTimeout(600); await p.click('#rooms [data-room=ask]'); await p.waitForTimeout(300);
-    await p.fill('#q-name', 'อรุณี'); await p.fill('#q-dob', '1995-08-14'); await p.fill('#q-text', 'แฟนจะกลับมาไหม'); await p.click('#roles .role >> nth=1'); await p.waitForTimeout(400);
+    await p.fill('#q-name', 'อรุณี'); await p.evaluate(() => { document.getElementById('q-dob').value = '1995-08-14'; }); await p.fill('#q-text', 'แฟนจะกลับมาไหม'); await p.click('#roles .role >> nth=1'); await p.waitForTimeout(400);
     await p.click(`label[for=sp-${sp}]`);
     await p.click('#intent button[type=submit]'); await p.waitForTimeout(400);
     await p.click('#btn-riffle-many');

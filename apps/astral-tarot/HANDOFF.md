@@ -39,7 +39,8 @@ git checkout claude/exciting-babbage-llebqn
 - THE ORACLE: `getSample()` (Claude ใน claude.ai → Gemini ผ่าน Worker → null), `ORACLE_RULES`, `buildOraclePrompt`, `houseChronicle` (ตำราสำรอง), `Chron`, `Chat`
 - THE OBSERVATORY (รอบ 9): หอดารา/ดวงจันทร์/ไพ่ประจำวัน, สมุดดวง, คลังไพ่ + ควิซ, ดวงคู่, Music, การ์ด PNG
 - ART DIRECTION (รอบ 10): astrolabe, กลุ่มดาว, ไพ่ลอย, กรอบทอง, ฉากเปิด, เมนูภาพ, `?debug`
-- WIRING: ผูก event ทั้งหมด เริ่มที่ `goRoom("hub")`
+- BIRTH-DATE WHEEL (รอบ 12): `input[data-dob]` ซ่อนค่า ISO ไว้ + ปุ่มเปิดวงล้อ (`mountDob`, `Wheel`, `openDob`) ตั้ง `.value` จากโค้ดได้ตามปกติ
+- WIRING: ผูก event ทั้งหมด เริ่มที่ `goRoom("ask")`
 
 ## กติกาที่ตกลงกับผู้ใช้แล้ว (ย่อ — ฉบับเต็มใน README)
 - ชื่อไพ่ใช้ภาษาอังกฤษเสมอ ไม่แปล
@@ -56,6 +57,7 @@ python3 make_test_html.py         # สร้าง tests/test.html จาก in
 node visuals.test.js              # ฉากเปิด, หอดาราจอกว้าง, โหมดลดการเคลื่อนไหว, มือถือ
 node rooms.test.js                # ไพ่ประจำวัน, คลังไพ่/ควิซ, ดวงคู่, สมุดดวง, ชาร์จพลังสับไพ่
 node ritual.test.js               # พิธีเปิดไพ่เต็มรอบ 3 โหมด (Claude จำลอง / ไม่มี AI / ไม่อนุญาต) + การ์ด PNG
+node dob.test.js                  # วงล้อวันเกิด: เมาส์ คลิก คีย์บอร์ด พ.ศ./ค.ศ. ก.พ. 28 วัน มือถือ
 ```
 ทดสอบ Worker + Gemini จำลอง:
 ```bash

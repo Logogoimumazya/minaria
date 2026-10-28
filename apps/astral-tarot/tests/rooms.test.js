@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
     const p = await b.newPage({ viewport: { width: w, height: h } });
     const errs = []; p.on('pageerror', e => errs.push(e.stack)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
     await p.addInitScript(() => sessionStorage.setItem('astral-tarot-intro', '1'));
-    await p.goto('file://' + __dirname + '/test.html'); await p.waitForTimeout(900);
+    await p.goto('file://' + __dirname + '/test.html'); await p.waitForTimeout(900); await p.click('#rooms [data-room=hub]'); await p.waitForTimeout(400);
     const sx = async tag => console.log(w, tag, 'scrollX', await p.evaluate(() => { scrollTo(600, scrollY); const x = scrollX; scrollTo(0, scrollY); return x; }));
     await p.screenshot({ path: __dirname + '/out/' + `h1-${w}.png`, fullPage: true }); await sx('hub');
     // hold to charge the card of the day
@@ -30,8 +30,8 @@ const { chromium } = require('playwright');
     // bond
     await p.click('#rooms [data-room=bond]'); await p.waitForTimeout(400);
     console.log('bond prefilled dob?', await p.inputValue('#bond-a'));
-    if (!(await p.inputValue('#bond-a'))) await p.fill('#bond-a', '1995-08-14');
-    await p.fill('#bond-b', '1993-03-02'); await p.fill('#bond-w', 'แฟน'); await p.click('[data-rel=love]'); await p.click('#bond-form button[type=submit]'); await p.waitForTimeout(900);
+    if (!(await p.inputValue('#bond-a'))) await p.evaluate(() => { document.getElementById('bond-a').value = '1995-08-14'; });
+    await p.evaluate(() => { document.getElementById('bond-b').value = '1993-03-02'; }); await p.fill('#bond-w', 'แฟน'); await p.click('[data-rel=love]'); await p.click('#bond-form button[type=submit]'); await p.waitForTimeout(900);
     console.log('bond:', (await p.textContent('#bond-out')).replace(/\s+/g, ' ').slice(0, 700));
     await p.screenshot({ path: __dirname + '/out/' + `b1-${w}.png`, fullPage: true }); await sx('bond');
     // journal with seeded entries (one older than 7 days)
