@@ -143,6 +143,10 @@ textarea { resize: vertical; min-height: 64px; }
 input::placeholder, textarea::placeholder { color: rgba(174,168,204,.6); }
 input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(232,196,106,.15); }
 .spreads { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.roles { display: flex; flex-wrap: wrap; gap: 6px; }
+.role { font: inherit; font-size: 13px; color: var(--mist); background: rgba(7,8,20,.45); border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; cursor: pointer; transition: all .2s; }
+.role:hover { color: var(--ivory); border-color: var(--line-strong); }
+.role[aria-pressed="true"] { color: var(--ink); background: linear-gradient(180deg, var(--gold-hi), var(--gold)); border-color: var(--gold); }
 .spread-opt { position: relative; }
 .spread-opt input { position: absolute; opacity: 0; inset: 0; pointer-events: none; }
 .spread-opt label {
@@ -683,6 +687,10 @@ svg.journey { width: 100%; height: auto; display: block; margin-bottom: 4px; }
               <label for="q-dob">วันเกิด</label>
               <input type="date" id="q-dob" min="1900-01-01" max="2026-12-31">
             </div>
+          </div>
+          <div class="field">
+            <span class="legend" id="roles-legend">บทบาทในชีวิตตอนนี้ <span class="hint">ไม่บังคับ เลือกได้หลายข้อ หมอจะปรับคำแนะนำให้เข้ากับภาระที่คุณแบกอยู่</span></span>
+            <div class="roles" id="roles" role="group" aria-labelledby="roles-legend"></div>
           </div>
           <div class="field">
             <label for="q-text">คำถามที่อยากถามไพ่</label>
@@ -1943,6 +1951,8 @@ function initAsk() {
   $("#altar").innerHTML = magicCircle("a") + peeks;
   $("#qa-topic").innerHTML = Object.entries(TOPICS).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
   $("#qa-type").innerHTML = Object.entries(QTYPES).map(([k, t]) => `<option value="${k}">${t.th}</option>`).join("");
+  $("#roles").innerHTML = ROLES.map(r => `<button type="button" class="role" data-role="${r[0]}" aria-pressed="false">${r[1]}</button>`).join("");
+  $("#roles").addEventListener("click", e => { const b = e.target.closest(".role"); if (b) b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true"); });
   ["qa-subject", "qa-w", "qa-topic", "qa-type", "qa-a", "qa-b"].forEach(id => $("#" + id).addEventListener("input", () => { $("#" + id).dataset.touched = "1"; refreshQA(); }));
   let qT;
   $("#q-text").addEventListener("input", () => { clearTimeout(qT); qT = setTimeout(analyzeInto, 250); });
@@ -1951,7 +1961,7 @@ function initAsk() {
   $("#intent").addEventListener("submit", e => {
     e.preventDefault();
     Sound.ensure();
-    S.q = { name: $("#q-name").value.trim(), dob: $("#q-dob").value, text: $("#q-text").value.trim(), ctx: readQA() };
+    S.q = { name: $("#q-name").value.trim(), dob: $("#q-dob").value, text: $("#q-text").value.trim(), ctx: readQA(), roles: $$("#roles .role[aria-pressed=true]").map(b => b.dataset.role) };
     S.spreadKey = ($("input[name=spread]:checked") || {}).value || "ppf";
     S.sp = resolveSpread(S.spreadKey, S.q.ctx);
     S.allowRev = $("#q-rev").checked;
@@ -2314,6 +2324,7 @@ function computeReading() {
   R.trend = findTrend(R);
   R.journey = findJourney(R);
   R.shadow = S.shadow ? { card: DECK[S.shadow.id], rev: S.shadow.rev } : null;
+  R.life = lifeContext(S.q);
   return R;
 }
 const band = s => s >= 80 ? 0 : s >= 65 ? 1 : s >= 50 ? 2 : s >= 35 ? 3 : 4;
@@ -2625,6 +2636,61 @@ const REFLECT = {
   general: ["ช่วงนี้อะไรกินพลังใจคุณมากที่สุด", "ถ้าให้ของขวัญตัวเองหนึ่งอย่างในสัปดาห์นี้ คุณอยากได้อะไร"]
 };
 
+/* ================= LIFE STAGE: age and roles shape the tone, never the verdict ================= */
+const ROLES = [
+  ["student", "นักเรียน/นักศึกษา", "ช่วงนี้มีทั้งเรื่องเรียนและความคาดหวังจากคนรอบตัวอยู่บนบ่า"],
+  ["firstjob", "เพิ่งเริ่มทำงาน", "ช่วงที่ยังสร้างที่ยืนของตัวเอง ทุกการตัดสินใจจึงดูใหญ่ไปหมด"],
+  ["working", "วัยทำงาน", "ท่ามกลางงานที่กินเวลาและแรงเกือบทั้งวัน"],
+  ["owner", "เจ้าของกิจการ/ฟรีแลนซ์", "เมื่อทุกการตัดสินใจมีผลกับรายได้และคนที่ทำงานกับคุณด้วย"],
+  ["seeking", "กำลังหางาน", "ในช่วงที่กำลังมองหาที่ทางใหม่ ซึ่งความไม่แน่นอนกินใจไม่น้อย"],
+  ["partner", "มีคู่ชีวิต", "เมื่อชีวิตมีอีกคนที่เดินไปด้วยกัน"],
+  ["parent", "เลี้ยงลูก", "เมื่อมีลูกที่พึ่งพาคุณอยู่ การตัดสินใจครั้งนี้จึงไม่ได้กระทบคุณคนเดียว"],
+  ["caregiver", "ดูแลพ่อแม่", "ทั้งที่ยังต้องดูแลพ่อแม่อยู่ด้วย แรงใจจึงถูกแบ่งไปหลายทาง"],
+  ["breadwinner", "เสาหลักของบ้าน", "ในฐานะคนที่หลายคนในบ้านพึ่งพา"],
+  ["retired", "เกษียณ", "ในช่วงที่ชีวิตมีเวลาให้ตัวเองมากขึ้น"]
+];
+const LIFE_STAGES = [
+  { max: 19, key: "teen", th: "วัยรุ่น", burden: "การค้นหาว่าตัวเองเป็นใคร ความคาดหวังจากบ้านและโรงเรียน และความรู้สึกที่ยังแรงและเปลี่ยนเร็ว",
+    line: "ช่วงนี้ของชีวิตคือการค้นหาว่าตัวเองเป็นใคร ความรู้สึกเลยแรงกว่าปกติ ซึ่งไม่ผิดอะไรเลย",
+    advise: "ไม่ต้องรีบมีคำตอบให้ทุกเรื่อง ลองทีละก้าว และถ้าเรื่องไหนหนักเกินจะแบกคนเดียว คุยกับผู้ใหญ่ที่ไว้ใจได้เสมอ" },
+  { max: 29, key: "early", th: "เริ่มต้นผู้ใหญ่", burden: "การหาที่ยืนในงานและความรัก การพึ่งตัวเองครั้งแรก และการเทียบตัวเองกับคนรอบข้าง",
+    line: "ช่วงนี้คือเวลาลองผิดลองถูกและสร้างตัวตน อะไรที่ดูเหมือนการตัดสินใจครั้งใหญ่ ส่วนมากยังแก้ไขได้",
+    advise: "ช่วงนี้ความผิดพลาดคือบทเรียนที่ราคาถูกที่สุด กล้าลอง แต่เก็บบทเรียนทุกครั้ง" },
+  { max: 39, key: "build", th: "สร้างตัว", burden: "การสร้างรากฐานทั้งงาน ความสัมพันธ์ และความมั่นคงทางเงิน ไปพร้อมกับความรู้สึกว่าเวลาเริ่มเร่ง",
+    line: "ช่วงที่กำลังวางรากฐานหลายเรื่องพร้อมกัน แต่ละทางเลือกจึงต้องชั่งระหว่างความฝันกับความมั่นคง",
+    advise: "ชั่งความฝันกับความมั่นคงให้ดี และมีตาข่ายรองรับก่อนกระโดด" },
+  { max: 54, key: "mid", th: "กลางชีวิต", burden: "การแบกหลายบทบาทพร้อมกัน ทั้งงาน ลูก และพ่อแม่ และคำถามว่าอะไรสำคัญจริงในชีวิตที่เหลือ",
+    line: "ช่วงที่แบกหลายบทบาทพร้อมกัน และเริ่มถามตัวเองว่าอะไรสำคัญจริง",
+    advise: "ในวันที่ต้องดูแลคนอื่นเยอะ อย่าลืมเผื่อพื้นที่เล็กๆ ไว้ดูแลตัวเองด้วย" },
+  { max: 64, key: "senior", th: "ผู้ใหญ่อาวุโส", burden: "การเตรียมเปลี่ยนผ่าน การส่งต่อสิ่งที่สร้างมา สุขภาพ และความหมายของช่วงชีวิตถัดไป",
+    line: "ช่วงที่เริ่มมองหาความหมายและการส่งต่อ มากกว่าการแข่งขัน",
+    advise: "เลือกสิ่งที่ทำให้ใจสงบและมีความหมาย มากกว่าสิ่งที่ต้องพิสูจน์" },
+  { max: 200, key: "elder", th: "วัยเก็บเกี่ยว", burden: "สุขภาพ ความสัมพันธ์กับลูกหลาน การปล่อยวาง และความสงบในใจ",
+    line: "ช่วงที่ประสบการณ์คือของมีค่าที่สุด และความสงบในใจสำคัญกว่าชัยชนะ",
+    advise: "ประสบการณ์ที่ผ่านมาของคุณคือเข็มทิศที่แม่นที่สุด เชื่อมันได้" }
+];
+function ageFrom(dob) {
+  if (!dob) return null;
+  const [y, m, d] = dob.split("-").map(Number); if (!y) return null;
+  const now = new Date(); let a = now.getFullYear() - y;
+  if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) a--;
+  return a >= 0 && a < 120 ? a : null;
+}
+function lifeContext(q) {
+  const age = ageFrom(q.dob), roles = (q.roles || []).map(k => ROLES.find(r => r[0] === k)).filter(Boolean);
+  let stage = age === null ? null : LIFE_STAGES.find(s => age <= s.max);
+  if (!stage && roles.length) stage = roles.some(r => r[0] === "retired") ? LIFE_STAGES[4] : roles.some(r => r[0] === "student") ? LIFE_STAGES[0] : null;
+  return { age, stage, roles, minor: age !== null && age < 18 };
+}
+/* one implicit sentence that shows the reader understands what this person carries */
+function lifeLine(L, pick) {
+  /* a role that shapes the load says more than the age; "working" and "partner" alone say less than the life stage */
+  const specific = L.roles.filter(r => !["working", "partner"].includes(r[0]));
+  if (specific.length) return pick(specific)[2];
+  if (L.stage) return L.stage.line;
+  return L.roles.length ? pick(L.roles)[2] : "";
+}
+
 /* ================= DEEP READING: dignities, combos, trend, journey ================= */
 const stripTags = s => String(s).replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 /* elemental dignities (Golden Dawn): neighbouring cards strengthen or weaken each other by element */
@@ -2806,6 +2872,10 @@ function oraclePayload(R, A) {
   return {
     question: R.q.text || "(ไม่ได้ตั้งคำถาม ให้อ่านภาพรวมของช่วงนี้)",
     asker_name: R.q.name || null,
+    asker_life_context: R.life.stage || R.life.roles.length ? {
+      life_stage: R.life.stage ? R.life.stage.th : null, typical_load: R.life.stage ? R.life.stage.burden : null,
+      roles_now: R.life.roles.map(r => r[1]), minor: R.life.minor
+    } : null,
     understanding: {
       about: ctx.subject === "other" ? whoFull(ctx.w) : "ตัวผู้ถามเอง", refer_to_other_person_as: ctx.w || null,
       topic: TOPICS[ctx.topic].th, question_type: QTYPES[ctx.type].th, choices: ctx.type === "choice" ? [ctx.A, ctx.B] : undefined
@@ -2833,6 +2903,8 @@ const ORACLE_RULES = `คุณคือ "หมอแห่งหอดาร�
 มุมมอง
 - เหตุผลจากข้างใน: อ่านไพ่แต่ละใบว่ามันสะท้อนอะไรที่กำลังเกิดขึ้นในใจของคนในเรื่อง ใช้ psyche ที่ให้มาเป็นบริบทภายใน แล้วอธิบายเป็นเหตุผลตรงๆ ว่าความคิดหรือความรู้สึกข้างในพาไปสู่การกระทำและผลลัพธ์อย่างไร เช่น "เพราะลึกๆ แล้วคุณยัง..." "ที่เขาเงียบไป อาจมาจาก..." พูดเหมือนคนที่เข้าใจใจคน ไม่ใช่คนบรรยายทฤษฎี
 - ห้ามอ้างที่มาหรือชื่อทฤษฎี ห้ามใช้วลีอย่าง "ในทางจิตวิทยา" "ตามแนวคิดของ..." และห้ามใช้ศัพท์เฉพาะอย่าง archetype, shadow, persona, ต้นแบบ, ฟังก์ชันทางจิต, จิตไร้สำนึก ให้พูดเป็นภาษาใจธรรมดาแทน
+- ช่วงชีวิตของผู้ถาม: ใช้ asker_life_context ปรับน้ำเสียง ตัวอย่างที่ยก และน้ำหนักของคำแนะนำให้เข้ากับภาระและบทบาทในช่วงชีวิตนั้น เช่น คนที่มีคนพึ่งพาต้องคิดถึงผลกระทบต่อคนในบ้านและความพร้อมก่อนกระโดด คนที่เพิ่งเริ่มต้นชีวิตมีพื้นที่ลองผิดลองถูกมากกว่า คนวัยอาวุโสให้น้ำหนักกับความหมาย สุขภาพ และความสงบ ห้ามพูดตัวเลขอายุหรือชื่อช่วงชีวิตตรงๆ ให้ความเข้าใจนั้นปรากฏผ่านเนื้อหาเหมือนคนที่รู้จักชีวิตผู้ถามจริง ถ้า asker_life_context เป็น null ให้ใช้โทนกลาง
+- ถ้า minor เป็น true: พูดอบอุ่นแบบพี่ที่ใจดี เน้นการเติบโตและคุณค่าในตัวเอง ไม่แนะนำเรื่องการลงทุนหรือเงินก้อนใหญ่ ไม่ส่งเสริมความสัมพันธ์ที่ไม่เหมาะกับวัย และเมื่อเรื่องหนักให้ชวนคุยกับผู้ใหญ่ที่ไว้ใจ
 - ปรัชญา: อนาคตคือแนวโน้มถ้าทุกอย่างเดินต่อแบบนี้ ไม่ใช่ฟ้าลิขิต แยกให้เห็นว่าอะไรอยู่ในมือผู้ถาม อะไรอยู่นอกมือ (เช่น ใจของคนอื่น จังหวะเวลา) และยอมรับว่าทุกอย่างเปลี่ยนได้ แต่ยังต้องตอบคำถามตรงๆ ไม่เลี่ยง
 - น้ำเสียง: เริ่มด้วยการรับรู้ความรู้สึกของผู้ถามสั้นๆ หนึ่งประโยค แล้วตอบตรง ให้เหตุผลเป็นลำดับต่อเนื่องด้วยคำเชื่อมอย่าง เพราะ จึง แปลว่า ซึ่งทำให้ โยงไพ่ใบหนึ่งไปสู่อีกใบเหมือนเล่าเหตุและผล สอดแทรกคำถามชวนสะท้อนคิด 1 ถึง 2 ข้อในเนื้อเรื่อง และปิดด้วยก้าวเล็กๆ ที่ทำได้จริงคืนนี้หรือพรุ่งนี้
 
@@ -2897,7 +2969,8 @@ function houseChronicle(R, A) {
   const out = [];
   /* I. acknowledge, answer, give the main reason */
   out.push(`[[ANSWER|${nums([...new Set([decider.i, R.sp.out])])}]]`);
-  out.push(`${pick(ACK[ctx.topic] || ACK.general)} ${R.q.text ? `สำหรับคำถาม “${R.q.text}” ` : ""}คำตอบตรงๆ คือ **${stripTags(A.head)}**`);
+  const life = lifeLine(R.life, pick);
+  out.push(`${pick(ACK[ctx.topic] || ACK.general)}${life ? " " + life : ""} ${R.q.text ? `สำหรับคำถาม “${R.q.text}” ` : ""}คำตอบตรงๆ คือ **${stripTags(A.head)}**`);
   out.push(`เหตุผลหลักมาจาก **${decider.card.en}**${decider.rev ? " ที่กลับหัว" : ""} ในตำแหน่ง “${decider.pos.k}” ซึ่งมีพลังของ ${kwList(decider.rev ? decider.card.kwR : decider.card.kwU)} ${pick(["ไพ่ไม่ได้ตัดสินแทนใคร แต่บอกทิศทางของเรื่องถ้าทุกอย่างเดินต่อแบบนี้", "นี่คือแนวโน้มจากสิ่งที่เป็นอยู่ตอนนี้ ไม่ใช่คำตัดสินที่เปลี่ยนไม่ได้", "ให้มองคำตอบนี้เป็นกระจกสะท้อนสถานการณ์ มากกว่าคำพิพากษา"])}`);
   /* II. the path of the psyche, card by card, linked by cause and effect */
   const firsts = ["เรื่องเริ่มที่", "จุดตั้งต้นอยู่ที่", "ไพ่ใบแรกคือ"];
@@ -2947,8 +3020,11 @@ function houseChronicle(R, A) {
   const outside = other ? `ใจและการตัดสินใจของ${other}` : "จังหวะเวลาและปัจจัยภายนอก";
   out.push(`มีสองเรื่องที่ควรแยกให้ออก เรื่องแรกคือ${outside} ซึ่งอยู่นอกมือคุณ ยิ่งพยายามควบคุมก็ยิ่งเหนื่อย เรื่องที่สองคือท่าทีและการกระทำของคุณเอง ซึ่งอยู่ในมือคุณทั้งหมด`);
   const worst = [...R.cards].sort((a, b) => a.val - b.val)[0], td = TOPICS[ctx.topic].dom;
+  const carries = R.life.roles.some(r => ["parent", "breadwinner", "caregiver", "owner"].includes(r[0]));
+  if (carries && ["career", "money"].includes(td)) out.push(pick(["เพราะมีคนที่พึ่งพาคุณอยู่ ก่อนตัดสินใจเรื่องใหญ่ให้เตรียมเงินสำรองไว้สักสามถึงหกเดือน และคุยกับคนในบ้านให้เห็นภาพเดียวกันก่อน", "ด้วยภาระที่คุณแบกอยู่ ทางที่ดีที่สุดอาจไม่ใช่ทางที่เร็วที่สุด แต่เป็นทางที่ทุกคนในบ้านไปด้วยกันได้"]));
   const caution = worst.val < 0 ? `ส่วนสิ่งที่ควรระวังคือเรื่อง “${firstKw(worst.card, worst.rev)}” ที่ ${worst.card.en} เตือนไว้` : `และอย่าลืมว่า${DOMAIN_AVOID[td || "luck"]}`;
-  out.push(`${pick(["ก้าวเล็กที่ทำได้เลยคือ", "ถ้าให้เริ่มจากสิ่งเดียว หมอแนะนำให้", "สิ่งที่ทำได้ตั้งแต่คืนนี้คือ"])}${K.dos[0]} ${K.dos[1] ? `${pick(["แล้วค่อยๆ", "ต่อด้วยการ", "จากนั้น"])}${K.dos[1]}` : ""} ${caution} ${pick(["ทุกคำทำนายเปลี่ยนได้ด้วยการกระทำของคุณเอง", "ไพ่บอกทิศทางลม แต่คนถือหางเสือคือคุณ"])}${R.q.name ? " คุณ" + R.q.name : ""}`);
+  if (R.life.stage) out.push(R.life.stage.advise);
+  out.push(`${pick(["ก้าวเล็กที่ทำได้เลยคือ", "ถ้าให้เริ่มจากสิ่งเดียว หมอแนะนำให้", "สิ่งที่ทำได้ตั้งแต่คืนนี้คือ"])}${K.dos[0]} ${K.dos[1] ? `${pick(["แล้วค่อยๆ ", "ต่อด้วยการ", "จากนั้น "])}${K.dos[1]}` : ""} ${caution} ${pick(["ทุกคำทำนายเปลี่ยนได้ด้วยการกระทำของคุณเอง", "ไพ่บอกทิศทางลม แต่คนถือหางเสือคือคุณ"])}${R.q.name ? " คุณ" + R.q.name : ""}`);
   const domEl = Object.entries(R.el).sort((a, b) => b[1] - a[1])[0][0];
   out.push("[[POEM]]");
   out.push(POEMS[domEl][A.tone || "mid"].join("\n"));
@@ -3268,8 +3344,8 @@ function renderReading(R) {
     <div class="panel">
       <h3><small>Talismans</small>สิ่งนำโชคจากการเปิดไพ่ครั้งนี้</h3>
       <div class="lucky">
-        <div class="item"><span>เลขนำโชค 2 ตัว</span><b class="num">${lucky.two.join(" · ")}</b></div>
-        <div class="item"><span>เลขนำโชค 3 ตัว</span><b class="num">${lucky.three}</b></div>
+        ${R.life.minor ? "" : `<div class="item"><span>เลขนำโชค 2 ตัว</span><b class="num">${lucky.two.join(" · ")}</b></div>
+        <div class="item"><span>เลขนำโชค 3 ตัว</span><b class="num">${lucky.three}</b></div>`}
         <div class="item"><span>สีเสริมดวง (ธาตุ${EL[domEl].th})</span><b><span class="swatch" style="background:${lc[1]}"></span>${lc[0]}</b><span><span class="swatch" style="background:${lc[3]}"></span>${lc[2]}</span></div>
         <div class="item"><span>${num ? "สีประจำวันเกิด" : "ธาตุนำ"}</span><b>${num ? `<span class="swatch" style="background:${num.day.hex}"></span>${num.day.color}` : "ธาตุ" + EL[domEl].th}</b><span>${num ? "วัน" + num.day.th : ""}</span></div>
       </div>
