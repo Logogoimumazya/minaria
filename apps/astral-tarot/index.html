@@ -3383,7 +3383,7 @@ const Oracle = {
     if (R.chron) { Chron.status(R.chronSrc || "book"); Chron.update(R.chron, false); Chron.done(R.chron, "replay"); Chron.status(R.chronSrc || "book"); this.chatReady(); return; }
     Chron.thinking(true);
     const sample = await getSample();
-    if (!sample) { Chron.thinking(false); Chron.play(houseChronicle(R, A), "book", "เปิดหน้านี้ใน claude.ai แล้ว Claude จะเขียนคำทำนายเฉพาะคุณ"); this.chatReady(); return; }
+    if (!sample) { Chron.thinking(false); Chron.play(houseChronicle(R, A), "book", window.claude ? "เปิดหน้านี้ใน claude.ai แล้ว Claude จะเขียนคำทำนายเฉพาะคุณ" : ""); this.chatReady(); return; }
     const ctl = new AbortController(); Chron.ctl = ctl;
     let started = false;
     try {
