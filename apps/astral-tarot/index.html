@@ -3398,7 +3398,7 @@ function buildOraclePrompt(R, A) {
   return `${ORACLE_RULES}
 
 งาน: เขียนคำทำนายจากการเปิดไพ่ด้านล่าง เป็นบทตามแท็กต่อไปนี้ เรียงตามลำดับ แต่ละแท็กอยู่บรรทัดของตัวเอง ตัวเลขหลัง | คือหมายเลขไพ่ (n) ที่บทนั้นพูดถึง ยาวรวมประมาณ 600 ถึง 900 คำ
-[[ANSWER|n,n]] รับรู้ความรู้สึกสั้นๆ แล้วตอบคำถามตรงๆ พร้อมเหตุผลหลักจากไพ่ที่ชี้ขาด 1 ถึง 2 ย่อหน้า
+[[ANSWER|n,n]] รับรู้ความรู้สึกสั้นๆ แล้วตอบคำถามตรงๆ พร้อมเหตุผลหลักจากไพ่ที่ชี้ขาด 1 ถึง 2 ย่อหน้า ทำตัวหนาด้วย **...** ครั้งเดียวที่วลีคำตอบตรงๆ ยาวไม่เกิน 15 คำ เพราะวลีนี้จะไปอยู่บนการ์ดภาพ
 [[JOURNEY|n,n,n]] เส้นทางของใจ: เล่าไพ่ทีละใบตามลำดับตำแหน่ง ว่าข้างในใจกำลังเกิดอะไรขึ้นและพาไปสู่ใบถัดไปอย่างไร เป็นเหตุเป็นผลต่อกัน 2 ถึง 3 ย่อหน้า
 [[DIALOGUE|n,n]] แรงที่ทำงานอยู่ข้างใน: ธาตุหนุนหรือต้านในฐานะความร่วมมือหรือความขัดแย้งในใจ คอมโบ แนวโน้ม และเส้นทางของไพ่ชุดใหญ่ 1 ถึง 2 ย่อหน้า
 [[SHADOW]] เงาของคุณ: อ่านไพ่เงาว่าอะไรซ่อนอยู่ใต้คำถามนี้ สิ่งที่ใจรู้แต่ยังไม่ค่อยยอมมอง ปิดด้วยคำถามชวนสะท้อนคิด 1 ย่อหน้า (ถ้า shadow_card เป็น null ให้ข้ามแท็กนี้)
@@ -4593,25 +4593,30 @@ function bondReading(dobA, dobB, rel, label) {
   return { A, B, ca, cb, bond, dig, pair, lp, score, rel, label: label || "เขา" };
 }
 const Bond = { rel: "friend", last: null, ctl: null };
-function renderBond() {
-  const p = profile(), me = p.dob ? numerology({ dob: p.dob }) : null, minor = (ageFrom(p.dob) ?? 99) < 18;
-  if (minor && Bond.rel === "love") Bond.rel = "friend";
+/* the asker's own birth cards, the top panel of the bond room */
+function bondMine(p) {
+  const me = p.dob ? numerology({ dob: p.dob }) : null;
   const soul = me && me.birth.length > 1 ? me.birth[me.birth.length - 1] : null;
   const tile = (id, lbl, extra) => { const c = DECK[id]; return `<div class="bc">${miniCard(c)}<div><span class="lbl">${lbl}</span><h4>${esc(c.en)}</h4><p><b>${esc(c.kwU)}</b></p><p>${extra}</p></div></div>`; };
-  $("#stage-bond").innerHTML = `
-    <div class="stage-head">
-      <div class="eyebrow">Birth Cards · Bonds</div>
-      <h2>ไพ่ประจำตัวและดวงคู่</h2>
-      <p>ไพ่ประจำตัวคำนวณจากวันเกิด เป็นไพ่ชุดใหญ่ที่สะท้อนพลังหลักของชีวิต ส่วนดวงคู่จะอ่านจากไพ่ประจำตัวและเลขเส้นทางชีวิตของทั้งสองคน</p>
-    </div>
-    <div class="panel">
+  return `
       <h3><small>Your Birth Cards</small>ไพ่ประจำชีวิตของคุณ</h3>
       ${me ? `<div class="bond-me">
         ${tile(me.birth[0], "ไพ่ประจำตัว · บุคลิกที่โลกเห็น", esc(psyche(DECK[me.birth[0]])))}
         ${soul !== null ? tile(soul, "ไพ่ประจำวิญญาณ · สิ่งที่ใจลึกๆ ตามหา", esc(DECK[soul].adv)) : ""}
         ${tile(me.yearCards[0], `ไพ่ประจำปี ${me.year} · ธีมของปีนี้`, esc(DECK[me.yearCards[0]].up))}
         <div class="bc" style="grid-template-columns:1fr"><div><span class="lbl">เลขเส้นทางชีวิต ${me.lp}</span><h4 style="font-family:var(--f-body)">${LIFE_PATH[me.lp][0]}</h4><p>${LIFE_PATH[me.lp][1]}</p><p class="muted">เกิดวัน${me.day.th} · ${me.day.planet} · สี${me.day.color}</p></div></div>
-      </div>` : `<label class="mini-dob">ใส่วันเกิดของคุณเพื่อดูไพ่ประจำชีวิต<input type="hidden" id="bond-mydob" data-dob></label>`}
+      </div>` : `<label class="mini-dob">ใส่วันเกิดของคุณเพื่อดูไพ่ประจำชีวิต<input type="hidden" id="bond-mydob" data-dob></label>`}`;
+}
+function renderBond() {
+  const p = profile(), minor = (ageFrom(p.dob) ?? 99) < 18;
+  if (minor && Bond.rel === "love") Bond.rel = "friend";
+  $("#stage-bond").innerHTML = `
+    <div class="stage-head">
+      <div class="eyebrow">Birth Cards · Bonds</div>
+      <h2>ไพ่ประจำตัวและดวงคู่</h2>
+      <p>ไพ่ประจำตัวคำนวณจากวันเกิด เป็นไพ่ชุดใหญ่ที่สะท้อนพลังหลักของชีวิต ส่วนดวงคู่จะอ่านจากไพ่ประจำตัวและเลขเส้นทางชีวิตของทั้งสองคน</p>
+    </div>
+    <div class="panel" id="bond-mine">${bondMine(p)}
     </div>
     <div class="panel" style="margin-top:18px">
       <h3><small>The Bond</small>ดวงคู่จากวันเกิด</h3>
@@ -4696,7 +4701,14 @@ function initBond() {
     e.preventDefault();
     const a = $("#bond-a").value, b = $("#bond-b").value;
     if (!a || !b) return toast("ใส่วันเกิดของทั้งสองคนก่อน");
-    if (!profile().dob) saveProfile({ dob: a });
+    if (!profile().dob) {
+      /* the first birth date given here becomes the asker's own, so the top panel and the under-18 rules follow it */
+      saveProfile({ dob: a }); $("#bond-mine").innerHTML = bondMine(profile());
+      if ((ageFrom(a) ?? 99) < 18) {
+        $$('#bond-form [data-rel="love"]').forEach(b => b.remove());
+        if (Bond.rel === "love") { Bond.rel = "friend"; $$("#bond-form [data-rel]").forEach(b => b.setAttribute("aria-pressed", b.dataset.rel === "friend")); }
+      }
+    }
     const B = Bond.last = bondReading(a, b, Bond.rel, $("#bond-w").value.trim());
     $("#bond-out").innerHTML = bondHTML(B);
     Sound.chime(523); Grade.flash(B.bond.el, .7);
@@ -4785,6 +4797,11 @@ function wrapText(x, text, maxW) {
   if (cur.trim()) lines.push(cur.trim());
   return lines;
 }
+/* the share card's answer: the phrase the oracle set in bold, else the computed verdict */
+function answerLineOf(R, A) {
+  const p = R.chron && parseChron(R.chron).find(c => c.key === "ANSWER"), m = p && p.body.match(/\*\*([^*\n]{2,140})\*\*/);
+  return m ? stripTags(m[1]).trim() : stripTags(A.head);
+}
 function poemOf(R) {
   const p = parseChron(R.chron || houseChronicle(R, answerFor(R))).find(c => c.key === "POEM");
   return p ? stripTags(p.body).replace(/\*\*/g, "").split(/\n+/).map(s => s.trim()).filter(Boolean).slice(0, 4) : [];
@@ -4811,7 +4828,7 @@ async function drawShareCard(R, withArt) {
   const cw = Math.min(n <= 3 ? 280 : n <= 5 ? 170 : 128, (W - 180 - (cols - 1) * gap) / cols), ch = cw * 1.7, lab = n > 5 ? 56 : 72;
   const A = answerFor(R), poem = poemOf(R), lh = 50;
   x.font = `500 40px ${TH}`; const qLines = R.q.text ? wrapText(x, `“${R.q.text}”`, W - 220).slice(0, 3) : [];
-  x.font = `700 40px ${TH}`; const aLines = wrapText(x, stripTags(A.head), W - 200).slice(0, 3);
+  x.font = `700 40px ${TH}`; const aLines = wrapText(x, answerLineOf(R, A), W - 200).slice(0, 3);
   /* the block from question to verse sits in the middle of the space between the header and the footer */
   const block = qLines.length * 58 + 24 + rows * (ch + lab) + 40 + 52 + aLines.length * 56 + 78 + (poem.length ? 26 + poem.length * lh : 0);
   let y = 262 + Math.max(0, (H - 180 - 220 - block) / 2);
