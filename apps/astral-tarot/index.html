@@ -318,6 +318,24 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shad
 .lucky .item b.num { font-family: var(--f-latin); font-size: 26px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; border: 1px solid rgba(255,255,255,.3); }
 .foot-note { text-align: center; font-size: 12.5px; color: var(--mist); margin-top: 8px; }
+/* ---------- the maker: Instagram and a PromptPay tip jar, at the foot of every room ---------- */
+.maker { position: relative; z-index: 1; margin: 64px auto 0; max-width: 720px; display: grid; gap: 22px; justify-items: center; text-align: center; padding-top: 30px; border-top: 1px solid var(--line); }
+.maker-id { display: flex; align-items: center; gap: 16px; text-align: left; color: inherit; text-decoration: none; padding: 10px 18px 10px 10px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); transition: border-color .2s, box-shadow .3s; }
+.maker-id:hover { border-color: var(--line-strong); box-shadow: 0 0 24px rgba(232,196,106,.18); }
+.ig-ring { width: 76px; height: 76px; flex: none; border-radius: 50%; padding: 3px; background: conic-gradient(from 210deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5, #feda75); }
+.ig-ring img, .ig-ring span { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%; border: 3px solid var(--void); object-fit: cover; background: var(--panel-solid); color: var(--gold); font-size: 28px; }
+.maker-id small { display: block; font-family: var(--f-latin); font-size: 11px; letter-spacing: .22em; color: var(--gold-deep); text-transform: uppercase; }
+.maker-id b { display: block; font-size: 19px; color: var(--gold-hi); letter-spacing: .02em; }
+.maker-id em { font-style: normal; font-size: 13.5px; color: var(--mist); }
+.tip { display: grid; gap: 10px; justify-items: center; }
+.tip h3 { font-size: 19px; color: var(--gold-hi); }
+.tip p { margin: 0; max-width: 46ch; color: var(--mist); font-size: 14.5px; }
+.pay { width: min(260px, 100%); background: #fff; color: #11284b; border-radius: 16px; overflow: hidden; display: grid; justify-items: center; box-shadow: 0 0 0 1px var(--line-strong), 0 0 34px rgba(232,196,106,.22); }
+.pay-top { width: 100%; background: #11365c; color: #fff; font: 700 14px var(--f-body); letter-spacing: .08em; padding: 8px 0; }
+.pay-pp { margin-top: 10px; font: 700 13px var(--f-body); color: #11365c; border: 1.5px solid #11365c; border-radius: 4px; padding: 0 8px; }
+#pay-qr { width: 100%; display: grid; justify-items: center; }
+.pay svg { width: 82%; height: auto; display: block; margin: 6px 0 2px; }
+.pay-who { font: 700 15px var(--f-body); padding-bottom: 12px; }
 .toast {
   position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--panel-solid); border: 1px solid var(--line-strong); color: var(--gold-hi);
@@ -1158,6 +1176,26 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
   <section class="stage" id="stage-journal" hidden></section>
   <section class="stage" id="stage-library" hidden></section>
   <section class="stage" id="stage-bond" hidden></section>
+
+  <!-- THE MAKER -->
+  <footer class="maker" id="maker">
+    <a class="maker-id" href="https://www.instagram.com/mogmagmaxmac/" target="_blank" rel="noopener">
+      <span class="ig-ring"><span aria-hidden="true">✦</span></span>
+      <span><small>Made by</small><b>@mogmagmaxmac</b><em>ติดตามหอดาราบน Instagram</em></span>
+    </a>
+    <div class="tip">
+      <h3>เลี้ยงชาหมอดูสักแก้ว</h3>
+      <p>หอดาราเปิดให้ดูดวงฟรี ถ้าคำทำนายช่วยให้ใจเบาลงได้บ้าง สนับสนุนค่าดูแลเว็บได้ทางพร้อมเพย์ ใส่จำนวนเท่าไรก็ได้</p>
+      <div class="pay" role="img" aria-label="คิวอาร์พร้อมเพย์ของ นาย ธนกฤต เงินเชื้อ">
+        <div class="pay-top">THAI QR PAYMENT</div>
+        <div class="pay-pp">PromptPay พร้อมเพย์</div>
+        <div id="pay-qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h33v33H0z"/><path stroke="#0b1a3a" d="M2 2.5h7m2 0h1m3 0h4m2 0h2m1 0h7M2 3.5h1m5 0h1m2 0h1m1 0h2m3 0h1m1 0h1m3 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h2m3 0h3m2 0h2m2 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m4 0h2m2 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h3m1 0h2m3 0h1m1 0h1m2 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h2m1 0h5m1 0h1m1 0h1M2 10.5h1m1 0h5m2 0h4m2 0h1m2 0h1m1 0h1m1 0h5M4 11.5h1m11 0h4m2 0h3m3 0h2M3 12.5h1m2 0h4m2 0h2m2 0h2m3 0h1m2 0h1m1 0h1m1 0h2M3 13.5h4m2 0h1m1 0h1m2 0h1m2 0h1m3 0h1m1 0h1m2 0h1m2 0h1M3 14.5h7m3 0h1m6 0h1m2 0h1m1 0h4M6 15.5h2m1 0h1m1 0h5m3 0h2m2 0h1m2 0h2m1 0h2M3 16.5h2m1 0h3m1 0h2m1 0h1m1 0h2m2 0h2m1 0h2m3 0h1m1 0h1M2 17.5h1m1 0h1m4 0h1m1 0h2m1 0h2m1 0h3m1 0h3m6 0h1M2 18.5h1m1 0h1m1 0h4m2 0h1m1 0h1m1 0h3m1 0h2m1 0h1m2 0h2m1 0h1M2 19.5h2m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h2m2 0h3m1 0h2m2 0h1M2 20.5h1m1 0h2m2 0h1m1 0h2m1 0h1m3 0h1m5 0h1m2 0h1m1 0h2M2 21.5h1m1 0h1m1 0h2m5 0h2m1 0h2m1 0h2m2 0h1m2 0h2m1 0h1M2 22.5h1m1 0h2m2 0h3m3 0h1m2 0h1m1 0h9m1 0h1M10 23.5h3m2 0h3m1 0h1m2 0h1m3 0h1m1 0h2M2 24.5h7m4 0h4m2 0h1m1 0h2m1 0h1m1 0h1m1 0h2M2 25.5h1m5 0h1m1 0h1m1 0h4m1 0h1m1 0h2m1 0h1m3 0h3M2 26.5h1m1 0h3m1 0h1m1 0h1m2 0h2m1 0h1m2 0h1m2 0h7M2 27.5h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h1m1 0h1m3 0h1m2 0h1m2 0h1M2 28.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h4m4 0h2m1 0h1m2 0h1M2 29.5h1m5 0h1m2 0h2m3 0h2m1 0h3m1 0h4m1 0h1M2 30.5h7m1 0h2m1 0h2m2 0h2m1 0h2m1 0h2m1 0h1m2 0h1"/></svg></div>
+        <div class="pay-who">นาย ธนกฤต เงินเชื้อ</div>
+      </div>
+      <div class="btn-row center-row"><button class="btn ghost" type="button" id="pay-save">บันทึกรูปคิวอาร์</button></div>
+      <p class="foot-note">บนมือถือ บันทึกรูปแล้วเปิดในแอปธนาคาร เลือกสแกนจากรูปภาพ</p>
+    </div>
+  </footer>
 </div>
 
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -4863,8 +4901,9 @@ async function drawShareCard(R, withArt) {
     poem.forEach(l => { x.fillText(l, W / 2, y); y += lh; });
   }
   const m = moonAt(R.date);
-  x.fillStyle = "#aea8cc"; x.font = `400 24px ${TH}`; x.fillText(`${m.ph.th} · ${m.lunar} · รหัสพิธี ${R.code}`, W / 2, H - 112);
-  x.fillStyle = "#e8c46a"; x.font = `700 30px ${TH}`; x.fillText("หอดาราทาโรต์", W / 2, H - 72);
+  x.fillStyle = "#aea8cc"; x.font = `400 24px ${TH}`; x.fillText(`${m.ph.th} · ${m.lunar} · รหัสพิธี ${R.code}`, W / 2, H - 146);
+  x.fillStyle = "#e8c46a"; x.font = `700 30px ${TH}`; x.fillText("หอดาราทาโรต์", W / 2, H - 104);
+  x.fillStyle = "#fff0c2"; x.font = `500 24px ${TH}`; x.fillText("IG @mogmagmaxmac · astral-tarot.pages.dev", W / 2, H - 68);
   return new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(new Error("empty")), "image/png"); } catch (e) { rej(e); } });
 }
 async function openShareCard(R) {
@@ -5304,6 +5343,15 @@ $("#music-btn").addEventListener("click", () => setMusic(!Music.nodes));
   addEventListener("pointerdown", go, true);
 })();
 initGfx(); initDebug(); initDob();
+/* the PromptPay code is drawn as SVG; saving it makes a plain PNG a banking app can scan from the photo roll */
+$("#pay-save").addEventListener("click", async () => {
+  const W = 900, cv = document.createElement("canvas"); cv.width = W; cv.height = W;
+  const x = cv.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, W);
+  const svg = $("#pay-qr svg").outerHTML;
+  const img = await loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg));
+  x.imageSmoothingEnabled = false; x.drawImage(img, 40, 40, W - 80, W - 80);
+  cv.toBlob(b => b ? saveFile("promptpay-astral-tarot.png", b, "image/png") : toast("บันทึกรูปไม่สำเร็จ"), "image/png");
+});
 $("#sky-strip").addEventListener("click", e => { const b = e.target.closest("[data-room]"); if (b) goRoom(b.dataset.room); });
 goRoom("ask");
 playIntro(); askMotion();
