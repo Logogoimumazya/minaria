@@ -1,0 +1,32 @@
+name: Deploy Astral Tarot oracle (Cloudflare Worker)
+
+on:
+  push:
+    branches: [claude/cloud-session-setup-btn8do, claude/exciting-babbage-llebqn]
+    paths: ["apps/astral-tarot/worker/**", ".github/workflows/astral-tarot-oracle.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' && secrets.GEMINI_API_KEY != '' }}
+    steps:
+      - name: Waiting for secrets
+        if: env.HAS_CF != 'true'
+        run: echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and GEMINI_API_KEY in the repository secrets to deploy the oracle (see apps/astral-tarot/worker/README.md)."
+      - uses: actions/checkout@v4
+        if: env.HAS_CF == 'true'
+      - uses: cloudflare/wrangler-action@v3
+        if: env.HAS_CF == 'true'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/astral-tarot/worker
+          secrets: |
+            GEMINI_API_KEY
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

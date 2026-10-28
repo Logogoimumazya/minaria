@@ -1038,6 +1038,7 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
           </div>
           <label class="toggle"><input type="checkbox" id="q-rev" checked> ใช้ไพ่กลับหัว (ระหว่างสับ ไพ่บางกองจะถูกหมุน 180°)</label>
           <div class="btn-row"><button class="btn" type="submit">เริ่มพิธีสับไพ่</button></div>
+          <p class="hint" id="ai-note" hidden>คำทำนายเขียนสดโดย Gemini ของ Google ผ่านบริการฟรี ซึ่ง Google อาจนำข้อความไปใช้ปรับปรุงบริการ จึงไม่ควรใส่ข้อมูลส่วนตัวที่ไม่อยากเปิดเผย · วันละ 5 คำทำนาย และถามต่อได้ 20 ครั้ง เกินจากนั้นหมอจะอ่านจากตำราของหอดารา</p>
         </form>
       </div>
     </div>
@@ -2335,6 +2336,7 @@ function initAsk() {
     startShuffle();
   });
   prefillAsk();
+  $("#ai-note").hidden = !window.ASTRAL_ORACLE_URL;
   analyzeInto();
   renderHistory();
 }
@@ -3237,8 +3239,33 @@ function drawLinks(R) {
 }
 
 /* ================= THE ORACLE: Claude writes the reading; the house book is the fallback ================= */
-let samplePromise = null;
-const getSample = () => samplePromise || (samplePromise = window.claude && window.claude.use ? window.claude.use("sample").catch(() => null) : Promise.resolve(null));
+let samplePromise = null, AI_NAME = "Claude";
+/* inside claude.ai the oracle is Claude; on the public site it can be Gemini through the site's own Worker (window.ASTRAL_ORACLE_URL) */
+const getSample = () => samplePromise || (samplePromise = (async () => {
+  const claude = window.claude && window.claude.use ? await window.claude.use("sample").catch(() => null) : null;
+  return claude || geminiSample();
+})());
+/* the same call shape as the sample capability: sample(input, {onText, signal}) → {text, truncated}, rejecting with {code, message, text} */
+function geminiSample() {
+  const url = window.ASTRAL_ORACLE_URL; if (!url) return null;
+  AI_NAME = "Gemini";
+  return async (input, opts = {}) => {
+    /* the main reading is the only prompt that asks for the tagged chapters; everything else counts as a follow-up */
+    const kind = typeof input === "string" && input.includes("[[ANSWER") ? "reading" : "chat";
+    const fail = (e, text) => ({ code: e && e.name === "AbortError" ? "cancelled" : "unavailable", message: String(e), text });
+    let res;
+    try { res = await fetch(url + "/oracle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, input }), signal: opts.signal }); }
+    catch (e) { throw fail(e); }
+    if (!res.ok) { let j = {}; try { j = await res.json(); } catch (e) { } throw { code: j.code || "unavailable", message: j.message || "" }; }
+    const rd = res.body.pipeThrough(new TextDecoderStream()).getReader();
+    let text = "";
+    try {
+      for (;;) { const { value, done } = await rd.read(); if (done) break; text += value; if (opts.onText) opts.onText({ text, delta: value }); }
+    } catch (e) { throw fail(e, text || undefined); }
+    if (!text.trim()) throw { code: "unavailable", message: "empty answer" };
+    return { text, truncated: false };
+  };
+}
 const CHAPTERS = {
   ANSWER: ["คำตอบ", "The Answer"], JOURNEY: ["เส้นทางของใจ", "The Psyche's Path"], DIALOGUE: ["แรงที่ทำงานอยู่ข้างใน", "Inner Forces"],
   SHADOW: ["เงาของคุณ", "The Shadow"], ADVICE: ["สิ่งที่อยู่ในมือคุณ", "Within Your Hands"], POEM: ["ลำนำปิดท้าย", "The Verse"]
@@ -3429,7 +3456,7 @@ const Chron = {
   },
   status(src, extra) {
     this.src = src;
-    const label = src === "claude" ? "✦ Claude เขียนคำทำนายนี้สดสำหรับคำถามของคุณ" : src === "claude-partial" ? "✦ Claude เขียนไว้บางส่วน" : "อ่านจากตำราของหอดารา";
+    const label = src === "claude" ? `✦ ${AI_NAME} เขียนคำทำนายนี้สดสำหรับคำถามของคุณ` : src === "claude-partial" ? `✦ ${AI_NAME} เขียนไว้บางส่วน` : "อ่านจากตำราของหอดารา";
     $("#chron-status").innerHTML = `<span class="src ${src.startsWith("claude") ? "ai" : "book"}">${label}</span>${extra ? ` <span class="muted">${extra}</span>` : ""}`;
   },
   update(text, live) {
@@ -3506,8 +3533,9 @@ const Oracle = {
       Chron.thinking(false);
       if (e.text && e.code !== "refused") { Chron.done(e.text, "claude-partial", e.code === "cancelled" ? "หยุดไว้ตรงนี้" : "การเชื่อมต่อขาดช่วง"); this.chatReady(sample); return; }
       const blocked = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code);
-      Chron.play(houseChronicle(R, A), "book", e.code === "cancelled" ? "" : blocked ? "ยังไม่ได้อนุญาตให้ Claude เขียน" : "Claude ไม่ว่างชั่วคราว");
-      this.chatReady(blocked ? null : sample, !blocked && e.code !== "cancelled");
+      const quota = e.code === "quota";
+      Chron.play(houseChronicle(R, A), "book", e.code === "cancelled" ? "" : quota ? e.message : blocked ? `ยังไม่ได้อนุญาตให้ ${AI_NAME} เขียน` : `${AI_NAME} ไม่ว่างชั่วคราว`);
+      this.chatReady(blocked ? null : sample, !blocked && !quota && e.code !== "cancelled");
     }
   },
   async chatReady(sample, offerRetry) {
@@ -3559,7 +3587,7 @@ ${stripTags(R.chron || "").replace(/\[\[ASK\]\][\s\S]*$/, "").slice(0, 6000)}`;
       this.turns.push({ role: "user", content: q }, { role: "assistant", content: res.text });
     } catch (e) {
       if (e.text) out.innerHTML = fmt(e.text) + `<p class="muted">${e.code === "cancelled" ? "หยุดไว้ตรงนี้" : "การเชื่อมต่อขาดช่วง"}</p>`;
-      else out.innerHTML = `<p class="muted">${e.code === "cancelled" ? "ยกเลิกคำถามแล้ว" : e.code === "rate_limited" ? "ถามถี่เกินไป รอสักครู่แล้วลองใหม่" : ["not_granted", "sampling_disabled"].includes(e.code) ? "ยังไม่ได้อนุญาตให้ Claude ตอบ" : "หมอตอบไม่ได้ในตอนนี้ ลองถามใหม่อีกครั้ง"}</p>`;
+      else out.innerHTML = `<p class="muted">${e.code === "cancelled" ? "ยกเลิกคำถามแล้ว" : e.code === "quota" ? esc(e.message) : e.code === "rate_limited" ? "ถามถี่เกินไป รอสักครู่แล้วลองใหม่" : ["not_granted", "sampling_disabled"].includes(e.code) ? `ยังไม่ได้อนุญาตให้ ${AI_NAME} ตอบ` : "หมอตอบไม่ได้ในตอนนี้ ลองถามใหม่อีกครั้ง"}</p>`;
       if (["not_granted", "sampling_disabled", "not_declared"].includes(e.code)) $("#askmore").hidden = true;
     } finally {
       this.busy = false; $("#ask-send").disabled = false; $("#ask-stop").hidden = true;
@@ -3642,7 +3670,7 @@ function renderReading(R) {
       <div class="chron-stage" id="chron-stage" aria-live="polite"></div>
       <div class="chron-nav" id="chron-nav" hidden>
         <button class="btn ghost" type="button" id="chron-prev">บทก่อน</button>
-        <button class="btn ghost" type="button" id="chron-retry" hidden>ให้ Claude เขียนอีกครั้ง</button>
+        <button class="btn ghost" type="button" id="chron-retry" hidden>ให้ ${AI_NAME} เขียนอีกครั้ง</button>
         <button class="btn" type="button" id="chron-next">บทถัดไป</button>
       </div>
     </div>
@@ -4586,7 +4614,7 @@ function initBond() {
         const res = await sample(bondPrompt(Bond.last), { modelTier: "default", onText: ({ text }) => { out.innerHTML = paraFmt(text); } });
         out.innerHTML = paraFmt(res.text);
       } catch (err) {
-        out.innerHTML = err.text ? paraFmt(err.text) : `<p class="muted">${err.code === "rate_limited" ? "ถามถี่เกินไป รอสักครู่แล้วลองใหม่" : "หมอยังเล่าเพิ่มไม่ได้ในตอนนี้"}</p>`;
+        out.innerHTML = err.text ? paraFmt(err.text) : `<p class="muted">${err.code === "quota" ? esc(err.message) : err.code === "rate_limited" ? "ถามถี่เกินไป รอสักครู่แล้วลองใหม่" : "หมอยังเล่าเพิ่มไม่ได้ในตอนนี้"}</p>`;
         e.target.disabled = false;
       }
     }

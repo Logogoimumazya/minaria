@@ -5,14 +5,20 @@ index.html is written for the claude.ai Artifact host, which supplies the
 same page runs as a plain static site (GitHub Pages), moving the title, meta
 and font links into <head> and adding a description, theme colour and icon.
 
+If ORACLE_URL is set (the Cloudflare Worker in worker/), the page is told to
+ask Gemini through it; otherwise readings come from the house book only.
+
 Usage: python3 apps/astral-tarot/build_site.py [out_dir]   (default: site/)
 """
+import json
+import os
 import pathlib
 import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "site")
+ORACLE_URL = os.environ.get("ORACLE_URL", "").strip().rstrip("/")
 
 DESCRIPTION = "หอดาราทาโรต์ ดูดวงไพ่ทาโรต์ 78 ใบ สับไพ่จริง อ่านคำทำนายตรงคำถาม ไพ่ประจำวันกับดวงจันทร์ สมุดดวง คลังไพ่ และดวงคู่"
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E"
@@ -36,6 +42,7 @@ def build() -> pathlib.Path:
         f'<link rel="icon" href="{ICON}">',
         # the same small reset the Artifact host puts in front of the page
         "<style>body{margin:0}[hidden]{display:none!important}</style>",
+        *([f"<script>window.ASTRAL_ORACLE_URL = {json.dumps(ORACLE_URL)};</script>"] if ORACLE_URL else []),
         head_part.strip(),
     ])
     html = f"<!doctype html>\n<html lang=\"th\">\n<head>\n{head}\n</head>\n<body>\n{body_part}\n</body>\n</html>\n"

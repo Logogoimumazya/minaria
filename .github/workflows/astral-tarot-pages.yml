@@ -27,6 +27,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build site
+        env:
+          # the Cloudflare Worker that reaches Gemini; leave the repository variable unset to use the house book only
+          ORACLE_URL: ${{ vars.ORACLE_URL }}
         run: python3 apps/astral-tarot/build_site.py site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

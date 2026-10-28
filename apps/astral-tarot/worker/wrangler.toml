@@ -1,0 +1,21 @@
+name = "astral-tarot-oracle"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+# comma-separated list of sites allowed to call the oracle
+ALLOWED_ORIGINS = "https://logogoimumazya.github.io"
+# "gemini-flash-latest" always points at Google's newest Flash model on the free tier
+GEMINI_MODEL = "gemini-flash-latest"
+READING_LIMIT = "5"
+CHAT_LIMIT = "20"
+# site-wide ceiling per day, kept under the free tier's daily request limit
+DAILY_CAP = "1000"
+
+[[durable_objects.bindings]]
+name = "QUOTA"
+class_name = "Quota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Quota"]
