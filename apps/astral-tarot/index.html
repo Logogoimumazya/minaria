@@ -114,6 +114,9 @@ h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 700; }
 .hero { position: relative; min-width: 0; text-align: center; padding-block: 8px; }
 .hero h1 {
   font-family: var(--f-title); font-size: clamp(46px, 8vw, 86px); line-height: 1.15;
+  /* Srisakdi's swashes (the loop of โ, the tail of ต์) reach far past the line box; the gold gradient is clipped to the
+     element's box, so the box is padded out and the padding taken back with negative margins */
+  padding: .45em .3em .25em; margin: -.45em -.3em -.25em;
   background: linear-gradient(180deg, var(--gold-hi) 10%, var(--gold) 50%, var(--gold-deep) 95%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 18px rgba(232,196,106,.28));
