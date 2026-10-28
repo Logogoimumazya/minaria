@@ -1,7 +1,7 @@
 // performance check: frame times through each phase of a full reading (house book, no AI), on the real GPU
 // usage: node perf-ritual.bench.js [html file] [cpu slowdown] [width] [height] [device pixel ratio]
 const { chromium } = require('playwright');
-const [FILE = __dirname + '/test.html', THR = 1, VW = 1920, VH = 1080, DPR = 1] = process.argv.slice(2);
+const [FILE_ARG, THR = 1, VW = 1920, VH = 1080, DPR = 1] = process.argv.slice(2), FILE = FILE_ARG || __dirname + '/test.html';
 (async () => {
   const b = await chromium.launch({ args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist', '--enable-gpu-rasterization'] });
   const p = await b.newPage({ viewport: { width: +VW, height: +VH }, deviceScaleFactor: +DPR });

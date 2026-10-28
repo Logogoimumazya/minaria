@@ -466,6 +466,7 @@ body.lb .letterbox::before, body.lb .letterbox::after { height: 7vh; }
 .top { position: relative; z-index: 4; }
 html { overflow-x: clip; }
 .circle { translate: calc(var(--px, 0) * 18px) calc(var(--py, 0) * 14px); }
+.circle > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .hero h1 { translate: calc(var(--px, 0) * -7px) calc(var(--py, 0) * -5px); }
 .altar { translate: calc(var(--px, 0) * 12px) calc(var(--py, 0) * 9px); }
 .fan { translate: calc(var(--px, 0) * -14px) 0; }
@@ -1774,22 +1775,24 @@ function magicCircle(cls) {
     ticks += `M${(200 + Math.cos(b) * 144).toFixed(1)} ${(200 + Math.sin(b) * 144).toFixed(1)}L${(200 + Math.cos(b) * 172).toFixed(1)} ${(200 + Math.sin(b) * 172).toFixed(1)}`;
   }
   const hex = [0, 1, 2, 3, 4, 5].map(i => { const a = i / 6 * Math.PI * 2 - Math.PI / 2; return `${(200 + Math.cos(a) * 118).toFixed(1)},${(200 + Math.sin(a) * 118).toFixed(1)}`; });
-  return `<svg class="circle ${cls || ""}" viewBox="0 0 400 400" aria-hidden="true">
-    <defs><path id="ringPath${cls || ""}" d="M200 200 m-128 0 a128 128 0 1 1 256 0 a128 128 0 1 1 -256 0"/></defs>
-    <g class="spin" style="transform-origin:200px 200px">
+  /* each turning ring is its own <svg>, stacked in the original order, so the compositor turns a finished picture:
+     turning <g> groups inside one svg had the browser redraw the whole circle every frame (about 210 ms of raster a
+     second on a phone-sized screen, enough to leave the page blank while scrolling on a real phone) */
+  return `<div class="circle ${cls || ""}" aria-hidden="true">
+    <svg class="spin" viewBox="0 0 400 400"><g>
       <circle cx="200" cy="200" r="176" fill="none" stroke="#e8c46a" stroke-opacity=".55"/>
       <circle cx="200" cy="200" r="140" fill="none" stroke="#e8c46a" stroke-opacity=".4"/>
       <path d="${ticks}" stroke="#e8c46a" stroke-opacity=".45"/>
       ${glyphs}
-    </g>
-    <g class="spin-rev" style="transform-origin:200px 200px">
+    </g></svg>
+    <svg class="spin-rev" viewBox="0 0 400 400"><defs><path id="ringPath${cls || ""}" d="M200 200 m-128 0 a128 128 0 1 1 256 0 a128 128 0 1 1 -256 0"/></defs><g>
       <text font-family="Cinzel, serif" font-size="10.5" letter-spacing="4.2" fill="#e8c46a" fill-opacity=".55"><textPath href="#ringPath${cls || ""}">IGNIS · AQUA · AER · TERRA · ARCANA MAIORA · ARCANA MINORA · ROTA FORTUNAE ·</textPath></text>
       <polygon points="${hex[0]} ${hex[2]} ${hex[4]}" fill="none" stroke="#e8c46a" stroke-opacity=".35"/>
       <polygon points="${hex[1]} ${hex[3]} ${hex[5]}" fill="none" stroke="#e8c46a" stroke-opacity=".35"/>
       <circle cx="200" cy="200" r="118" fill="none" stroke="#e8c46a" stroke-opacity=".25" stroke-dasharray="2 6"/>
-    </g>
-    <circle cx="200" cy="200" r="70" fill="url(#gHalo)"/>
-  </svg>`;
+    </g></svg>
+    <svg viewBox="0 0 400 400"><circle cx="200" cy="200" r="70" fill="url(#gHalo)"/></svg>
+  </div>`;
 }
 function spreadIcon(sp) {
   const W = 42, H = 42;
@@ -2269,7 +2272,8 @@ const freshDeck = () => DECK.map(c => ({ id: c.id, rev: false }));
 
 function goStage(name) {
   if (typeof closeStory === "function") closeStory();
-  if (S.stage !== name && name !== "reading") Cam.dip();
+  const dip = S.stage !== name && name !== "reading";
+  if (dip) Cam.dip();
   Grade.set(name);
   S.stage = name;
   ["hub", "ask", "shuffle", "pick", "reveal", "journal", "library", "bond"].forEach(s => $("#stage-" + s).hidden = !(s === name || (name === "reading" && s === "reveal")));
@@ -2278,7 +2282,9 @@ function goStage(name) {
   syncRooms(name);
   Music.setMood(name === "reading" && S.reading ? readingElement(S.reading) : name);
   Art.tint(name === "reading" && S.reading ? readingElement(S.reading) : name);
-  if (name !== "reading") scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+  /* behind the dip the new room is already in place, so it starts at the top at once: smooth-scrolling up through a
+     page the phone had never drawn left the screen black for over a second on a real phone */
+  if (name !== "reading") scrollTo({ top: 0, behavior: REDUCED || dip ? "auto" : "smooth" });
 }
 
 /* ================= QUESTION ENGINE ================= */
