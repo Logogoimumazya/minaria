@@ -31,7 +31,7 @@ Worker จะรับเฉพาะคำขอจากเว็บของ�
 
 ## ปรับค่า
 แก้ใน `wrangler.toml` แล้ว push (workflow จะ deploy ให้เอง)
-- `GEMINI_MODEL`: ค่าเริ่มต้น `gemini-flash-latest` ชี้ไปที่รุ่น Flash ล่าสุดที่ใช้ฟรีได้
+- `GEMINI_MODEL`: รายชื่อรุ่นคั่นด้วยจุลภาค ลองตามลำดับ ถ้ารุ่นแรกคนใช้เยอะ (503) ถูกปลด (404) หรือโควตาหมด (429) จะต่อรุ่นถัดไปเอง ค่าเริ่มต้น `gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest` (ทดสอบ 2026-10-28: 3.5 ตอบใน ~6 วินาที ส่วน `gemini-flash-latest` = 3.8 ตอบ 503 หลังรอ 20–40 วินาที · `gemini-2.5-flash` ปิดรับผู้ใช้ใหม่แล้ว)
 - `READING_LIMIT`, `CHAT_LIMIT`, `DAILY_CAP`: จำนวนครั้งตามด้านบน
 - `ALLOWED_ORIGINS`: เว็บที่เรียกได้ ถ้าใช้โดเมนของตัวเองให้เพิ่มคั่นด้วยจุลภาค
 

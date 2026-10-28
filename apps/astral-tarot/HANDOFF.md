@@ -69,7 +69,8 @@ node gemini.e2e.js                # เว็บที่ build จริงเ�
 ภาพหน้าจอจากการทดสอบอยู่ใน `tests/out/` ทุกสคริปต์ต้องจบด้วย `errors []`
 
 ## งานค้าง / ไอเดียถัดไป
-1. **ใช้ Gemini จริง**: ทำ 5 ขั้นใน `worker/README.md` แล้วลองดูดวงบนเว็บจริง ตรวจว่า `gemini-flash-latest` ใช้ได้กับบัญชีฟรี ถ้า Google ตอบ 404 ให้เปลี่ยน `GEMINI_MODEL` ใน `wrangler.toml`
+1. **ใช้ Gemini จริง** (2026-10-28 ทำต่อบนเครื่อง): key ของผู้ใช้ใช้ได้แล้ว · `gemini-2.5-flash` ปิดรับผู้ใช้ใหม่ (404) · `gemini-flash-latest` (3.8) คนใช้เยอะ ตอบ 503 หลังรอ 20–40 วิ · `gemini-3.5-flash` ตอบภาษาไทยดีใน ~6 วิ → Worker รองรับรายชื่อรุ่นสำรองแล้ว (`GEMINI_MODEL` คั่นจุลภาค ต่อรุ่นถัดไปเมื่อ 404/429/500/503) · **ยังค้าง**: ผู้ใช้ใส่ GitHub secrets 3 ตัวเอง (auto mode ไม่ให้ Claude เขียน secret) แล้ว Claude รัน workflow Worker → ตั้ง `ORACLE_URL` → deploy เว็บ → ทดสอบบนเว็บจริง
+   - บนเครื่องผู้ใช้: Python 3.12 อยู่ที่ `%LOCALAPPDATA%\Programs\Python\Python312\python.exe` (ไม่อยู่ใน PATH ของ bash) · Playwright ติดตั้งนอก repo ใช้ผ่าน `NODE_PATH` · ติดตั้ง plugin `cloudflare@cloudflare` ของ Claude Code แล้ว
 2. ตรวจคุณภาพคำทำนายที่ Gemini เขียนเทียบกับกติกา (ชื่อไพ่อังกฤษ, ไม่มีชื่อทฤษฎี, แท็ก `[[ANSWER|n]]` ฯลฯ ครบ) ถ้าหลุดบ่อยให้ปรับ `ORACLE_RULES`
 3. merge PR #1 เข้า branch หลัก (ต้องเปิดกฎ environment `github-pages` ถ้าจะ deploy จาก branch อื่น)
 4. บนการ์ด PNG คำตอบใช้คำตอบที่ระบบคำนวณ ยังไม่ใช้บรรทัดแรกที่ AI เขียน

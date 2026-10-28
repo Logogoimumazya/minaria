@@ -77,19 +77,24 @@ export default {
     }
     const refund = () => Promise.all([counter(env, "ip:" + ip, "give", kind, day, limit), counter(env, "site", "give", "all", day, cap)]);
 
-    const model = env.GEMINI_MODEL || "gemini-flash-latest";
+    /* GEMINI_MODEL is a comma-separated list: a model that is overloaded, retired or out of quota hands over to the next */
+    const models = (env.GEMINI_MODEL || "gemini-flash-latest").split(",").map(s => s.trim()).filter(Boolean);
+    const payload = JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: toContents(msgs),
+      generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
+    });
     let upstream;
-    try {
-      upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM }] },
-          contents: toContents(msgs),
-          generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
-        })
-      });
-    } catch (e) { upstream = null; }
+    for (const model of models) {
+      try {
+        upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+          body: payload
+        });
+      } catch (e) { upstream = null; }
+      if (upstream && (upstream.ok || ![404, 429, 500, 503].includes(upstream.status))) break;
+    }
     if (!upstream || !upstream.ok) {
       await refund();
       const busy = upstream && upstream.status === 429;

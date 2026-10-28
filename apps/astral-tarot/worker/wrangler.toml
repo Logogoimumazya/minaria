@@ -5,8 +5,9 @@ compatibility_date = "2025-09-01"
 [vars]
 # comma-separated list of sites allowed to call the oracle
 ALLOWED_ORIGINS = "https://logogoimumazya.github.io"
-# "gemini-flash-latest" always points at Google's newest Flash model on the free tier
-GEMINI_MODEL = "gemini-flash-latest"
+# tried in order; a model that is overloaded (503), retired (404) or out of quota (429) hands over to the next.
+# 2026-10-28: gemini-flash-latest (3.8) answered 503 after 20-40 s, gemini-3.5-flash answered in ~6 s
+GEMINI_MODEL = "gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest"
 READING_LIMIT = "5"
 CHAT_LIMIT = "20"
 # site-wide ceiling per day, kept under the free tier's daily request limit
