@@ -6,9 +6,9 @@ const SYSTEM = "คุณคือ \"หมอแห่งหอดารา\" �
 const MAX_INPUT = 60000;
 
 /* ---------- usage log (D1 binding DB): what people ask and what the oracle answered ----------
-   Kept: the question, how it was read (topic, spread, cards, life stage, lens) and the answer.
-   Never kept: name, birth date, IP. A visitor is a salted hash of the IP that changes every day,
-   enough to tell "one person asked five times" from "five people asked once". */
+   Kept: the name the asker typed (optional), a random id stored on their device, the question,
+   how it was read (topic, spread, cards, life stage, lens) and the answer. Shown to the owner at /admin.
+   Never kept: birth date, IP. `visitor` is a salted hash of the IP that changes every day. */
 const clip = (v, n) => typeof v === "string" ? v.slice(0, n) : v == null ? null : String(v).slice(0, n);
 async function visitorId(ip, day, salt) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}|${day}|${ip}`));
@@ -19,9 +19,9 @@ async function logUsage(env, row) {
   const m = row.log && typeof row.log === "object" ? row.log : {};
   const cards = Array.isArray(m.cards) ? m.cards.slice(0, 15).map(c => clip(c, 80)).join(" | ") : null;
   try {
-    await env.DB.prepare(`INSERT INTO events (ts, day, visitor, kind, type, rid, question, topic, qtype, subject, spread, cards, shadow,
-      life_stage, minor, lens, overall, rel, model, status, ms, answer, answer_chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-      .bind(new Date().toISOString(), row.day, row.visitor, row.kind, clip(m.type || row.kind, 20), clip(m.rid, 40),
+    await env.DB.prepare(`INSERT INTO events (uid, name, ts, day, visitor, kind, type, rid, question, topic, qtype, subject, spread, cards, shadow,
+      life_stage, minor, lens, overall, rel, model, status, ms, answer, answer_chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(/^[0-9a-f]{16}$/.test(m.uid || "") ? m.uid : null, clip((m.name || "").trim(), 60) || null, new Date().toISOString(), row.day, row.visitor, row.kind, clip(m.type || row.kind, 20), clip(m.rid, 40),
         /* journal notes and bond birth dates are private: only their type is kept */
         ["reading", "chat"].includes(m.type) ? clip(m.question, 600) : null,
         clip(m.topic, 20), clip(m.qtype, 20), clip(m.subject, 20), clip(m.spread, 30), cards, clip(m.shadow, 60),
@@ -33,6 +33,8 @@ async function logUsage(env, row) {
 }
 
 /* per-visitor and site-wide daily counters, one object per name */
+import { adminRoute } from "./admin.js";
+
 export class Quota {
   constructor(ctx) { this.ctx = ctx; }
   async fetch(req) {
@@ -78,6 +80,7 @@ export default {
       "Access-Control-Expose-Headers": "X-Quota-Left",
       "Vary": "Origin"
     };
+    if (new URL(req.url).pathname.startsWith("/admin")) return adminRoute(req, env);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (req.method !== "POST" || new URL(req.url).pathname !== "/oracle") return json({ code: "not_found" }, 404, cors);
     if (!allowed.includes(origin)) return json({ code: "forbidden", message: "หอดาราตอบเฉพาะคำขอจากเว็บของหอดาราเอง" }, 403, cors);

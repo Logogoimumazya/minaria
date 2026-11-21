@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   await p.goto('http://localhost:8765/'); await p.waitForTimeout(800);
   await p.click('#rooms [data-room=ask]'); await p.waitForTimeout(300);
   console.log('ai note visible', await p.$eval('#ai-note', e => !e.hidden));
-  await p.fill('#q-text', 'แฟนจะกลับมาไหม'); await p.click('label[for=sp-yesno]');
+  await p.fill('#q-name', 'ทดสอบชื่อ'); await p.fill('#q-text', 'แฟนจะกลับมาไหม'); await p.click('label[for=sp-yesno]');
   await p.click('#intent button[type=submit]'); await p.waitForTimeout(400);
   await p.click('#btn-riffle-many');
   await p.waitForFunction(() => !document.querySelector('#btn-cut').disabled, null, { timeout: 90000 });

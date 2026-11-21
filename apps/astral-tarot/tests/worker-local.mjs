@@ -21,16 +21,20 @@ globalThis.fetch = async (url, init) => {
 };
 const objs = {};
 const mkStorage = () => { const m = new Map(); return { get: async k => m.get(k), put: async (k, v) => m.set(k, v), delete: async k => m.delete(k), list: async () => new Map(m) }; };
-/* a stand-in for D1 that keeps inserted rows in memory, served at /_log */
-const logRows = [];
-const DB = { prepare: sql => ({ bind: (...v) => ({ run: async () => { const cols = sql.match(/\(([^)]*)\) VALUES/)[1].split(",").map(c => c.trim()); logRows.push(Object.fromEntries(cols.map((c, i) => [c, v[i]]))); } }) }) };
+/* a stand-in for D1: real SQLite in memory (node:sqlite) with the production schema, rows served at /_log */
+import { DatabaseSync } from "node:sqlite";
+import { readFileSync } from "node:fs";
+const sq = new DatabaseSync(":memory:");
+sq.exec(readFileSync(new URL("../worker/schema.sql", import.meta.url), "utf8"));
+const DB = { prepare: sql => { const st = sq.prepare(sql); const mk = v => ({ run: async () => st.run(...v), all: async () => ({ results: st.all(...v) }) }); return { bind: (...v) => mk(v), ...mk([]) }; } };
+const logRows = { get length() { return 0; } };
 const pending = [], ctx = { waitUntil: p => pending.push(p) };
 const env = {
-  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: "busy, ok", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000", LOG_SALT: "test", DB,
+  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: "busy, ok", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000", LOG_SALT: "test", DB, ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
   QUOTA: { idFromName: n => n, get: n => ({ fetch: (u, i) => (objs[n] ||= new Quota({ storage: mkStorage() })).fetch(new Request(u, i)) }) }
 };
 http.createServer(async (req, res) => {
-  if (req.url === "/_log") { await Promise.all(pending); res.end(JSON.stringify(logRows)); return; }
+  if (req.url === "/_log") { await Promise.all(pending); res.end(JSON.stringify(sq.prepare("SELECT * FROM events ORDER BY id").all())); return; }
   if (req.url === "/_nocap") { env.READING_LIMIT = "0"; res.end("ok"); return; }
   if (req.url === "/_stats") { res.end(JSON.stringify({ geminiCalls, system: lastBody && lastBody.systemInstruction.parts[0].text.slice(0, 40), roles: lastBody && lastBody.contents.map(c => c.role), tried: tried.slice(-2) })); return; }
   const chunks = []; for await (const c of req) chunks.push(c);

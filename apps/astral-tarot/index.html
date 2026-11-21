@@ -1135,7 +1135,7 @@ html[data-q="low"] .aurora i, html[data-q="low"] .astrolabe g.ring { animation: 
           </div>
           <label class="toggle"><input type="checkbox" id="q-rev" checked> ใช้ไพ่กลับหัว (ระหว่างสับ ไพ่บางกองจะถูกหมุน 180°)</label>
           <div class="btn-row"><button class="btn" type="submit">เริ่มพิธีสับไพ่</button></div>
-          <p class="hint" id="ai-note" hidden>คำทำนายเขียนสดโดย Gemini ของ Google ผ่านบริการฟรี ซึ่ง Google อาจนำข้อความไปใช้ปรับปรุงบริการ จึงไม่ควรใส่ข้อมูลส่วนตัวที่ไม่อยากเปิดเผย · หอดาราเก็บคำถาม ไพ่ที่ออก และคำทำนายไว้ดูว่าควรปรับหมออย่างไร โดยไม่เก็บชื่อ วันเกิด หรือเลข IP · ช่วงนี้หอดาราไม่จำกัดจำนวนครั้ง ถ้าบริการ AI แน่น หมอจะรอสักครู่แล้วลองใหม่ให้หนึ่งครั้ง ถ้ายังไม่ได้จะอ่านจากตำราของหอดาราแทน</p>
+          <p class="hint" id="ai-note" hidden>คำทำนายเขียนสดโดย Gemini ของ Google ผ่านบริการฟรี ซึ่ง Google อาจนำข้อความไปใช้ปรับปรุงบริการ จึงไม่ควรใส่ข้อมูลส่วนตัวที่ไม่อยากเปิดเผย · หอดาราเก็บชื่อที่คุณกรอก คำถาม ไพ่ที่ออก และคำทำนายไว้ให้ผู้ดูแลดูเพื่อปรับปรุงหมอ ไม่เก็บวันเกิดหรือเลข IP ถ้าไม่อยากให้เก็บชื่อ เว้นช่องชื่อว่างได้ · ช่วงนี้หอดาราไม่จำกัดจำนวนครั้ง ถ้าบริการ AI แน่น หมอจะรอสักครู่แล้วลองใหม่ให้หนึ่งครั้ง ถ้ายังไม่ได้จะอ่านจากตำราของหอดาราแทน</p>
         </form>
       </div>
     </div>
@@ -3487,7 +3487,7 @@ function geminiSample() {
     const kind = typeof input === "string" && input.includes("[[ANSWER") ? "reading" : "chat";
     const fail = (e, text) => ({ code: e && e.name === "AbortError" ? "cancelled" : "unavailable", message: String(e), text });
     let res;
-    try { res = await fetch(url + "/oracle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, input, log: opts.log }), signal: opts.signal }); }
+    try { res = await fetch(url + "/oracle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, input, log: opts.log && { ...opts.log, ...whoAmI() } }), signal: opts.signal }); }
     catch (e) { throw fail(e); }
     if (!res.ok) { let j = {}; try { j = await res.json(); } catch (e) { } throw { code: j.code || "unavailable", message: j.message || "" }; }
     const rd = res.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -3510,6 +3510,12 @@ async function sampleRetry(sample, input, opts = {}, onWait) {
     if (opts.signal && opts.signal.aborted) throw { code: "cancelled", message: "" };
     return await sample(input, opts);
   }
+}
+/* who is asking, for the admin monitor: a random id kept on this device (not tied to IP) and the name typed in the form */
+function whoAmI() {
+  let uid = store("astral-uid");
+  if (!uid) { uid = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join(""); store("astral-uid", uid); }
+  return { uid, name: (($("#q-name") && $("#q-name").value.trim()) || profile().name || "").slice(0, 60) };
 }
 /* what the Worker keeps in the usage log for each call: the question and how it was read, never the name or birth date */
 function usageMeta(R) {

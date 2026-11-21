@@ -15,7 +15,7 @@ HERE = Path(__file__).resolve().parent
 WORKER = HERE.parent / "worker"
 DB_NAME = "astral-tarot-usage"
 LOCAL = Path(os.environ.get("ASTRAL_USAGE_DB", r"D:\astral-tarot-data\usage.db"))
-COLS = ["id", "ts", "day", "visitor", "kind", "type", "rid", "question", "topic", "qtype", "subject", "spread", "cards", "shadow",
+COLS = ["id", "uid", "name", "ts", "day", "visitor", "kind", "type", "rid", "question", "topic", "qtype", "subject", "spread", "cards", "shadow",
         "life_stage", "minor", "lens", "overall", "rel", "model", "status", "ms", "answer", "answer_chars"]
 
 
@@ -90,8 +90,10 @@ def report():
                        ("life_stage", "ช่วงชีวิต"), ("status", "ผลลัพธ์"), ("model", "รุ่น Gemini")]:
         md += table(title, q(f"SELECT {col}, COUNT(*), ROUND(AVG(ms)/1000.0, 1) FROM events GROUP BY {col} ORDER BY 2 DESC"), [col, "ครั้ง", "วินาทีเฉลี่ย"])
     md += table("ผู้ถามต่ำกว่า 18 ปี", q("SELECT SUM(minor), COUNT(*) FROM events WHERE type='reading'"), ["minor", "จากคำทำนาย"])
-    md += table("คำถามล่าสุด 40 ข้อ", q("SELECT day, topic, qtype, spread, question FROM events WHERE type='reading' AND question <> '' ORDER BY id DESC LIMIT 40"),
-                ["วัน", "หัวข้อ", "แบบ", "การวาง", "คำถาม"])
+    md += table("ผู้ใช้ที่ใช้บ่อย", q("SELECT COALESCE(MAX(name), '(ไม่กรอกชื่อ)'), COALESCE(uid, 'v:' || visitor) p, COUNT(*), SUM(type='reading'), SUM(type='chat'), MAX(day) FROM events GROUP BY p ORDER BY 3 DESC LIMIT 30"),
+                ["ชื่อ", "รหัส", "ครั้ง", "เปิดไพ่", "ถามต่อ", "ล่าสุด"])
+    md += table("คำถามล่าสุด 40 ข้อ", q("SELECT day, name, topic, qtype, spread, question FROM events WHERE type='reading' AND question <> '' ORDER BY id DESC LIMIT 40"),
+                ["วัน", "ชื่อ", "หัวข้อ", "แบบ", "การวาง", "คำถาม"])
     md += table("ถามต่อล่าสุด 40 ข้อ", q("SELECT e.day, r.question, e.question FROM events e LEFT JOIN events r ON r.rid = e.rid AND r.type='reading' WHERE e.type='chat' ORDER BY e.id DESC LIMIT 40"),
                 ["วัน", "คำถามหลัก", "ถามต่อ"])
     # Thai has no spaces between words, so whole questions are counted: the suggested follow-ups show up here when people tap them
