@@ -21,15 +21,21 @@ globalThis.fetch = async (url, init) => {
 };
 const objs = {};
 const mkStorage = () => { const m = new Map(); return { get: async k => m.get(k), put: async (k, v) => m.set(k, v), delete: async k => m.delete(k), list: async () => new Map(m) }; };
+/* a stand-in for D1 that keeps inserted rows in memory, served at /_log */
+const logRows = [];
+const DB = { prepare: sql => ({ bind: (...v) => ({ run: async () => { const cols = sql.match(/\(([^)]*)\) VALUES/)[1].split(",").map(c => c.trim()); logRows.push(Object.fromEntries(cols.map((c, i) => [c, v[i]]))); } }) }) };
+const pending = [], ctx = { waitUntil: p => pending.push(p) };
 const env = {
-  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: "busy, ok", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000",
+  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: "busy, ok", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000", LOG_SALT: "test", DB,
   QUOTA: { idFromName: n => n, get: n => ({ fetch: (u, i) => (objs[n] ||= new Quota({ storage: mkStorage() })).fetch(new Request(u, i)) }) }
 };
 http.createServer(async (req, res) => {
+  if (req.url === "/_log") { await Promise.all(pending); res.end(JSON.stringify(logRows)); return; }
+  if (req.url === "/_nocap") { env.READING_LIMIT = "0"; res.end("ok"); return; }
   if (req.url === "/_stats") { res.end(JSON.stringify({ geminiCalls, system: lastBody && lastBody.systemInstruction.parts[0].text.slice(0, 40), roles: lastBody && lastBody.contents.map(c => c.role), tried: tried.slice(-2) })); return; }
   const chunks = []; for await (const c of req) chunks.push(c);
   const r = new Request("http://localhost:8790" + req.url, { method: req.method, headers: req.headers, body: ["GET", "HEAD", "OPTIONS"].includes(req.method) ? undefined : Buffer.concat(chunks) });
-  const out = await worker.fetch(r, env);
+  const out = await worker.fetch(r, env, ctx);
   res.writeHead(out.status, Object.fromEntries(out.headers));
   if (out.body) for await (const c of out.body) res.write(c);
   res.end();

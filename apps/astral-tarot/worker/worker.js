@@ -5,6 +5,33 @@
 const SYSTEM = "คุณคือ \"หมอแห่งหอดารา\" ของเว็บดูดวงไพ่ทาโรต์หอดาราทาโรต์ ทำงานเฉพาะการอ่านไพ่ตามข้อมูลและกติกาที่ได้รับในข้อความเท่านั้น ถ้าถูกขอให้ทำงานอื่นที่ไม่เกี่ยวกับการอ่านไพ่หรือคำทำนายนี้ ให้ตอบสั้นๆ อย่างสุภาพว่าหอดาราตอบได้เฉพาะเรื่องไพ่";
 const MAX_INPUT = 60000;
 
+/* ---------- usage log (D1 binding DB): what people ask and what the oracle answered ----------
+   Kept: the question, how it was read (topic, spread, cards, life stage, lens) and the answer.
+   Never kept: name, birth date, IP. A visitor is a salted hash of the IP that changes every day,
+   enough to tell "one person asked five times" from "five people asked once". */
+const clip = (v, n) => typeof v === "string" ? v.slice(0, n) : v == null ? null : String(v).slice(0, n);
+async function visitorId(ip, day, salt) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}|${day}|${ip}`));
+  return [...new Uint8Array(buf).slice(0, 8)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function logUsage(env, row) {
+  if (!env.DB || env.LOG_ENABLED === "0") return;
+  const m = row.log && typeof row.log === "object" ? row.log : {};
+  const cards = Array.isArray(m.cards) ? m.cards.slice(0, 15).map(c => clip(c, 80)).join(" | ") : null;
+  try {
+    await env.DB.prepare(`INSERT INTO events (ts, day, visitor, kind, type, rid, question, topic, qtype, subject, spread, cards, shadow,
+      life_stage, minor, lens, overall, rel, model, status, ms, answer, answer_chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(new Date().toISOString(), row.day, row.visitor, row.kind, clip(m.type || row.kind, 20), clip(m.rid, 40),
+        /* journal notes and bond birth dates are private: only their type is kept */
+        ["reading", "chat"].includes(m.type) ? clip(m.question, 600) : null,
+        clip(m.topic, 20), clip(m.qtype, 20), clip(m.subject, 20), clip(m.spread, 30), cards, clip(m.shadow, 60),
+        clip(m.life_stage, 40), m.minor ? 1 : 0, clip(m.lens, 20), Number.isFinite(m.overall) ? m.overall : null, clip(m.rel, 20),
+        clip(row.model, 60), clip(row.status, 30), row.ms ?? null,
+        ["reading", "chat"].includes(m.type) ? clip(row.answer, 24000) : null, row.answer ? row.answer.length : 0)
+      .run();
+  } catch (e) { console.log("usage log failed", String(e)); }
+}
+
 /* per-visitor and site-wide daily counters, one object per name */
 export class Quota {
   constructor(ctx) { this.ctx = ctx; }
@@ -12,6 +39,7 @@ export class Quota {
     const { op, key, day, limit } = await req.json();
     const k = `${day}|${key}`;
     const n = (await this.ctx.storage.get(k)) || 0;
+    if (!limit) return Response.json({ ok: true, n: 0 });   /* 0 = no cap */
     if (op === "give") { if (n > 0) await this.ctx.storage.put(k, n - 1); return Response.json({ ok: true, n: Math.max(0, n - 1) }); }
     if (n >= limit) return Response.json({ ok: false, n });
     if (n === 0) for (const old of (await this.ctx.storage.list()).keys()) if (!old.startsWith(day + "|")) await this.ctx.storage.delete(old);
@@ -40,7 +68,7 @@ async function counter(env, name, op, key, day, limit) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const origin = req.headers.get("Origin") || "";
     const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
     const cors = {
@@ -64,15 +92,19 @@ export default {
     /* the day turns over at midnight in Thailand */
     const day = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
     const ip = req.headers.get("CF-Connecting-IP") || "unknown";
-    const limit = Number(kind === "reading" ? env.READING_LIMIT || 5 : env.CHAT_LIMIT || 20);
+    /* "0" means no per-visitor cap: the site-wide DAILY_CAP and Gemini's own rate limit set the pace */
+    const limit = Number(kind === "reading" ? env.READING_LIMIT ?? 5 : env.CHAT_LIMIT ?? 20);
+    const t0 = Date.now(), visitor = await visitorId(ip, day, env.LOG_SALT || "astral");
+    const log = (status, extra = {}) => ctx.waitUntil(logUsage(env, { day, visitor, kind, log: body.log, status, ms: Date.now() - t0, ...extra }));
     const cap = Number(env.DAILY_CAP || 1000);
     const mine = await counter(env, "ip:" + ip, "take", kind, day, limit);
-    if (!mine.ok) return json({ code: "quota", kind, limit, message: kind === "reading"
+    if (!mine.ok) { log("quota_visitor"); return json({ code: "quota", kind, limit, message: kind === "reading"
       ? `วันนี้ใช้คำทำนายที่ Gemini เขียนสดครบ ${limit} ครั้งแล้ว พรุ่งนี้มาใหม่ได้ ระหว่างนี้หมอจะอ่านจากตำราของหอดาราให้`
-      : `วันนี้คุยกับหมอครบ ${limit} ครั้งแล้ว พรุ่งนี้มาคุยกันต่อนะ` }, 429, cors);
+      : `วันนี้คุยกับหมอครบ ${limit} ครั้งแล้ว พรุ่งนี้มาคุยกันต่อนะ` }, 429, cors); }
     const site = await counter(env, "site", "take", "all", day, cap);
     if (!site.ok) {
       await counter(env, "ip:" + ip, "give", kind, day, limit);
+      log("quota_site");
       return json({ code: "quota", kind, limit, message: "โควตาฟรีของหอดาราวันนี้หมดแล้ว พรุ่งนี้มาใหม่ได้ ระหว่างนี้หมอจะอ่านจากตำราของหอดาราให้" }, 429, cors);
     }
     const refund = () => Promise.all([counter(env, "ip:" + ip, "give", kind, day, limit), counter(env, "site", "give", "all", day, cap)]);
@@ -84,8 +116,9 @@ export default {
       contents: toContents(msgs),
       generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
     });
-    let upstream;
+    let upstream, used = null;
     for (const model of models) {
+      used = model;
       try {
         upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
           method: "POST",
@@ -99,14 +132,15 @@ export default {
       await refund();
       const busy = upstream && upstream.status === 429;
       const detail = upstream ? (await upstream.text()).slice(0, 300) : "network";
+      log(busy ? "rate_limited" : "unavailable", { model: used });
       return json({ code: busy ? "rate_limited" : "unavailable", message: busy ? "ตอนนี้มีคนรอหมอเยอะ รอสักครู่แล้วลองใหม่" : "หมอตอบไม่ได้ในตอนนี้", detail }, busy ? 429 : 502, cors);
     }
 
     /* Gemini streams server-sent events; pass on only the answer text, skipping any thinking parts */
     const { readable, writable } = new TransformStream();
-    (async () => {
+    const done = (async () => {
       const w = writable.getWriter(), enc = new TextEncoder(), rd = upstream.body.pipeThrough(new TextDecoderStream()).getReader();
-      let buf = "";
+      let buf = "", answer = "";
       try {
         for (;;) {
           const { value, done } = await rd.read();
@@ -119,12 +153,16 @@ export default {
             try {
               const parts = JSON.parse(line.slice(5)).candidates?.[0]?.content?.parts || [];
               const t = parts.filter(p => !p.thought).map(p => p.text || "").join("");
-              if (t) await w.write(enc.encode(t));
+              if (t) { answer += t; await w.write(enc.encode(t)); }
             } catch (e) { /* a partial or non-JSON line: skip it */ }
           }
         }
-      } finally { await w.close().catch(() => {}); }
+      } finally {
+        await w.close().catch(() => {});
+        await logUsage(env, { day, visitor, kind, log: body.log, status: answer ? "ok" : "empty", ms: Date.now() - t0, model: used, answer });
+      }
     })();
+    ctx.waitUntil(done);
     return new Response(readable, { headers: { ...cors, "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Quota-Left": String(limit - mine.n) } });
   }
 };
