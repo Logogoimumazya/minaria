@@ -38,3 +38,13 @@ const sum = await (await fetch(A + "/api/summary", { headers: auth })).json(); c
 r = await post({ kind: "reading", input: "x [[ANSWER", log: { ...meta, rid: "who2", uid: "0123456789abcdef", name: "กานต์" } }); await r.text();
 const ppl2 = await (await fetch(A + "/api/people", { headers: auth })).json();
 console.log("admin latest name", ppl2.find(p => p.pid === "0123456789abcdef").name);
+
+// speed: every model tried is logged with its result, and the first word time is kept
+const last = JSON.parse(await (await fetch("http://localhost:8790/_log")).text()).filter(x => x.status === "ok").at(-1);
+console.log("attempts", last.attempts, "| ttft ms", last.ttft);
+// learning: a starred answer is handed to Gemini as an example on the next reading
+const starId = JSON.parse(await (await fetch("http://localhost:8790/_log")).text()).find(x => x.type === "reading" && x.answer).id;
+r = await fetch(A + "/api/star", { method: "POST", headers: { ...auth, "Content-Type": "application/json" }, body: JSON.stringify({ id: starId, star: true }) }); console.log("star", r.status);
+r = await post({ kind: "reading", input: "x [[ANSWER", log: { ...meta, rid: "ex1" } }); await r.text();
+console.log("example sent to gemini", JSON.parse(await (await fetch("http://localhost:8790/_stats")).text()).example);
+const starred = await (await fetch(A + "/api/events?star=1", { headers: auth })).json(); console.log("starred filter", starred.length, starred[0] && starred[0].id === starId);

@@ -19,9 +19,9 @@ async function logUsage(env, row) {
   const m = row.log && typeof row.log === "object" ? row.log : {};
   const cards = Array.isArray(m.cards) ? m.cards.slice(0, 15).map(c => clip(c, 80)).join(" | ") : null;
   try {
-    await env.DB.prepare(`INSERT INTO events (uid, name, ts, day, visitor, kind, type, rid, question, topic, qtype, subject, spread, cards, shadow,
-      life_stage, minor, lens, overall, rel, model, status, ms, answer, answer_chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-      .bind(/^[0-9a-f]{16}$/.test(m.uid || "") ? m.uid : null, clip((m.name || "").trim(), 60) || null, new Date().toISOString(), row.day, row.visitor, row.kind, clip(m.type || row.kind, 20), clip(m.rid, 40),
+    await env.DB.prepare(`INSERT INTO events (attempts, ttft, uid, name, ts, day, visitor, kind, type, rid, question, topic, qtype, subject, spread, cards, shadow,
+      life_stage, minor, lens, overall, rel, model, status, ms, answer, answer_chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(clip(row.attempts, 400), row.ttft ?? null, /^[0-9a-f]{16}$/.test(m.uid || "") ? m.uid : null, clip((m.name || "").trim(), 60) || null, new Date().toISOString(), row.day, row.visitor, row.kind, clip(m.type || row.kind, 20), clip(m.rid, 40),
         /* journal notes and bond birth dates are private: only their type is kept */
         ["reading", "chat"].includes(m.type) ? clip(m.question, 600) : null,
         clip(m.topic, 20), clip(m.qtype, 20), clip(m.subject, 20), clip(m.spread, 30), cards, clip(m.shadow, 60),
@@ -34,6 +34,22 @@ async function logUsage(env, row) {
 
 /* per-visitor and site-wide daily counters, one object per name */
 import { adminRoute } from "./admin.js";
+
+/* the house learns from the owner's picks: answers starred in /admin are shown to Gemini as examples of the
+   wanted way of analysing and speaking. Cached per isolate for a minute so a new star is picked up quickly. */
+let starCache = { t: 0, text: "" };
+async function starExamples(env) {
+  if (!env.DB) return "";
+  if (Date.now() - starCache.t < Number(env.STAR_CACHE_MS ?? 60000)) return starCache.text;
+  let text = "";
+  try {
+    const { results } = await env.DB.prepare("SELECT answer FROM events WHERE star = 1 AND type = 'reading' AND answer IS NOT NULL ORDER BY id DESC LIMIT 2").all();
+    if (results.length) text = "\n\nตัวอย่างคำทำนายที่ผู้ดูแลหอดาราคัดว่าดี ใช้ดูวิธีวิเคราะห์ น้ำเสียง และจังหวะภาษาเท่านั้น ห้ามคัดลอกประโยค ไพ่ หรือเรื่องของผู้ถามในตัวอย่าง:\n"
+      + results.map((r, i) => `--- ตัวอย่าง ${i + 1} ---\n${r.answer.slice(0, 2500)}`).join("\n");
+  } catch (e) { /* the star column may not exist yet */ }
+  starCache = { t: Date.now(), text };
+  return text;
+}
 
 export class Quota {
   constructor(ctx) { this.ctx = ctx; }
@@ -112,30 +128,44 @@ export default {
     }
     const refund = () => Promise.all([counter(env, "ip:" + ip, "give", kind, day, limit), counter(env, "site", "give", "all", day, cap)]);
 
-    /* GEMINI_MODEL is a comma-separated list: a model that is overloaded, retired or out of quota hands over to the next */
+    /* GEMINI_MODEL is a comma-separated list: a model that is overloaded, retired, out of quota or slower than
+       MODEL_WAIT_MS to start answering hands over to the next; the last one gets LAST_WAIT_MS.
+       GEMINI_THINKING ("minimal" | "low" | "" = model default) trims the thinking Gemini does before the first word;
+       a model that rejects the setting (400) is asked again without it. Every attempt is written to the log. */
     const models = (env.GEMINI_MODEL || "gemini-flash-latest").split(",").map(s => s.trim()).filter(Boolean);
-    const payload = JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM }] },
-      contents: toContents(msgs),
-      generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
+    const system = SYSTEM + (kind === "reading" ? await starExamples(env) : "");
+    const contents = toContents(msgs), thinking = env.GEMINI_THINKING || "";
+    const payload = think => JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] }, contents,
+      generationConfig: { temperature: 0.9, maxOutputTokens: 8192, ...(think ? { thinkingConfig: { thinkingLevel: think } } : {}) }
     });
-    let upstream, used = null;
-    for (const model of models) {
-      used = model;
+    const attempts = [];
+    const call = async (model, think, waitMs) => {
+      const ac = new AbortController(), t1 = Date.now(), timer = setTimeout(() => ac.abort(), waitMs);
+      let r = null, note;
       try {
-        upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-          body: payload
+        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+          method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, body: payload(think), signal: ac.signal
         });
-      } catch (e) { upstream = null; }
+        note = r.status;
+      } catch (e) { note = ac.signal.aborted ? "timeout" : "net"; }
+      clearTimeout(timer);
+      attempts.push(`${model}${think ? "/" + think : ""}:${note}@${((Date.now() - t1) / 1000).toFixed(1)}s`);
+      return r;
+    };
+    let upstream = null, used = null;
+    for (let k = 0; k < models.length; k++) {
+      const model = models[k], waitMs = Number(k === models.length - 1 ? env.LAST_WAIT_MS || 60000 : env.MODEL_WAIT_MS || 15000);
+      used = model;
+      upstream = await call(model, thinking, waitMs);
+      if (upstream && upstream.status === 400 && thinking) upstream = await call(model, "", waitMs);
       if (upstream && (upstream.ok || ![404, 429, 500, 503].includes(upstream.status))) break;
     }
     if (!upstream || !upstream.ok) {
       await refund();
       const busy = upstream && upstream.status === 429;
       const detail = upstream ? (await upstream.text()).slice(0, 300) : "network";
-      log(busy ? "rate_limited" : "unavailable", { model: used });
+      log(busy ? "rate_limited" : "unavailable", { model: used, attempts: attempts.join(" ") });
       return json({ code: busy ? "rate_limited" : "unavailable", message: busy ? "ตอนนี้มีคนรอหมอเยอะ รอสักครู่แล้วลองใหม่" : "หมอตอบไม่ได้ในตอนนี้", detail }, busy ? 429 : 502, cors);
     }
 
@@ -143,7 +173,7 @@ export default {
     const { readable, writable } = new TransformStream();
     const done = (async () => {
       const w = writable.getWriter(), enc = new TextEncoder(), rd = upstream.body.pipeThrough(new TextDecoderStream()).getReader();
-      let buf = "", answer = "";
+      let buf = "", answer = "", ttft = null;
       try {
         for (;;) {
           const { value, done } = await rd.read();
@@ -156,13 +186,13 @@ export default {
             try {
               const parts = JSON.parse(line.slice(5)).candidates?.[0]?.content?.parts || [];
               const t = parts.filter(p => !p.thought).map(p => p.text || "").join("");
-              if (t) { answer += t; await w.write(enc.encode(t)); }
+              if (t) { if (ttft === null) ttft = Date.now() - t0; answer += t; await w.write(enc.encode(t)); }
             } catch (e) { /* a partial or non-JSON line: skip it */ }
           }
         }
       } finally {
         await w.close().catch(() => {});
-        await logUsage(env, { day, visitor, kind, log: body.log, status: answer ? "ok" : "empty", ms: Date.now() - t0, model: used, answer });
+        await logUsage(env, { day, visitor, kind, log: body.log, status: answer ? "ok" : "empty", ms: Date.now() - t0, model: used, answer, ttft, attempts: attempts.join(" ") });
       }
     })();
     ctx.waitUntil(done);

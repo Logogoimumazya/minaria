@@ -31,7 +31,7 @@ export async function adminRoute(req, env) {
   if (p === "/admin/api/summary") {
     const today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
     const [t] = await all(`SELECT COUNT(*) n, SUM(type='reading') readings, SUM(type='chat') chats, COUNT(DISTINCT ${PERSON}) people,
-      ROUND(AVG(CASE WHEN status='ok' THEN ms END)/1000.0,1) wait, SUM(status<>'ok') errors FROM events WHERE day=?`, today);
+      ROUND(AVG(CASE WHEN status='ok' THEN ms END)/1000.0,1) wait, ROUND(AVG(ttft)/1000.0,1) first, SUM(status<>'ok') errors FROM events WHERE day=?`, today);
     const [total] = await all(`SELECT COUNT(*) n, COUNT(DISTINCT ${PERSON}) people FROM events`);
     const days = await all(`SELECT day, COUNT(*) n, SUM(type='reading') readings, COUNT(DISTINCT ${PERSON}) people FROM events GROUP BY day ORDER BY day DESC LIMIT 14`);
     const by = col => all(`SELECT ${col} k, COUNT(*) n FROM events WHERE day >= date(?, '-6 days') AND ${col} IS NOT NULL GROUP BY ${col} ORDER BY n DESC LIMIT 12`, today);
@@ -49,10 +49,17 @@ export async function adminRoute(req, env) {
   if (p === "/admin/api/events") {
     const pid = a.get("pid"), q = a.get("q"), before = Number(a.get("before")) || 1e15, after = Number(a.get("after")) || 0;
     const where = ["id < ?", "id > ?"], v = [before, after];
+    if (a.get("star")) where.push("star = 1");
     if (pid) { where.push(`${PERSON} = ?`); v.push(pid); }
     if (q) { where.push("(question LIKE ? OR answer LIKE ? OR name LIKE ?)"); v.push(`%${q}%`, `%${q}%`, `%${q}%`); }
     return out(await all(`SELECT id, ts, ${PERSON} pid, name, type, rid, question, topic, qtype, subject, spread, cards, shadow, life_stage, minor, lens,
-      overall, rel, model, status, ms, answer FROM events WHERE ${where.join(" AND ")} ORDER BY id DESC LIMIT 60`, ...v));
+      overall, rel, model, status, ms, ttft, attempts, star, answer FROM events WHERE ${where.join(" AND ")} ORDER BY id DESC LIMIT 60`, ...v));
+  }
+  if (p === "/admin/api/star" && req.method === "POST") {
+    const { id, star } = await req.json().catch(() => ({}));
+    if (!Number.isInteger(id)) return out({ code: "bad_request" }, 400);
+    await env.DB.prepare("UPDATE events SET star = ? WHERE id = ?").bind(star ? 1 : 0, id).run();
+    return out({ ok: true, id, star: star ? 1 : 0 });
   }
   return out({ code: "not_found" }, 404);
 }
@@ -79,14 +86,16 @@ header input{margin-left:auto;width:min(320px,100%)}main{padding:16px;display:gr
 .ans{white-space:pre-wrap;margin:8px 0 0;padding:10px;border-radius:8px;background:#0b0e24;max-height:420px;overflow:auto}
 .bars{display:grid;gap:4px;font-size:12.5px}.bar{display:grid;grid-template-columns:110px 1fr 36px;gap:8px;align-items:center}.bar i{height:8px;border-radius:99px;background:var(--gold);display:block}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}button.more{font:inherit;color:var(--gold);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
-.empty{color:var(--mist)}
+.empty{color:var(--mist)}.star{font:inherit;cursor:pointer;background:none;border:1px solid var(--line);border-radius:99px;padding:0 10px;color:var(--mist)}
+.star.on{color:#1a1206;background:var(--gold);border-color:var(--gold)}.att{color:var(--mist);font-size:11.5px;margin-top:4px;font-family:ui-monospace,Consolas,monospace}
+label.only{font-size:12.5px;color:var(--mist);display:flex;gap:6px;align-items:center}
 </style></head><body>
 <header><h1>หอดาราทาโรต์ · ผู้ดูแล</h1><span class="live"><i></i><span id="upd">กำลังโหลด…</span></span><input id="search" type="search" placeholder="ค้นชื่อ คำถาม หรือคำตอบ"></header>
 <main>
   <section class="tiles" id="tiles"></section>
   <section class="cols">
     <div class="box"><h2>ผู้ใช้ <small id="pc" class="empty"></small></h2><div class="people" id="people"></div></div>
-    <div class="box"><h2 id="feed-h">ล่าสุด</h2><div class="feed" id="feed"></div><p><button class="more" id="more" hidden>โหลดเพิ่ม</button></p></div>
+    <div class="box"><h2 id="feed-h">ล่าสุด</h2><label class="only"><input type="checkbox" id="only-star"> ดูเฉพาะคำตอบที่ติดดาว (★ = ใช้เป็นตัวอย่างให้หมอเรียนน้ำเสียง)</label><div class="feed" id="feed"></div><p><button class="more" id="more" hidden>โหลดเพิ่ม</button></p></div>
   </section>
   <section class="grid3" id="charts"></section>
 </main>
@@ -111,7 +120,7 @@ function bars(title, rows, map = {}) {
 async function summary() {
   const s = await api("summary");
   $("#tiles").replaceChildren(tile(s.t.readings, "เปิดไพ่วันนี้"), tile(s.t.chats, "ถามต่อวันนี้"), tile(s.t.people, "ผู้ใช้วันนี้"),
-    tile(s.t.wait != null ? s.t.wait + " วิ" : "–", "รอคำตอบเฉลี่ยวันนี้"), tile(s.t.errors, "ตอบไม่สำเร็จวันนี้"), tile(s.total.people, "ผู้ใช้ทั้งหมด"), tile(s.total.n, "คำขอทั้งหมด"));
+    tile(s.t.first != null ? s.t.first + " วิ" : "–", "เริ่มตอบเฉลี่ยวันนี้"), tile(s.t.wait != null ? s.t.wait + " วิ" : "–", "ตอบจบเฉลี่ยวันนี้"), tile(s.t.errors, "ตอบไม่สำเร็จวันนี้"), tile(s.total.people, "ผู้ใช้ทั้งหมด"), tile(s.total.n, "คำขอทั้งหมด"));
   $("#charts").replaceChildren(bars("14 วันล่าสุด (คำขอ)", s.days.map(d => ({ k: d.day, n: d.n }))), bars("หัวข้อ 7 วัน", s.topics, TOPIC),
     bars("แบบการวาง 7 วัน", s.spreads), bars("เลนส์ปรัชญา 7 วัน", s.lenses), bars("ผลลัพธ์ 7 วัน", s.status, STATUS), bars("รุ่น Gemini 7 วัน", s.models));
 }
@@ -137,20 +146,28 @@ function card(e) {
   if (e.lens && e.lens !== "none") m.append(el("span", "", "เลนส์ " + e.lens));
   if (e.life_stage) m.append(el("span", "", e.life_stage));
   if (e.minor) m.append(el("span", "tag bad", "ต่ำกว่า 18"));
-  m.append(el("span", e.status === "ok" ? "" : "tag bad", (STATUS[e.status] || e.status) + (e.ms ? \` · \${(e.ms / 1000).toFixed(1)} วิ\` : "") + (e.model ? " · " + e.model : "")));
+  m.append(el("span", e.status === "ok" ? "" : "tag bad", (STATUS[e.status] || e.status) + (e.ttft != null ? \` · เริ่มตอบ \${(e.ttft / 1000).toFixed(1)} วิ\` : "") + (e.ms ? \` · จบ \${(e.ms / 1000).toFixed(1)} วิ\` : "") + (e.model ? " · " + e.model : "")));
+  if (e.type === "reading" && e.answer) {
+    const st = el("button", "star" + (e.star ? " on" : ""), e.star ? "★ ตัวอย่าง" : "☆ ติดดาว");
+    st.onclick = async () => { const on = !st.classList.contains("on"); st.disabled = true;
+      try { await fetch("/admin/api/star", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: e.id, star: on }) }); st.classList.toggle("on", on); st.textContent = on ? "★ ตัวอย่าง" : "☆ ติดดาว"; } finally { st.disabled = false; } };
+    m.append(st);
+  }
   d.append(m);
+  if (e.attempts) d.append(el("div", "att", e.attempts));
   if (e.question) d.append(el("div", "q", e.question)); else if (e.type === "reading") d.append(el("div", "q empty", "(ไม่ได้ตั้งคำถาม อ่านภาพรวม)"));
   if (e.cards) d.append(el("div", "cards", e.cards + (e.shadow ? " · ไพ่เงา " + e.shadow : "")));
   if (e.answer) { const det = el("details"); det.append(el("summary", "", "ดูคำตอบของหมอ"), el("div", "ans", e.answer)); d.append(det); }
   return d;
 }
 async function feed(reset) {
-  const q = { q: S.q }; if (S.pid) q.pid = S.pid;
+  const q = { q: S.q }; if (S.pid) q.pid = S.pid; if ($("#only-star").checked) q.star = 1;
   if (reset) { const rows = await api("events", q); $("#feed").replaceChildren(...(rows.length ? rows.map(card) : [el("p", "empty", "ยังไม่มีข้อมูล")])); S.top = rows[0]?.id || 0; S.oldest = rows.at(-1)?.id || 0; $("#more").hidden = rows.length < 60; return; }
   const rows = await api("events", { ...q, after: S.top });
   if (rows.length) { $("#feed").querySelector(".empty")?.remove(); $("#feed").prepend(...rows.map(card)); S.top = rows[0].id; }
 }
-$("#more").onclick = async () => { const q = { q: S.q, before: S.oldest }; if (S.pid) q.pid = S.pid; const rows = await api("events", q); $("#feed").append(...rows.map(card)); if (rows.length) S.oldest = rows.at(-1).id; $("#more").hidden = rows.length < 60; };
+$("#only-star").onchange = () => feed(true);
+$("#more").onclick = async () => { const q = { q: S.q, before: S.oldest }; if (S.pid) q.pid = S.pid; if ($("#only-star").checked) q.star = 1; const rows = await api("events", q); $("#feed").append(...rows.map(card)); if (rows.length) S.oldest = rows.at(-1).id; $("#more").hidden = rows.length < 60; };
 function pick(pid, name) { S.pid = pid; $("#feed-h").textContent = pid ? "ประวัติของ " + (name || "ผู้ใช้ไม่ระบุชื่อ") : "ล่าสุด"; people(); feed(true); }
 let t; $("#search").oninput = e => { clearTimeout(t); t = setTimeout(() => { S.q = e.target.value.trim(); people(); feed(true); }, 350); };
 async function tick(first) {

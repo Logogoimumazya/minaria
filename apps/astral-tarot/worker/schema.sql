@@ -16,7 +16,10 @@ CREATE TABLE IF NOT EXISTS events (
   model TEXT, status TEXT,     -- ok | empty | rate_limited | unavailable | quota_site | quota_visitor
   ms INTEGER,
   answer TEXT,                 -- reading/chat only
-  answer_chars INTEGER
+  answer_chars INTEGER,
+  ttft INTEGER,                -- ms until the first word reached the asker
+  attempts TEXT,               -- each model tried: model[/thinking]:status@seconds
+  star INTEGER DEFAULT 0       -- starred in /admin: used as an example for Gemini
 );
 CREATE INDEX IF NOT EXISTS events_day ON events(day);
 CREATE INDEX IF NOT EXISTS events_rid ON events(rid);

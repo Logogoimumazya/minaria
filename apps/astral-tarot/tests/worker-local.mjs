@@ -7,6 +7,10 @@ globalThis.fetch = async (url, init) => {
   if (String(url).includes("generativelanguage")) {
     const model = String(url).match(/models\/([^:]+)/)[1]; tried.push(model);
     if (model === "busy") return new Response("overloaded", { status: 503 });
+    /* "slow" never starts within MODEL_WAIT_MS and must be cut off by the abort signal */
+    if (model === "slow") return new Promise((_, no) => { const t = setTimeout(() => no(new Error("late")), 5000); init.signal?.addEventListener("abort", () => { clearTimeout(t); no(new DOMException("aborted", "AbortError")); }); });
+    /* "ok" refuses the thinking setting, so the worker must ask again without it */
+    if (JSON.parse(init.body).generationConfig.thinkingConfig) return new Response("bad thinking", { status: 400 });
     geminiCalls++; lastBody = JSON.parse(init.body);
     if (process.env.GEMINI_DOWN) return new Response("down", { status: 500 });
     const text = lastBody.contents.length > 1 || !lastBody.contents[0].parts[0].text.includes("[[ANSWER") ? "ควรรอให้เขาพร้อมก่อน แล้วค่อยเริ่มบทสนทนาแบบเบาๆ" : FAKE;
@@ -30,13 +34,13 @@ const DB = { prepare: sql => { const st = sq.prepare(sql); const mk = v => ({ ru
 const logRows = { get length() { return 0; } };
 const pending = [], ctx = { waitUntil: p => pending.push(p) };
 const env = {
-  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: "busy, ok", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000", LOG_SALT: "test", DB, ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
+  ALLOWED_ORIGINS: "http://localhost:8765", GEMINI_API_KEY: "test", GEMINI_MODEL: process.env.MODELS || "busy, ok", MODEL_WAIT_MS: "800", GEMINI_THINKING: process.env.THINK || "", STAR_CACHE_MS: "0", READING_LIMIT: "5", CHAT_LIMIT: "20", DAILY_CAP: "1000", LOG_SALT: "test", DB, ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
   QUOTA: { idFromName: n => n, get: n => ({ fetch: (u, i) => (objs[n] ||= new Quota({ storage: mkStorage() })).fetch(new Request(u, i)) }) }
 };
 http.createServer(async (req, res) => {
   if (req.url === "/_log") { await Promise.all(pending); res.end(JSON.stringify(sq.prepare("SELECT * FROM events ORDER BY id").all())); return; }
   if (req.url === "/_nocap") { env.READING_LIMIT = "0"; res.end("ok"); return; }
-  if (req.url === "/_stats") { res.end(JSON.stringify({ geminiCalls, system: lastBody && lastBody.systemInstruction.parts[0].text.slice(0, 40), roles: lastBody && lastBody.contents.map(c => c.role), tried: tried.slice(-2) })); return; }
+  if (req.url === "/_stats") { res.end(JSON.stringify({ geminiCalls, system: lastBody && lastBody.systemInstruction.parts[0].text.slice(0, 40), roles: lastBody && lastBody.contents.map(c => c.role), example: !!lastBody && lastBody.systemInstruction.parts[0].text.includes("ตัวอย่างคำทำนายที่ผู้ดูแล"), tried: tried.slice(-2) })); return; }
   const chunks = []; for await (const c of req) chunks.push(c);
   const r = new Request("http://localhost:8790" + req.url, { method: req.method, headers: req.headers, body: ["GET", "HEAD", "OPTIONS"].includes(req.method) ? undefined : Buffer.concat(chunks) });
   const out = await worker.fetch(r, env, ctx);
