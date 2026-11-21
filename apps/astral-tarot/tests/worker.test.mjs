@@ -34,3 +34,7 @@ const ppl = await (await fetch(A + "/api/people", { headers: auth })).json();
 const aru = ppl.find(p => p.pid === "0123456789abcdef"); console.log("admin person", aru && aru.name, aru && aru.readings);
 const evs = await (await fetch(A + "/api/events?pid=0123456789abcdef", { headers: auth })).json(); console.log("admin events", evs.length, evs[0] && evs[0].question.slice(0, 20));
 const sum = await (await fetch(A + "/api/summary", { headers: auth })).json(); console.log("admin summary people", sum.total.people, "topics", JSON.stringify(sum.topics));
+// the same device types a new name: the admin list shows the latest one
+r = await post({ kind: "reading", input: "x [[ANSWER", log: { ...meta, rid: "who2", uid: "0123456789abcdef", name: "กานต์" } }); await r.text();
+const ppl2 = await (await fetch(A + "/api/people", { headers: auth })).json();
+console.log("admin latest name", ppl2.find(p => p.pid === "0123456789abcdef").name);

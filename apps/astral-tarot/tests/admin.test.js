@@ -8,7 +8,7 @@ const { chromium } = require("playwright");
     await p.goto("http://localhost:8790/admin"); await p.waitForSelector(".ev");
     const names = await p.$$eval(".person b", n => n.map(x => x.textContent));
     const xss = await p.$$eval(".ev .q", n => n.map(x => x.textContent).find(t => t.includes("<img")));
-    await p.click("text=อรุณี"); await p.waitForFunction(() => [...document.querySelectorAll(".ev .who")].every(x => x.textContent === "อรุณี"));
+    await p.click("text=กานต์"); await p.waitForFunction(() => document.querySelector("#feed-h").textContent === "ประวัติของ กานต์" && document.querySelectorAll(".ev").length === 2);
     const feedN = await p.$$eval(".ev", n => n.length);
     await p.fill("#search", "งานใหม่"); await p.waitForTimeout(900);
     const found = await p.$$eval(".ev .q", n => n.length);

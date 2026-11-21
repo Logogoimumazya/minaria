@@ -40,9 +40,10 @@ export async function adminRoute(req, env) {
   }
   if (p === "/admin/api/people") {
     const q = `%${(a.get("q") || "").slice(0, 60)}%`;
-    return out(await all(`SELECT ${PERSON} pid, MAX(name) name, COUNT(*) n, SUM(type='reading') readings, SUM(type='chat') chats,
+    /* the name shown is the one typed most recently on that device */
+    return out(await all(`SELECT ${PERSON} pid, (SELECT e2.name FROM events e2 WHERE COALESCE(e2.uid, 'v:' || e2.visitor) = COALESCE(ev.uid, 'v:' || ev.visitor) AND e2.name IS NOT NULL ORDER BY e2.id DESC LIMIT 1) name, COUNT(*) n, SUM(type='reading') readings, SUM(type='chat') chats,
       MIN(ts) first, MAX(ts) last, GROUP_CONCAT(DISTINCT topic) topics, MAX(minor) minor
-      FROM events GROUP BY pid HAVING COALESCE(MAX(name),'') LIKE ?1 OR pid LIKE ?1 OR SUM(question LIKE ?1) > 0
+      FROM events ev GROUP BY pid HAVING COALESCE(MAX(name),'') LIKE ?1 OR pid LIKE ?1 OR SUM(question LIKE ?1) > 0
       ORDER BY last DESC LIMIT 200`, q));
   }
   if (p === "/admin/api/events") {
