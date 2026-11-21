@@ -1,0 +1,38 @@
+name = "astral-tarot-oracle"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+# comma-separated list of sites allowed to call the oracle
+ALLOWED_ORIGINS = "https://astral-tarot.pages.dev,https://logogoimumazya.github.io"
+# tried in order; a model that is overloaded (503), retired (404) or out of quota (429) hands over to the next.
+# 2026-10-28: gemini-flash-latest (3.8) answered 503 after 20-40 s, gemini-3.5-flash answered in ~6 s
+# 2026-11-21 live probe (thinking "low"): 3.5-flash and flash-latest did not start within 15 s, flash-lite started in 4.6 s
+GEMINI_MODEL = "gemini-flash-lite-latest,gemini-3.5-flash,gemini-flash-latest"
+# per-visitor daily caps; "0" = no cap (2026-11-21: the page says there is no count limit, the API sets the pace)
+# 2026-11-21 (log: answers took 20-80 s): a model gets MODEL_WAIT_MS to start answering before the next is tried,
+# the last one LAST_WAIT_MS. GEMINI_THINKING trims the thinking before the first word ("minimal" | "low" | "" = default);
+# a model that rejects it is asked again without it. Each attempt shows in /admin under the answer.
+MODEL_WAIT_MS = "10000"
+LAST_WAIT_MS = "60000"
+GEMINI_THINKING = "low"
+READING_LIMIT = "0"
+CHAT_LIMIT = "0"
+# site-wide ceiling per day, kept under the free tier's daily request limit
+DAILY_CAP = "1000"
+# usage log in D1 (schema.sql); "0" turns it off. LOG_SALT is a secret: wrangler secret put LOG_SALT
+LOG_ENABLED = "1"
+
+[[durable_objects.bindings]]
+name = "QUOTA"
+class_name = "Quota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Quota"]
+
+# usage log: what people ask and what the oracle answered (no name, birth date or IP)
+[[d1_databases]]
+binding = "DB"
+database_name = "astral-tarot-usage"
+database_id = "f729396e-2e3b-46e4-8270-fe56c1b7b627"
